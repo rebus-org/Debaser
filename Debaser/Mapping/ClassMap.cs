@@ -36,11 +36,13 @@ namespace Debaser.Mapping
     {
         public SqlDbType SqlDbType { get; }
         public int? Size { get; }
+        public int? AddSize { get; }
 
-        public ColumnInfo(SqlDbType sqlDbType, int? size = null)
+        public ColumnInfo(SqlDbType sqlDbType, int? size = null, int? addSize = null)
         {
             SqlDbType = sqlDbType;
             Size = size;
+            AddSize = addSize;
         }
     }
 }
