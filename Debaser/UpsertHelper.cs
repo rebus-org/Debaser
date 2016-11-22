@@ -2,7 +2,7 @@
 using System.Configuration;
 using System.Threading.Tasks;
 
-namespace Debaser.Config
+namespace Debaser
 {
     public class UpsertHelper<T>
     {

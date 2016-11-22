@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Debaser.Config;
 using NUnit.Framework;
 
-namespace Debaser.Tests.Config
+namespace Debaser.Tests
 {
     [TestFixture]
-    public class TestDatabase : FixtureBase
+    public class TestUpsertHelper : FixtureBase
     {
         UpsertHelper<SimpleRow> _upsertHelper;
 

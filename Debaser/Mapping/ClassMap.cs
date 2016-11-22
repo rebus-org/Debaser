@@ -22,13 +22,22 @@ namespace Debaser.Mapping
 
     public class ClassMapProperty
     {
+        public string ColumnName { get; }
         public string Name { get; }
         public ColumnInfo ColumnInfo { get; }
+        public bool IsKey { get; }
 
-        public ClassMapProperty(string name, ColumnInfo columnInfo)
+        public ClassMapProperty(string name, ColumnInfo columnInfo, string columnName, bool isKey)
         {
             Name = name;
             ColumnInfo = columnInfo;
+            ColumnName = columnName;
+            IsKey = isKey;
+        }
+
+        public string GetColumnDefinition()
+        {
+            return $"[{ColumnName}] {ColumnInfo.GetTypeDefinition()}";
         }
     }
 
@@ -43,6 +52,13 @@ namespace Debaser.Mapping
             SqlDbType = sqlDbType;
             Size = size;
             AddSize = addSize;
+        }
+
+        public string GetTypeDefinition()
+        {
+            return Size == null
+                ? $"{SqlDbType.ToString().ToUpper()}"
+                : $"{SqlDbType.ToString().ToUpper()}({Size.Value})";
         }
     }
 }

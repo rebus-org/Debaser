@@ -14,6 +14,11 @@ namespace Debaser.Mapping
             {
                 var properties = GetProperties(type).ToList();
 
+                if (!properties.Any(p => p.IsKey))
+                {
+                    throw new ArgumentException($@"At least one key property needs to be specified");
+                }
+
                 return new ClassMap(type, properties);
             }
             catch (Exception exception)
@@ -28,7 +33,8 @@ namespace Debaser.Mapping
             {
                 var name = property.Name;
                 var columnInfo = GetColumnInfo(property);
-                yield return new ClassMapProperty(name, columnInfo);
+                var columnName = property.Name;
+                yield return new ClassMapProperty(name, columnInfo, columnName, string.Equals("Id", name, StringComparison.CurrentCultureIgnoreCase));
             }
         }
 

@@ -51,7 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\UpsertHelper.cs" />
+    <Compile Include="Ex\StringEx.cs" />
+    <Compile Include="Schema\SchemaCreator.cs" />
+    <Compile Include="UpsertHelper.cs" />
     <Compile Include="Mapping\AutoMapper.cs" />
     <Compile Include="Mapping\ClassMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
