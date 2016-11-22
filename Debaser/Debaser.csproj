@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\UpsertHelper.cs" />
+    <Compile Include="Mapping\AutoMapper.cs" />
+    <Compile Include="Mapping\ClassMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Activator.cs" />
     <Compile Include="Values\IValueLookup.cs" />

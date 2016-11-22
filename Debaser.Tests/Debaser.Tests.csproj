@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="FixtureBase.cs" />
     <Compile Include="Config\TestDatabase.cs" />
+    <Compile Include="Mapping\TestAutomapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
