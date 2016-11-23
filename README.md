@@ -83,7 +83,7 @@ and then let's perform some iterations where we pick 10k random rows, mutate the
 
 which on my machine yields this:
 
-	Updating 10000 random rows in dataset of 100000 took average of 0,2 s - that's 57191,1 rows/s
+	Updating 10000 random rows in dataset of 100000 took average of 0.2 s - that's 57191.1 rows/s
 
 which (again) I think is OK.
 
