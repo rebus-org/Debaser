@@ -7,7 +7,7 @@
     <authors>mookid8000</authors>
     <owners>mookid8000</owners>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
-    <projectUrl>v</projectUrl>
+    <projectUrl>https://github.com/mookid8000/Debaser</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>lean mean SQL Server upsert machine</description>
     <copyright>Copyright 2012-2016</copyright>
