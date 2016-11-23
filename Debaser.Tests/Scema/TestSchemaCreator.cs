@@ -16,7 +16,7 @@ namespace Debaser.Tests.Scema
             var properties = map.Properties;
             var keyProperties = properties.Where(p => p.IsKey);
 
-            var creator = new SchemaCreator(ConnectionString, "testtable", "testdata", "testproc", keyProperties, properties, schema: "bimse");
+            var creator = new SchemaManager(ConnectionString, "testtable", "testdata", "testproc", keyProperties, properties, schema: "bimse");
 
             creator.DropSchema();
             creator.CreateSchema();

@@ -20,11 +20,17 @@ namespace Debaser.Tests
         [Test]
         public async Task CanRoundtripSingleRow()
         {
-            await _upsertHelper.Upsert(new[] { new SimpleRow() });
+            await _upsertHelper.Upsert(new[]
+            {
+                new SimpleRow {Id = 1, Text = "this is the first row"},
+                new SimpleRow {Id = 2, Text = "this is the second row"},
+            });
 
-            var rows = _upsertHelper.Load().ToList();
+            var rows = _upsertHelper.Load().OrderBy(r => r.Id).ToList();
 
-            Assert.That(rows.Count, Is.EqualTo(1));
+            Assert.That(rows.Count, Is.EqualTo(2));
+            Assert.That(rows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2 }));
+            Assert.That(rows.Select(r => r.Text), Is.EqualTo(new[] { "this is the first row", "this is the second row" }));
         }
 
         class SimpleRow

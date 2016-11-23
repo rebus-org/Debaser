@@ -34,8 +34,19 @@ namespace Debaser.Mapping
                 var name = property.Name;
                 var columnInfo = GetColumnInfo(property);
                 var columnName = property.Name;
-                yield return new ClassMapProperty(name, columnInfo, columnName, string.Equals("Id", name, StringComparison.CurrentCultureIgnoreCase));
+                var isKey = string.Equals("Id", name, StringComparison.CurrentCultureIgnoreCase);
+                yield return new ClassMapProperty(name, columnInfo, columnName, isKey, DefaultGetter(property), DefaultSetter(property));
             }
+        }
+
+        static Action<object, object> DefaultSetter(PropertyInfo property)
+        {
+            return property.SetValue;
+        }
+
+        static Func<object, object> DefaultGetter(PropertyInfo property)
+        {
+            return property.GetValue;
         }
 
         static ColumnInfo GetColumnInfo(PropertyInfo property)

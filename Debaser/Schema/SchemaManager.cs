@@ -4,10 +4,11 @@ using System.Data.SqlClient;
 using System.Linq;
 using Debaser.Ex;
 using Debaser.Mapping;
+// ReSharper disable ArgumentsStyleLiteral
 
 namespace Debaser.Schema
 {
-    public class SchemaCreator
+    public class SchemaManager
     {
         readonly string _connectionString;
         readonly string _tableName;
@@ -18,7 +19,7 @@ namespace Debaser.Schema
         readonly List<ClassMapProperty> _keyProperties;
         readonly List<ClassMapProperty> _properties;
 
-        public SchemaCreator(string connectionString, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo")
+        public SchemaManager(string connectionString, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo")
         {
             _connectionString = connectionString;
             _tableName = tableName;
@@ -30,6 +31,10 @@ namespace Debaser.Schema
 
             _mutableProperties = _properties.Except(_keyProperties).ToList();
         }
+
+        public string SprocName => _sprocName;
+
+        public string DataTypeName => _dataTypeName;
 
         public void CreateSchema()
         {
@@ -167,6 +172,19 @@ END
             }
         }
 
+        public string GetQuery()
+        {
+            var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => p.ColumnName).Indented(4));
+
+            return $@"
+
+SELECT 
+{columnList}
+FROM [{_schema}].[{_tableName}]
+
+";
+        }
+
         string GetUpdateSql(int indentation)
         {
             return string.Join("," + Environment.NewLine,
@@ -211,6 +229,5 @@ END
 ", exception);
             }
         }
-
     }
 }

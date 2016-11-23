@@ -51,8 +51,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DataReaderLookup.cs" />
     <Compile Include="Ex\StringEx.cs" />
-    <Compile Include="Schema\SchemaCreator.cs" />
+    <Compile Include="Mapping\ClassMapProperty.cs" />
+    <Compile Include="Mapping\ColumnInfo.cs" />
+    <Compile Include="Schema\SchemaManager.cs" />
     <Compile Include="UpsertHelper.cs" />
     <Compile Include="Mapping\AutoMapper.cs" />
     <Compile Include="Mapping\ClassMap.cs" />

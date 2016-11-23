@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FixtureBase.cs" />
+    <Compile Include="Reflection\TestActivator.cs" />
     <Compile Include="Scema\TestSchemaCreator.cs" />
     <Compile Include="TestUpsertHelper.cs" />
     <Compile Include="Mapping\TestAutomapper.cs" />
