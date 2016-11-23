@@ -20,13 +20,18 @@ namespace Debaser
         readonly ClassMap _classMap;
 
         public UpsertHelper(string connectionStringOrConnectionStringName, string tableName = null, string schema = "dbo")
+            : this(connectionStringOrConnectionStringName, new AutoMapper().GetMap(typeof(T)), tableName, schema)
+        {
+        }
+
+        public UpsertHelper(string connectionStringOrConnectionStringName, ClassMap classMap, string tableName = null, string schema = "dbo")
         {
             var connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringOrConnectionStringName];
 
             _connectionString = connectionStringSettings?.ConnectionString
                                 ?? connectionStringOrConnectionStringName;
 
-            _classMap = new AutoMapper().GetMap(typeof(T));
+            _classMap = classMap;
 
             var upsertTableName = tableName ?? typeof(T).Name;
             var dataTypeName = $"{upsertTableName}Type";
@@ -43,14 +48,6 @@ namespace Debaser
         public void CreateSchema()
         {
             _schemaManager.CreateSchema();
-        }
-
-        SchemaManager GetSchemaCreator(string schema, string tableName, string dataTypeName, string procedureName)
-        {
-            var properties = _classMap.Properties.ToList();
-            var keyProperties = properties.Where(p => p.IsKey);
-
-            return new SchemaManager(_connectionString, tableName, dataTypeName, procedureName, keyProperties, properties, schema);
         }
 
         public async Task Upsert(IEnumerable<T> rows)
@@ -121,6 +118,14 @@ namespace Debaser
 
                 yield return reusableRecord;
             }
+        }
+
+        SchemaManager GetSchemaCreator(string schema, string tableName, string dataTypeName, string procedureName)
+        {
+            var properties = _classMap.Properties.ToList();
+            var keyProperties = properties.Where(p => p.IsKey);
+
+            return new SchemaManager(_connectionString, tableName, dataTypeName, procedureName, keyProperties, properties, schema);
         }
     }
 }

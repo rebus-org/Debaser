@@ -45,7 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FixtureBase.cs" />
+    <Compile Include="Readme\Snippets.cs" />
     <Compile Include="Reflection\TestActivator.cs" />
     <Compile Include="Scema\TestSchemaCreator.cs" />
     <Compile Include="TestUpsertHelper.cs" />
