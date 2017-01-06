@@ -31,12 +31,19 @@ namespace Debaser.Mapping
                 return $"{SqlDbType.ToString().ToUpper()}";
             }
 
-            return $"{SqlDbType.ToString().ToUpper()}({Size.Value})";
+            var sizeString = GetSizeString(Size.Value);
+
+            return $"{SqlDbType.ToString().ToUpper()}({sizeString})";
+        }
+
+        string GetSizeString(int size)
+        {
+            return SizeIsMax(size) ? "MAX" : size.ToString();
         }
 
         public SqlMetaData GetSqlMetaData(string columnName)
         {
-            if (Size == null)
+            if (!Size.HasValue || SizeIsMax(Size.Value))
             {
                 if (IsString)
                 {
@@ -49,6 +56,11 @@ namespace Debaser.Mapping
             return new SqlMetaData(columnName, SqlDbType, maxLength: Size.Value);
         }
 
-        bool IsString => new[] {SqlDbType.NVarChar, SqlDbType.VarChar}.Contains(SqlDbType);
+        static bool SizeIsMax(int size)
+        {
+            return size == int.MaxValue;
+        }
+
+        bool IsString => new[] { SqlDbType.NVarChar, SqlDbType.VarChar }.Contains(SqlDbType);
     }
 }

@@ -1,8 +1,8 @@
 using System;
 using System.Data.SqlClient;
-using Debaser.Values;
+using Debaser.Internals.Values;
 
-namespace Debaser.Data
+namespace Debaser.Internals.Data
 {
     class DataReaderLookup : IValueLookup
     {

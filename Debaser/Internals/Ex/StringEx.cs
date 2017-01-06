@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Debaser.Ex
+namespace Debaser.Internals.Ex
 {
     static class StringEx
     {

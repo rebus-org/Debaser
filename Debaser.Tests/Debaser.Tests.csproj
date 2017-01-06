@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Customization\TestDebaserMapper.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FixtureBase.cs" />
     <Compile Include="Readme\Snippets.cs" />

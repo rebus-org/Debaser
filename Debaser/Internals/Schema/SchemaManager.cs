@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using Debaser.Ex;
+using Debaser.Internals.Ex;
 using Debaser.Mapping;
+
 // ReSharper disable ArgumentsStyleLiteral
 
-namespace Debaser.Schema
+namespace Debaser.Internals.Schema
 {
-    public class SchemaManager
+    class SchemaManager
     {
         readonly string _connectionString;
         readonly string _tableName;

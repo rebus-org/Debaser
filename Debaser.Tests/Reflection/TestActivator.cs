@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Debaser.Values;
+using Debaser.Internals.Values;
 using NUnit.Framework;
-using Activator = Debaser.Reflection.Activator;
+using Activator = Debaser.Internals.Reflection.Activator;
 
 namespace Debaser.Tests.Reflection
 {

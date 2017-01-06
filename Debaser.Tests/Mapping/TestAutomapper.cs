@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using Debaser.Attributes;
 using Debaser.Mapping;
 using NUnit.Framework;
 
@@ -40,6 +41,29 @@ namespace Debaser.Tests.Mapping
         class Poco
         {
             public int Id { get; set; }
+
+            public decimal Decimal { get; set; }
+
+            public DateTime DateTime { get; set; }
+        }
+
+        [Test]
+        public void CanSpecifyKeyWithAttribute()
+        {
+            var properties = _mapper.GetMap(typeof(PocoWithExplicitKey)).Properties;
+
+            var keys = properties.Where(p => p.IsKey);
+
+            Assert.That(keys.Select(k => k.Name), Is.EqualTo(new[] { "KeyA", "KeyB" }));
+        }
+
+        class PocoWithExplicitKey
+        {
+            [DebaserKey]
+            public int KeyA { get; set; }
+
+            [DebaserKey]
+            public int KeyB { get; set; }
 
             public decimal Decimal { get; set; }
 

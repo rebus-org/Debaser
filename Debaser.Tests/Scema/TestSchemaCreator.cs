@@ -1,6 +1,6 @@
 ﻿using System.Linq;
+using Debaser.Internals.Schema;
 using Debaser.Mapping;
-using Debaser.Schema;
 using NUnit.Framework;
 
 namespace Debaser.Tests.Scema

@@ -11,7 +11,7 @@ namespace Debaser.Mapping
         public string ColumnName { get; }
         public string Name { get; }
         public ColumnInfo ColumnInfo { get; }
-        public bool IsKey { get; }
+        public bool IsKey { get; private set; }
 
         public ClassMapProperty(string name, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> getValue, Action<object, object> setValue)
         {
@@ -21,6 +21,11 @@ namespace Debaser.Mapping
             IsKey = isKey;
             _getValue = getValue;
             _setValue = setValue;
+        }
+
+        public void MakeKey()
+        {
+            IsKey = true;
         }
 
         public object GetValue(object target)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using Debaser.Attributes;
 
 namespace Debaser.Mapping
 {
@@ -16,7 +17,7 @@ namespace Debaser.Mapping
 
                 if (!properties.Any(p => p.IsKey))
                 {
-                    throw new ArgumentException($@"At least one key property needs to be specified");
+                    throw new ArgumentException(@"At least one key property needs to be specified. Either create a property named 'Id' or apply [DebaserKey] on one or more properties");
                 }
 
                 return new ClassMap(type, properties);
@@ -29,14 +30,32 @@ namespace Debaser.Mapping
 
         static IEnumerable<ClassMapProperty> GetProperties(Type type)
         {
-            foreach (var property in type.GetProperties())
+            var properties = type.GetProperties()
+                .Select(property =>
+                {
+                    var name = property.Name;
+                    var columnInfo = GetColumnInfo(property);
+                    var columnName = property.Name;
+                    var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
+
+                    return new ClassMapProperty(name, columnInfo, columnName, isKey, DefaultGetter(property),
+                        DefaultSetter(property));
+                })
+                .ToList();
+
+            if (!properties.Any(p => p.IsKey))
             {
-                var name = property.Name;
-                var columnInfo = GetColumnInfo(property);
-                var columnName = property.Name;
-                var isKey = string.Equals("Id", name, StringComparison.CurrentCultureIgnoreCase);
-                yield return new ClassMapProperty(name, columnInfo, columnName, isKey, DefaultGetter(property), DefaultSetter(property));
+                var defaultKeyProperty = properties.FirstOrDefault(p => string.Equals("Id", p.Name));
+
+                if (defaultKeyProperty == null)
+                {
+                    throw new ArgumentException("Could not find property named 'Id'");
+                }
+
+                defaultKeyProperty.MakeKey();
             }
+
+            return properties;
         }
 
         static Action<object, object> DefaultSetter(PropertyInfo property)
@@ -72,7 +91,33 @@ namespace Debaser.Mapping
             if (defaultDbTypes.TryGetValue(property.PropertyType, out columnInfo))
                 return columnInfo;
 
+            var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();
+
+            if (debaserMapperAttribute != null)
+            {
+                return GetColumInfoFromDebaserMapper(debaserMapperAttribute.Type);
+            }
+
             throw new ArgumentException($"Could not automatically generate column info for {property}");
+        }
+
+        static ColumnInfo GetColumInfoFromDebaserMapper(Type type)
+        {
+            var mapper = CreateInstance(type);
+
+            return new ColumnInfo(mapper.SqlDbType, mapper.SizeOrNull, mapper.AdditionalSizeOrNull);
+        }
+
+        static IDebaserMapper CreateInstance(Type type)
+        {
+            try
+            {
+                return (IDebaserMapper)Activator.CreateInstance(type);
+            }
+            catch (Exception exception)
+            {
+                throw new ApplicationException($"Could not create Debaser mapper {type}", exception);
+            }
         }
     }
 }

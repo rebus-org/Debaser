@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Debaser.Values;
+using Debaser.Internals.Values;
 
-namespace Debaser.Reflection
+namespace Debaser.Internals.Reflection
 {
-    public class Activator
+    class Activator
     {
         readonly Func<IValueLookup, object> _creationFunction;
 

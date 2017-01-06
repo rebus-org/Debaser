@@ -5,11 +5,11 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Debaser.Data;
+using Debaser.Internals.Data;
+using Debaser.Internals.Schema;
 using Debaser.Mapping;
-using Debaser.Schema;
 using Microsoft.SqlServer.Server;
-using Activator = Debaser.Reflection.Activator;
+using Activator = Debaser.Internals.Reflection.Activator;
 
 namespace Debaser
 {
