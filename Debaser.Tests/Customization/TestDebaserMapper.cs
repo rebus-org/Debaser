@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Debaser.Attributes;
+using Newtonsoft.Json;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
 namespace Debaser.Tests.Customization
 {
@@ -68,9 +68,20 @@ namespace Debaser.Tests.Customization
 
         class JsonMapperino : IDebaserMapper
         {
+            static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings{TypeNameHandling=TypeNameHandling.All};
             public SqlDbType SqlDbType => SqlDbType.NVarChar;
             public int? SizeOrNull => int.MaxValue;
             public int? AdditionalSizeOrNull => null;
+
+            public object ToDatabase(object arg)
+            {
+                return JsonConvert.SerializeObject(arg, SerializerSettings);
+            }
+
+            public object FromDatabase(object arg)
+            {
+                return JsonConvert.DeserializeObject((string)arg, SerializerSettings);
+            }
         }
     }
 }

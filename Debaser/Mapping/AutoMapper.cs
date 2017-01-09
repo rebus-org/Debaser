@@ -38,8 +38,10 @@ namespace Debaser.Mapping
                     var columnName = property.Name;
                     var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
 
-                    return new ClassMapProperty(name, columnInfo, columnName, isKey, DefaultGetter(property),
-                        DefaultSetter(property));
+                    var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
+                    var fromDatabase = columnInfo.CustomFromDatabase ?? DefaultFromDatabase();
+
+                    return new ClassMapProperty(name, columnInfo, columnName, isKey, toDatabase, fromDatabase, property);
                 })
                 .ToList();
 
@@ -58,14 +60,14 @@ namespace Debaser.Mapping
             return properties;
         }
 
-        static Action<object, object> DefaultSetter(PropertyInfo property)
+        static Func<object, object> DefaultFromDatabase()
         {
-            return property.SetValue;
+            return obj => obj;
         }
 
-        static Func<object, object> DefaultGetter(PropertyInfo property)
+        static Func<object, object> DefaultToDatabase()
         {
-            return property.GetValue;
+            return obj => obj;
         }
 
         static ColumnInfo GetColumnInfo(PropertyInfo property)
@@ -105,7 +107,7 @@ namespace Debaser.Mapping
         {
             var mapper = CreateInstance(type);
 
-            return new ColumnInfo(mapper.SqlDbType, mapper.SizeOrNull, mapper.AdditionalSizeOrNull);
+            return new ColumnInfo(mapper.SqlDbType, mapper.SizeOrNull, mapper.AdditionalSizeOrNull, mapper.ToDatabase, mapper.FromDatabase);
         }
 
         static IDebaserMapper CreateInstance(Type type)

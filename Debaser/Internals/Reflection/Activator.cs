@@ -59,9 +59,16 @@ namespace Debaser.Internals.Reflection
                     .Select(parameter => lookup.GetValue(parameter.Name, parameter.ParameterType))
                     .ToArray();
 
-                var instance = System.Activator.CreateInstance(type, parameterValues);
+                try
+                {
+                    var instance = System.Activator.CreateInstance(type, parameterValues);
 
-                return instance;
+                    return instance;
+                }
+                catch (Exception exception)
+                {
+                    throw new ApplicationException($"Could not create instance of {type} with ctor arguments {string.Join(", ", parameterValues)}", exception);
+                }
             };
         }
 

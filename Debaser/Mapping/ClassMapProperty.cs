@@ -1,26 +1,29 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.SqlServer.Server;
 
 namespace Debaser.Mapping
 {
     public class ClassMapProperty
     {
-        readonly Func<object, object> _getValue;
-        readonly Action<object, object> _setValue;
+        readonly Func<object, object> _toDatabase;
+        readonly Func<object, object> _fromDatabase;
+        readonly PropertyInfo _property;
 
         public string ColumnName { get; }
         public string Name { get; }
         public ColumnInfo ColumnInfo { get; }
         public bool IsKey { get; private set; }
 
-        public ClassMapProperty(string name, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> getValue, Action<object, object> setValue)
+        public ClassMapProperty(string name, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
         {
             Name = name;
             ColumnInfo = columnInfo;
             ColumnName = columnName;
             IsKey = isKey;
-            _getValue = getValue;
-            _setValue = setValue;
+            _toDatabase = toDatabase;
+            _fromDatabase = fromDatabase;
+            _property = property;
         }
 
         public void MakeKey()
@@ -28,14 +31,9 @@ namespace Debaser.Mapping
             IsKey = true;
         }
 
-        public object GetValue(object target)
+        public object ToDatabase(object target)
         {
-            return _getValue(target);
-        }
-
-        public void SetValue(object target, object value)
-        {
-            _setValue(target, value);
+            return _toDatabase(target);
         }
 
         public string GetColumnDefinition()
@@ -46,22 +44,29 @@ namespace Debaser.Mapping
         public void WriteTo(SqlDataRecord record, object row)
         {
             var ordinal = record.GetOrdinal(ColumnName);
-            var value = GetValue(row);
+            var value = _property.GetValue(row);
+            var valueToWrite = ToDatabase(value);
 
-            record.SetValue(ordinal, value);
-            return;
-            if (value == null)
-            {
-                record.SetDBNull(ordinal);
-            }
-            else
-            {
-            }
+            record.SetValue(ordinal, valueToWrite);
+        }
+
+        public object FromDatabase(object value)
+        {
+            var valueToSet = _fromDatabase(value);
+
+            return valueToSet;
         }
 
         public SqlMetaData GetSqlMetaData()
         {
             return ColumnInfo.GetSqlMetaData(ColumnName);
+        }
+
+        public override string ToString()
+        {
+            return IsKey
+                ? $"{Name} ([{ColumnName}] PK)"
+                : $"{Name} ([{ColumnName}])";
         }
     }
 }

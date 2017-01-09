@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Linq;
 using Microsoft.SqlServer.Server;
 // ReSharper disable ArgumentsStyleNamedExpression
@@ -13,11 +14,16 @@ namespace Debaser.Mapping
         public int? Size { get; }
         public int? AddSize { get; }
 
-        public ColumnInfo(SqlDbType sqlDbType, int? size = null, int? addSize = null)
+        public Func<object, object> CustomToDatabase { get; }
+        public Func<object, object> CustomFromDatabase { get; }
+
+        public ColumnInfo(SqlDbType sqlDbType, int? size = null, int? addSize = null, Func<object, object> customToDatabase = null, Func<object, object> customFromDatabase = null)
         {
             SqlDbType = sqlDbType;
             Size = size;
             AddSize = addSize;
+            CustomToDatabase = customToDatabase;
+            CustomFromDatabase = customFromDatabase;
         }
 
         public string GetTypeDefinition()

@@ -96,7 +96,8 @@ namespace Debaser
 
                         using (var reader = command.ExecuteReader())
                         {
-                            var lookup = new DataReaderLookup(reader);
+                            var classMapProperties = _classMap.Properties.ToDictionary(p => p.Name);
+                            var lookup = new DataReaderLookup(reader, classMapProperties);
 
                             while (reader.Read())
                             {
@@ -117,7 +118,14 @@ namespace Debaser
             {
                 foreach (var property in _classMap.Properties)
                 {
-                    property.WriteTo(reusableRecord, row);
+                    try
+                    {
+                        property.WriteTo(reusableRecord, row);
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new ApplicationException($"Could not write property {property} of row {row}", exception);
+                    }
                 }
 
                 yield return reusableRecord;
