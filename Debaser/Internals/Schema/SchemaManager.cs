@@ -234,5 +234,14 @@ FROM [{_schema}].[{_tableName}]
 ", exception);
             }
         }
+
+        public string GetDeleteCommand(string criteria)
+        {
+            var sql = $@"DELETE FROM [{_schema}].[{_tableName}]";
+
+            if (string.IsNullOrWhiteSpace(criteria)) return sql;
+
+            return $"{sql} WHERE {criteria}";
+        }
     }
 }

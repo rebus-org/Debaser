@@ -45,7 +45,7 @@ namespace Debaser.Tests.Readme
             Console.WriteLine($"Updating {rowsToChange} random rows in dataset of {count} took average of {averageExecutionTimeSeconds:0.0} s - that's {rowsToChange / averageExecutionTimeSeconds:0.0} rows/s");
         }
 
-        [TestCase(100000)]
+        [TestCase(1000000)]
         public async Task InsertRows(int count)
         {
             var rows = Enumerable.Range(1, count)

@@ -111,6 +111,48 @@ namespace Debaser
             }
         }
 
+        public async Task DeleteWhere(string criteria, object args = null)
+        {
+            if (criteria == null) throw new ArgumentNullException(nameof(criteria));
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.Transaction = transaction;
+                        command.CommandTimeout = 120;
+                        command.CommandType = CommandType.Text;
+
+                        var querySql = _schemaManager.GetDeleteCommand(criteria);
+                        var parameters = GetParameters(args);
+
+                        if (parameters.Any())
+                        {
+                            foreach (var parameter in parameters)
+                            {
+                                parameter.AddTo(command);
+                            }
+                        }
+
+                        command.CommandText = querySql;
+
+                        try
+                        {
+                            await command.ExecuteNonQueryAsync();
+                        }
+                        catch (Exception exception)
+                        {
+                            throw new ApplicationException($"Could not execute SQL {querySql}", exception);
+                        }
+                    }
+                }
+            }
+        }
+
         public async Task<List<T>> LoadWhere(string criteria, object args = null)
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
