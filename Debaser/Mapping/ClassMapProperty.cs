@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using FastMember;
 using Microsoft.SqlServer.Server;
 
 namespace Debaser.Mapping
@@ -8,7 +9,8 @@ namespace Debaser.Mapping
     {
         readonly Func<object, object> _toDatabase;
         readonly Func<object, object> _fromDatabase;
-        readonly PropertyInfo _property;
+        readonly TypeAccessor _accessor;
+        readonly string _propertyName;
 
         public string ColumnName { get; }
         public string Name { get; }
@@ -23,7 +25,8 @@ namespace Debaser.Mapping
             IsKey = isKey;
             _toDatabase = toDatabase;
             _fromDatabase = fromDatabase;
-            _property = property;
+            _accessor = TypeAccessor.Create(property.DeclaringType);
+            _propertyName = property.Name;
         }
 
         public void MakeKey()
@@ -44,7 +47,7 @@ namespace Debaser.Mapping
         public void WriteTo(SqlDataRecord record, object row)
         {
             var ordinal = record.GetOrdinal(ColumnName);
-            var value = _property.GetValue(row);
+            var value = _accessor[row, _propertyName];
             var valueToWrite = ToDatabase(value);
 
             record.SetValue(ordinal, valueToWrite);

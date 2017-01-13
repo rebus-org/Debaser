@@ -149,6 +149,8 @@ namespace Debaser
                             throw new ApplicationException($"Could not execute SQL {querySql}", exception);
                         }
                     }
+
+                    transaction.Commit();
                 }
             }
         }
