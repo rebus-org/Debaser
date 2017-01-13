@@ -173,17 +173,21 @@ END
             }
         }
 
-        public string GetQuery()
+        public string GetQuery(string criteria = null)
         {
             var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => p.ColumnName).Indented(4));
 
-            return $@"
+            var sql = $@"
 
 SELECT 
 {columnList}
 FROM [{_schema}].[{_tableName}]
 
 ";
+
+            if (string.IsNullOrWhiteSpace(criteria)) return sql;
+
+            return $"{sql} WHERE {criteria}";
         }
 
         string GetUpdateSql(int indentation)

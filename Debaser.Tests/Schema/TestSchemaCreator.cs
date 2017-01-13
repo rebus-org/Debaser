@@ -3,7 +3,7 @@ using Debaser.Internals.Schema;
 using Debaser.Mapping;
 using NUnit.Framework;
 
-namespace Debaser.Tests.Scema
+namespace Debaser.Tests.Schema
 {
     [TestFixture]
     public class TestSchemaCreator : FixtureBase

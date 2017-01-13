@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -6,6 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Debaser.Internals.Data;
+using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
 using Debaser.Mapping;
 using Microsoft.SqlServer.Server;
@@ -80,7 +82,7 @@ namespace Debaser
             }
         }
 
-        public IEnumerable<T> Load()
+        public IEnumerable<T> LoadAll()
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -107,6 +109,74 @@ namespace Debaser
                     }
                 }
             }
+        }
+
+        public async Task<List<T>> LoadWhere(string criteria, object args = null)
+        {
+            if (criteria == null) throw new ArgumentNullException(nameof(criteria));
+
+            var results = new List<T>();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.Transaction = transaction;
+                        command.CommandTimeout = 120;
+                        command.CommandType = CommandType.Text;
+
+                        var querySql = _schemaManager.GetQuery(criteria);
+                        var parameters = GetParameters(args);
+
+                        if (parameters.Any())
+                        {
+                            foreach (var parameter in parameters)
+                            {
+                                parameter.AddTo(command);
+                            }
+                        }
+                        
+                        command.CommandText = querySql;
+
+                        try
+                        {
+                            using (var reader = await command.ExecuteReaderAsync())
+                            {
+                                var classMapProperties = _classMap.Properties.ToDictionary(p => p.Name);
+                                var lookup = new DataReaderLookup(reader, classMapProperties);
+
+                                while (reader.Read())
+                                {
+                                    var instance = (T) _activator.CreateInstance(lookup);
+
+                                    results.Add(instance);
+                                }
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            throw new ApplicationException($"Could not execute SQL {querySql}", exception);
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        List<Parameter> GetParameters(object args)
+        {
+            if (args == null) return new List<Parameter>();
+
+            var properties = args.GetType().GetProperties();
+
+            return properties
+                .Select(p => new Parameter(p.Name, p.GetValue(args)))
+                .ToList();
         }
 
         IEnumerable<SqlDataRecord> GetData(IEnumerable<T> rows)

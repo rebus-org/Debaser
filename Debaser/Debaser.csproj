@@ -46,6 +46,7 @@
     <Compile Include="Internals\Data\DataReaderLookup.cs" />
     <Compile Include="IDebaserMapper.cs" />
     <Compile Include="Internals\Ex\StringEx.cs" />
+    <Compile Include="Internals\Query\Parameter.cs" />
     <Compile Include="Mapping\ClassMapProperty.cs" />
     <Compile Include="Mapping\ColumnInfo.cs" />
     <Compile Include="Internals\Schema\SchemaManager.cs" />

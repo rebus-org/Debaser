@@ -32,7 +32,7 @@ namespace Debaser.Tests.Customization
 
             await _upsertHelper.Upsert(rows);
 
-            var roundtrippedRows = _upsertHelper.Load().OrderBy(r => r.Id).ToList();
+            var roundtrippedRows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 
             Assert.That(roundtrippedRows.Select(r => r.Json.Text), Is.EqualTo(new[]
             {

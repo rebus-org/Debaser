@@ -51,9 +51,10 @@
     <Compile Include="Customization\TestDebaserMapper.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FixtureBase.cs" />
+    <Compile Include="Query\TestQueries.cs" />
     <Compile Include="Readme\Snippets.cs" />
     <Compile Include="Reflection\TestActivator.cs" />
-    <Compile Include="Scema\TestSchemaCreator.cs" />
+    <Compile Include="Schema\TestSchemaCreator.cs" />
     <Compile Include="TestUpsertHelper.cs" />
     <Compile Include="Mapping\TestAutomapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

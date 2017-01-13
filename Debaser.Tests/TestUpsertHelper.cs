@@ -26,7 +26,7 @@ namespace Debaser.Tests
                 new SimpleRow {Id = 2, Text = "this is the second row"},
             });
 
-            var rows = _upsertHelper.Load().OrderBy(r => r.Id).ToList();
+            var rows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 
             Assert.That(rows.Count, Is.EqualTo(2));
             Assert.That(rows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2 }));
