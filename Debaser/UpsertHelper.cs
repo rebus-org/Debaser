@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -15,6 +14,9 @@ using Activator = Debaser.Internals.Reflection.Activator;
 
 namespace Debaser
 {
+    /// <summary>
+    /// This is the UpsertHelper. <code>new</code> up an instance of this guy and start messing around with your data
+    /// </summary>
     public class UpsertHelper<T>
     {
         readonly Activator _activator = new Activator(typeof(T));
@@ -22,11 +24,17 @@ namespace Debaser
         readonly string _connectionString;
         readonly ClassMap _classMap;
 
+        /// <summary>
+        /// Creates the upsert helper
+        /// </summary>
         public UpsertHelper(string connectionStringOrConnectionStringName, string tableName = null, string schema = "dbo")
             : this(connectionStringOrConnectionStringName, new AutoMapper().GetMap(typeof(T)), tableName, schema)
         {
         }
 
+        /// <summary>
+        /// Creates the upsert helper
+        /// </summary>
         public UpsertHelper(string connectionStringOrConnectionStringName, ClassMap classMap, string tableName = null, string schema = "dbo")
         {
             if (connectionStringOrConnectionStringName == null) throw new ArgumentNullException(nameof(connectionStringOrConnectionStringName));
@@ -46,18 +54,31 @@ namespace Debaser
             _schemaManager = GetSchemaCreator(schema, upsertTableName, dataTypeName, procedureName);
         }
 
+        /// <summary>
+        /// Immediately executes DROP statements for everything that the helper has created in the database.
+        /// WARNING: This will DROP the table with your data in, so it is DESTRUCTIVE
+        /// </summary>
         public void DropSchema()
         {
             _schemaManager.DropSchema();
         }
 
+        /// <summary>
+        /// Ensures that the necessary schema is created (i.e. table, custom data type, and stored procedure).
+        /// Does NOT detect changes, just skips creation if it finds objects with the known names in the database.
+        /// This means that you need to handle migrations yourself
+        /// </summary>
         public void CreateSchema()
         {
             _schemaManager.CreateSchema();
         }
 
+        /// <summary>
+        /// Upserts the given sequence of <typeparamref name="T"/> instances
+        /// </summary>
         public async Task Upsert(IEnumerable<T> rows)
         {
+            if (rows == null) throw new ArgumentNullException(nameof(rows));
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
@@ -82,6 +103,10 @@ namespace Debaser
             }
         }
 
+        /// <summary>
+        /// Loads all rows from the database (in a streaming fashion, allows you to traverse all
+        /// objects without worrying about memory usage)
+        /// </summary>
         public IEnumerable<T> LoadAll()
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -98,7 +123,7 @@ namespace Debaser
 
                         using (var reader = command.ExecuteReader())
                         {
-                            var classMapProperties = _classMap.Properties.ToDictionary(p => p.Name);
+                            var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
                             var lookup = new DataReaderLookup(reader, classMapProperties);
 
                             while (reader.Read())
@@ -111,6 +136,11 @@ namespace Debaser
             }
         }
 
+        /// <summary>
+        /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+        /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+        /// <code>new { someValue = "hej" }</code>
+        /// </summary>
         public async Task DeleteWhere(string criteria, object args = null)
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
@@ -155,6 +185,11 @@ namespace Debaser
             }
         }
 
+        /// <summary>
+        /// Loads all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+        /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+        /// <code>new { someValue = "hej" }</code>
+        /// </summary>
         public async Task<List<T>> LoadWhere(string criteria, object args = null)
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
@@ -190,7 +225,7 @@ namespace Debaser
                         {
                             using (var reader = await command.ExecuteReaderAsync())
                             {
-                                var classMapProperties = _classMap.Properties.ToDictionary(p => p.Name);
+                                var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
                                 var lookup = new DataReaderLookup(reader, classMapProperties);
 
                                 while (reader.Read())

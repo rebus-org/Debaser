@@ -10,4 +10,8 @@
 * Ability to `DeleteWhere` in the same way as `LoadWhere`
 * Use the excellent [FastMember] to extract property values from objects to be even faster
 
+## 0.2.0
+
+* Comments!
+
 [FastMember]: https://github.com/mgravell/fast-member

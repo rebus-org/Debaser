@@ -5,20 +5,37 @@ using Microsoft.SqlServer.Server;
 
 namespace Debaser.Mapping
 {
+    /// <summary>
+    /// Represents a mapping from a type to a table in the database
+    /// </summary>
     public class ClassMap
     {
         readonly List<ClassMapProperty> _properties;
 
+        /// <summary>
+        /// Creates the map for the given <paramref name="type"/> containing the given list of <paramref name="properties"/> to be mapped
+        /// </summary>
         public ClassMap(Type type, IEnumerable<ClassMapProperty> properties)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (properties == null) throw new ArgumentNullException(nameof(properties));
             Type = type;
             _properties = properties.ToList();
         }
 
+        /// <summary>
+        /// Gets the mapped type
+        /// </summary>
         public Type Type { get; }
 
+        /// <summary>
+        /// Gets the sequence of properties
+        /// </summary>
         public IEnumerable<ClassMapProperty> Properties => _properties;
 
+        /// <summary>
+        /// Gets the <see cref="SqlMetaData"/> for each property
+        /// </summary>
         public SqlMetaData[] GetSqlMetaData()
         {
             return Properties

@@ -7,8 +7,14 @@ using Debaser.Attributes;
 
 namespace Debaser.Mapping
 {
+    /// <summary>
+    /// Helper that can generate a <see cref="ClassMap"/> for the <see cref="UpsertHelper{T}"/> to use
+    /// </summary>
     public class AutoMapper
     {
+        /// <summary>
+        /// Gets an automatically generated map from the given <paramref name="type"/>
+        /// </summary>
         public ClassMap GetMap(Type type)
         {
             try
@@ -33,7 +39,7 @@ namespace Debaser.Mapping
             var properties = type.GetProperties()
                 .Select(property =>
                 {
-                    var name = property.Name;
+                    var propertyName = property.Name;
                     var columnInfo = GetColumnInfo(property);
                     var columnName = property.Name;
                     var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
@@ -41,13 +47,13 @@ namespace Debaser.Mapping
                     var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
                     var fromDatabase = columnInfo.CustomFromDatabase ?? DefaultFromDatabase();
 
-                    return new ClassMapProperty(name, columnInfo, columnName, isKey, toDatabase, fromDatabase, property);
+                    return new ClassMapProperty(propertyName, columnInfo, columnName, isKey, toDatabase, fromDatabase, property);
                 })
                 .ToList();
 
             if (!properties.Any(p => p.IsKey))
             {
-                var defaultKeyProperty = properties.FirstOrDefault(p => string.Equals("Id", p.Name));
+                var defaultKeyProperty = properties.FirstOrDefault(p => string.Equals("Id", p.PropertyName));
 
                 if (defaultKeyProperty == null)
                 {
@@ -97,7 +103,7 @@ namespace Debaser.Mapping
 
             if (debaserMapperAttribute != null)
             {
-                return GetColumInfoFromDebaserMapper(debaserMapperAttribute.Type);
+                return GetColumInfoFromDebaserMapper(debaserMapperAttribute.DebaserMapperType);
             }
 
             throw new ArgumentException($"Could not automatically generate column info for {property}");

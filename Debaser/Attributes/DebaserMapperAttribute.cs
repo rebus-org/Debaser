@@ -2,14 +2,22 @@
 
 namespace Debaser.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    /// <summary>
+    /// Attribute that can be applied to a property to affect how the value is roundtripped to/from a database column
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
     public class DebaserMapperAttribute : Attribute
     {
-        public Type Type { get; }
+        internal Type DebaserMapperType { get; }
 
-        public DebaserMapperAttribute(Type type)
+        /// <summary>
+        /// Contructs the attribute with the <paramref name="debaserMapperType"/> type as the roundtripper. The type must implement
+        /// <see cref="IDebaserMapper"/> and have a default constructor
+        /// </summary>
+        public DebaserMapperAttribute(Type debaserMapperType)
         {
-            Type = type;
+            if (debaserMapperType == null) throw new ArgumentNullException(nameof(debaserMapperType));
+            DebaserMapperType = debaserMapperType;
         }
     }
 }

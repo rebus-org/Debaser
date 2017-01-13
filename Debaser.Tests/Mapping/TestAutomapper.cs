@@ -24,7 +24,7 @@ namespace Debaser.Tests.Mapping
 
             Assert.That(classMap.Type, Is.EqualTo(typeof(Poco)));
             Assert.That(classMap.Properties.Count(), Is.EqualTo(3));
-            Assert.That(classMap.Properties.Select(p => p.Name), Is.EqualTo(new[]
+            Assert.That(classMap.Properties.Select(p => p.PropertyName), Is.EqualTo(new[]
             {
                 nameof(Poco.Id),
                 nameof(Poco.Decimal),
@@ -54,7 +54,7 @@ namespace Debaser.Tests.Mapping
 
             var keys = properties.Where(p => p.IsKey);
 
-            Assert.That(keys.Select(k => k.Name), Is.EqualTo(new[] { "KeyA", "KeyB" }));
+            Assert.That(keys.Select(k => k.PropertyName), Is.EqualTo(new[] { "KeyA", "KeyB" }));
         }
 
         class PocoWithExplicitKey

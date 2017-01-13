@@ -6,17 +6,19 @@ using Microsoft.SqlServer.Server;
 
 namespace Debaser.Mapping
 {
+    /// <summary>
+    /// Represents a single column in the database
+    /// </summary>
     public class ColumnInfo
     {
+        /// <summary>
+        /// Gets the default length of NVARCHAR columns
+        /// </summary>
         public const int DefaultNVarcharLength = 256;
 
-        public SqlDbType SqlDbType { get; }
-        public int? Size { get; }
-        public int? AddSize { get; }
-
-        public Func<object, object> CustomToDatabase { get; }
-        public Func<object, object> CustomFromDatabase { get; }
-
+        /// <summary>
+        /// Creates the column info
+        /// </summary>
         public ColumnInfo(SqlDbType sqlDbType, int? size = null, int? addSize = null, Func<object, object> customToDatabase = null, Func<object, object> customFromDatabase = null)
         {
             SqlDbType = sqlDbType;
@@ -26,7 +28,27 @@ namespace Debaser.Mapping
             CustomFromDatabase = customFromDatabase;
         }
 
-        public string GetTypeDefinition()
+        /// <summary>
+        /// Gets the SQL database column type
+        /// </summary>
+        public SqlDbType SqlDbType { get; }
+        
+        /// <summary>
+        /// Gets the size (or null if irrelevant)
+        /// </summary>
+        public int? Size { get; }
+        
+        /// <summary>
+        /// Gets the additional size (or null if irrelevant)
+        /// Can be used to specify decimal places in the DECIMAL size specification
+        /// </summary>
+        public int? AddSize { get; }
+
+        internal Func<object, object> CustomToDatabase { get; }
+
+        internal Func<object, object> CustomFromDatabase { get; }
+
+        internal string GetTypeDefinition()
         {
             if (Size == null)
             {
@@ -47,7 +69,7 @@ namespace Debaser.Mapping
             return SizeIsMax(size) ? "MAX" : size.ToString();
         }
 
-        public SqlMetaData GetSqlMetaData(string columnName)
+        internal SqlMetaData GetSqlMetaData(string columnName)
         {
             if (!Size.HasValue || SizeIsMax(Size.Value))
             {
