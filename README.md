@@ -1,5 +1,7 @@
 # Debaser
 
+![](https://raw.githubusercontent.com/rebus-org/Debaser/master/artwork/logo3-200.png)
+
 Have you ever had the need to insert/update many rows in SQL Server? (i.e. "upsert" them)
 
 Did you try to use the `MERGE INTO ...` syntax then? (and did you enjoy it?)
