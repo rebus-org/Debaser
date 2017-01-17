@@ -52,7 +52,9 @@
     <Compile Include="FixtureBase.cs" />
     <Compile Include="Query\TestDeleting.cs" />
     <Compile Include="Query\TestQueries.cs" />
+    <Compile Include="Readme\SchemaSnips.cs" />
     <Compile Include="Readme\Snippets.cs" />
+    <Compile Include="Readme\ValueType.cs" />
     <Compile Include="Reflection\TestActivator.cs" />
     <Compile Include="Revisioning\TestRevisioning.cs" />
     <Compile Include="Revisioning\TestRevisioningCompositeCriteria.cs" />

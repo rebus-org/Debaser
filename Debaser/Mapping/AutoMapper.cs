@@ -80,6 +80,8 @@ namespace Debaser.Mapping
         {
             var defaultDbTypes = new Dictionary<Type, ColumnInfo>
             {
+                {typeof(bool), new ColumnInfo(SqlDbType.Bit)},
+                {typeof(byte), new ColumnInfo(SqlDbType.TinyInt)},
                 {typeof(short), new ColumnInfo(SqlDbType.SmallInt)},
                 {typeof(int), new ColumnInfo(SqlDbType.Int)},
                 {typeof(long), new ColumnInfo(SqlDbType.BigInt)},
@@ -92,6 +94,8 @@ namespace Debaser.Mapping
 
                 {typeof(DateTime), new ColumnInfo(SqlDbType.DateTime2)},
                 {typeof(DateTimeOffset), new ColumnInfo(SqlDbType.DateTimeOffset)},
+
+                {typeof(Guid), new ColumnInfo(SqlDbType.UniqueIdentifier)},
             };
 
             ColumnInfo columnInfo;
