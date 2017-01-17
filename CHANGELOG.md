@@ -14,4 +14,8 @@
 
 * Comments!
 
+## 0.3.0
+
+* Add `[DebaserUpdateCriteria]` which can be used to add extra criteria to an upsert type, which must be satisfied for a potential update to be carried out (can be used for avoiding overwriting with old data)
+
 [FastMember]: https://github.com/mgravell/fast-member

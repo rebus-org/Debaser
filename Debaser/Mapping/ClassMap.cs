@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Debaser.Attributes;
 using Microsoft.SqlServer.Server;
 
 namespace Debaser.Mapping
@@ -41,6 +43,17 @@ namespace Debaser.Mapping
             return Properties
                 .Select(p => p.GetSqlMetaData())
                 .ToArray();
+        }
+
+        /// <summary>
+        /// Gets any extra criteria required for a potential UPDATE to be carried out
+        /// </summary>
+        public string GetExtraCriteria()
+        {
+            var criteria = Type.GetCustomAttributes<DebaserUpdateCriteriaAttribute>()
+                .Select(a => $" AND {a.UpdateCriteria}");
+
+            return string.Concat(criteria);
         }
     }
 }

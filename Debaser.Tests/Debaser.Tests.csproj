@@ -54,6 +54,8 @@
     <Compile Include="Query\TestQueries.cs" />
     <Compile Include="Readme\Snippets.cs" />
     <Compile Include="Reflection\TestActivator.cs" />
+    <Compile Include="Revisioning\TestRevisioning.cs" />
+    <Compile Include="Revisioning\TestRevisioningCompositeCriteria.cs" />
     <Compile Include="Schema\TestSchemaCreator.cs" />
     <Compile Include="TestUpsertHelper.cs" />
     <Compile Include="Mapping\TestAutomapper.cs" />

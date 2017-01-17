@@ -285,8 +285,9 @@ namespace Debaser
         {
             var properties = _classMap.Properties.ToList();
             var keyProperties = properties.Where(p => p.IsKey);
+            var extraCriteria = _classMap.GetExtraCriteria();
 
-            return new SchemaManager(_connectionString, tableName, dataTypeName, procedureName, keyProperties, properties, schema);
+            return new SchemaManager(_connectionString, tableName, dataTypeName, procedureName, keyProperties, properties, schema, extraCriteria);
         }
     }
 }

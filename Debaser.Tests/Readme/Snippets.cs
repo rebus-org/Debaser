@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Debaser.Attributes;
 using Debaser.Tests.Extensions;
 using NUnit.Framework;
 
