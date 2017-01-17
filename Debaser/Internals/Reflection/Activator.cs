@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Debaser.Internals.Values;
+using FastMember;
 
 namespace Debaser.Internals.Reflection
 {
@@ -26,20 +27,23 @@ namespace Debaser.Internals.Reflection
                 .Where(p => p.SetMethod != null)
                 .ToArray();
 
+            var accessor = TypeAccessor.Create(type);
+            
             return lookup =>
             {
                 var instance = System.Activator.CreateInstance(type);
 
                 foreach (var property in properties)
                 {
-                    var value = lookup.GetValue(property.Name, property.PropertyType);
+                    var propertyName = property.Name;
+                    var value = lookup.GetValue(propertyName, property.PropertyType);
                     try
                     {
-                        property.SetValue(instance, value);
+                        accessor[instance, propertyName] = value;
                     }
                     catch (Exception exception)
                     {
-                        throw new ApplicationException($"Could not set value of property {property.Name} to {value}", exception);
+                        throw new ApplicationException($"Could not set value of property {propertyName} to {value}", exception);
                     }
                 }
 
