@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Corners\InsertEmptySequence.cs" />
     <Compile Include="Customization\TestDebaserMapper.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FixtureBase.cs" />

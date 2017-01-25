@@ -50,6 +50,7 @@
     <Compile Include="Attributes\DebaserUpdateCriteriaAttribute.cs" />
     <Compile Include="Internals\Data\DataReaderLookup.cs" />
     <Compile Include="IDebaserMapper.cs" />
+    <Compile Include="Internals\Exceptions\EmptySequenceException.cs" />
     <Compile Include="Internals\Ex\StringEx.cs" />
     <Compile Include="Internals\Query\Parameter.cs" />
     <Compile Include="Mapping\ClassMapProperty.cs" />

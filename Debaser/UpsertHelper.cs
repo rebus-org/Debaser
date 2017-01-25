@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Debaser.Internals.Data;
+using Debaser.Internals.Exceptions;
 using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
 using Debaser.Mapping;
@@ -95,7 +98,11 @@ namespace Debaser
                         parameter.SqlDbType = SqlDbType.Structured;
                         parameter.TypeName = _schemaManager.DataTypeName;
 
-                        await command.ExecuteNonQueryAsync();
+                        try
+                        {
+                            await command.ExecuteNonQueryAsync();
+                        }
+                        catch (EmptySequenceException) { }
                     }
 
                     transaction.Commit();
@@ -262,6 +269,7 @@ namespace Debaser
         {
             var sqlMetaData = _classMap.GetSqlMetaData();
             var reusableRecord = new SqlDataRecord(sqlMetaData);
+            var didYieldRows = false;
 
             foreach (var row in rows)
             {
@@ -278,6 +286,14 @@ namespace Debaser
                 }
 
                 yield return reusableRecord;
+
+                didYieldRows = true;
+            }
+
+            // sorry - but we need to handle this somehow, and we don't know that the sequence was empty until we have tried to run it through
+            if (!didYieldRows)
+            {
+                throw new EmptySequenceException();
             }
         }
 

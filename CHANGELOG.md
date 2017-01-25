@@ -18,4 +18,9 @@
 
 * Add `[DebaserUpdateCriteria]` which can be used to add extra criteria to an upsert type, which must be satisfied for a potential update to be carried out (can be used for avoiding overwriting with old data)
 
+## 0.4.0
+
+* Fix bug that would make the upsert helper unable to handle single-column tables (i.e. a table that simply consists of PKs)
+* Fix bug that would result in an exception when upserting an empty sequence
+
 [FastMember]: https://github.com/mgravell/fast-member
