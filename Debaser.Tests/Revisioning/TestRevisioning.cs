@@ -15,12 +15,12 @@ namespace Debaser.Tests.Revisioning
         protected override void SetUp()
         {
             _upsertHelper = new UpsertHelper<SomeRowWithIntegerRevision>(ConnectionString);
-            _upsertHelper.DropSchema();
-            _upsertHelper.CreateSchema();
+            _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
+            _upsertHelper.CreateSchema(createType: true, createTable: true, createProcedure: true);
 
             _upsertHelper2 = new UpsertHelper<SomeRowWithDateTimeRevision>(ConnectionString);
-            _upsertHelper2.DropSchema();
-            _upsertHelper2.CreateSchema();
+            _upsertHelper2.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
+            _upsertHelper2.CreateSchema(createType: true, createTable: true, createProcedure: true);
         }
 
         [Test]

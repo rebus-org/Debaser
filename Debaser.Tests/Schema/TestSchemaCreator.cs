@@ -18,8 +18,8 @@ namespace Debaser.Tests.Schema
 
             var creator = new SchemaManager(ConnectionString, "testtable", "testdata", "testproc", keyProperties, properties, schema: "bimse");
 
-            creator.DropSchema();
-            creator.CreateSchema();
+            creator.DropSchema(true, true, true);
+            creator.CreateSchema(true, true, true);
         }
 
         class SomeClass

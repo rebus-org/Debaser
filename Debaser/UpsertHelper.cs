@@ -58,12 +58,12 @@ namespace Debaser
         }
 
         /// <summary>
-        /// Immediately executes DROP statements for everything that the helper has created in the database.
-        /// WARNING: This will DROP the table with your data in, so it is DESTRUCTIVE
+        /// Immediately executes DROP statements for the things you select by setting <paramref name="dropProcedure"/>,
+        /// <paramref name="dropType"/>, and/or <paramref name="dropTable"/> to <code>true</code>.
         /// </summary>
-        public void DropSchema()
+        public void DropSchema(bool dropProcedure = false, bool dropType = false, bool dropTable = false)
         {
-            _schemaManager.DropSchema();
+            _schemaManager.DropSchema(dropProcedure, dropType, dropTable);
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace Debaser
         /// Does NOT detect changes, just skips creation if it finds objects with the known names in the database.
         /// This means that you need to handle migrations yourself
         /// </summary>
-        public void CreateSchema()
+        public void CreateSchema(bool createProcedure = false, bool createType = false, bool createTable = false)
         {
-            _schemaManager.CreateSchema();
+            _schemaManager.CreateSchema(createProcedure, createType, createTable);
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace Debaser
                                 parameter.AddTo(command);
                             }
                         }
-                        
+
                         command.CommandText = querySql;
 
                         try
@@ -237,7 +237,7 @@ namespace Debaser
 
                                 while (reader.Read())
                                 {
-                                    var instance = (T) _activator.CreateInstance(lookup);
+                                    var instance = (T)_activator.CreateInstance(lookup);
 
                                     results.Add(instance);
                                 }

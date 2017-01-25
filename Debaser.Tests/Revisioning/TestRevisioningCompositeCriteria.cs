@@ -14,8 +14,8 @@ namespace Debaser.Tests.Revisioning
         protected override void SetUp()
         {
             _upsertHelper = new UpsertHelper<SomeRowWithCompositeRevision>(ConnectionString);
-            _upsertHelper.DropSchema();
-            _upsertHelper.CreateSchema();
+            _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
+            _upsertHelper.CreateSchema(createType: true, createTable: true, createProcedure: true);
         }
 
         [Test]

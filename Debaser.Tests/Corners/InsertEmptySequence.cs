@@ -12,8 +12,8 @@ namespace Debaser.Tests.Corners
         protected override void SetUp()
         {
             _upserter = new UpsertHelper<MinimalRow>(ConnectionString);
-            _upserter.DropSchema();
-            _upserter.CreateSchema();
+            _upserter.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
+            _upserter.CreateSchema(createType: true, createTable: true, createProcedure: true);
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace Debaser.Tests.Corners
 
             var allRows = _upserter.LoadAll().OrderBy(r => r.Id).ToList();
 
-            Assert.That(allRows.Select(r => r.Id), Is.EqualTo(new[]{1,2,3,4}));
+            Assert.That(allRows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2, 3, 4 }));
         }
 
         class MinimalRow
@@ -45,7 +45,7 @@ namespace Debaser.Tests.Corners
                 Id = id;
             }
 
-            public int Id { get;  }
+            public int Id { get; }
         }
     }
 }

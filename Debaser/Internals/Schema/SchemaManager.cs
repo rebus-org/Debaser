@@ -38,11 +38,12 @@ namespace Debaser.Internals.Schema
 
         public string DataTypeName => _dataTypeName;
 
-        public void CreateSchema()
+        public void CreateSchema(bool createProcedure, bool createType, bool createTable)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
+
                 using (var transaction = connection.BeginTransaction())
                 {
                     ExecuteStatement(connection, transaction, $@"
@@ -58,7 +59,9 @@ SELECT [schema_id] FROM sys.schemas WHERE [name]='{_schema}'
 
 ");
 
-                    ExecuteStatement(connection, transaction, $@"
+                    if (createTable)
+                    {
+                        ExecuteStatement(connection, transaction, $@"
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE [name]='{_tableName}' AND [type]='U' AND [schema_id]={schemaId})
     CREATE TABLE [{_schema}].[{_tableName}] (
@@ -67,8 +70,11 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE [name]='{_tableName}' AND [type]=
     )
 
 ");
+                    }
 
-                    ExecuteStatement(connection, transaction, $@"
+                    if (createType)
+                    {
+                        ExecuteStatement(connection, transaction, $@"
 
 IF NOT EXISTS (SELECT * FROM sys.types WHERE [name]='{_dataTypeName}' AND [is_user_defined] = 1 AND [schema_id]={schemaId})
     CREATE TYPE [{_schema}].[{_dataTypeName}] AS TABLE (
@@ -76,15 +82,18 @@ IF NOT EXISTS (SELECT * FROM sys.types WHERE [name]='{_dataTypeName}' AND [is_us
     )
 
 ");
+                    }
 
-                    ExecuteStatement(connection, transaction, $@"
+                    if (createProcedure)
+                    {
+                        ExecuteStatement(connection, transaction, $@"
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE [name]='{_sprocName}' AND [type]='P' AND [schema_id]={schemaId})
     EXEC('CREATE PROCEDURE [{_schema}].[{_sprocName}] AS BEGIN SET NOCOUNT ON; END')
 
 ");
 
-                    ExecuteStatement(connection, transaction, $@"
+                        ExecuteStatement(connection, transaction, $@"
 
 ALTER PROCEDURE [{_schema}].[{_sprocName}] (
     @data [{_schema}].[{_dataTypeName}] READONLY
@@ -119,6 +128,8 @@ BEGIN
 END
 
 ");
+                    }
+
 
                     transaction.Commit();
                 }
@@ -135,7 +146,7 @@ END
             }
         }
 
-        public void DropSchema()
+        public void DropSchema(bool dropProcedure, bool dropType, bool dropTable)
         {
             const int objectNotFound = 3701;
             const int typeNotFound = 218;
@@ -143,42 +154,55 @@ END
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        ExecuteStatement(connection, transaction, $@"DROP PROCEDURE [{_schema}].[{_sprocName}]", wrapException: false);
 
-                        transaction.Commit();
-                    }
-                    catch (SqlException exception) when (exception.Number == objectNotFound)
+                if (dropProcedure)
+                {
+                    using (var transaction = connection.BeginTransaction())
                     {
+                        try
+                        {
+                            ExecuteStatement(connection, transaction, $@"DROP PROCEDURE [{_schema}].[{_sprocName}]",
+                                wrapException: false);
+
+                            transaction.Commit();
+                        }
+                        catch (SqlException exception) when (exception.Number == objectNotFound)
+                        {
+                        }
                     }
                 }
 
-                using (var transaction = connection.BeginTransaction())
+                if (dropType)
                 {
-                    try
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        ExecuteStatement(connection, transaction, $@"DROP TYPE [{_schema}].[{_dataTypeName}]", wrapException: false);
+                        try
+                        {
+                            ExecuteStatement(connection, transaction, $@"DROP TYPE [{_schema}].[{_dataTypeName}]",
+                                wrapException: false);
 
-                        transaction.Commit();
-                    }
-                    catch (SqlException exception) when (exception.Number == typeNotFound)
-                    {
+                            transaction.Commit();
+                        }
+                        catch (SqlException exception) when (exception.Number == typeNotFound)
+                        {
+                        }
                     }
                 }
 
-                using (var transaction = connection.BeginTransaction())
+                if (dropTable)
                 {
-                    try
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        ExecuteStatement(connection, transaction, $@"DROP TABLE [{_schema}].[{_tableName}]", wrapException: false);
+                        try
+                        {
+                            ExecuteStatement(connection, transaction, $@"DROP TABLE [{_schema}].[{_tableName}]",
+                                wrapException: false);
 
-                        transaction.Commit();
-                    }
-                    catch (SqlException exception) when (exception.Number == objectNotFound)
-                    {
+                            transaction.Commit();
+                        }
+                        catch (SqlException exception) when (exception.Number == objectNotFound)
+                        {
+                        }
                     }
                 }
             }

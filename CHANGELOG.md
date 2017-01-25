@@ -22,5 +22,7 @@
 
 * Fix bug that would make the upsert helper unable to handle single-column tables (i.e. a table that simply consists of PKs)
 * Fix bug that would result in an exception when upserting an empty sequence
+* Parameterize the `DropSchema` method so it can be used to e.g. drop only the data type and the procedure
+* Parameterize the `CreateSchema` method so it can be used to e.g. create only the table
 
 [FastMember]: https://github.com/mgravell/fast-member
