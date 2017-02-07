@@ -10,9 +10,26 @@ namespace Debaser.Tests.Reflection
     public class TestActivator : FixtureBase
     {
         [Test]
+        public void SkipsPropertyWhenNotIncluded_Constructor()
+        {
+            var activator = new Activator(typeof(SomeClassWithConstructor), new[] { nameof(SomeClassWithConstructor.Number) });
+
+            var values = new TestValueLookup(new Dictionary<string, object>
+            {
+                {nameof(SomeClassWithConstructor.Number), 123 },
+                {nameof(SomeClassWithConstructor.Text), "HELLO" },
+            });
+
+            var instance = (SomeClassWithConstructor)activator.CreateInstance(values);
+
+            Assert.That(instance.Number, Is.EqualTo(123));
+            Assert.That(instance.Text, Is.EqualTo(null));
+        }
+
+        [Test]
         public void CanCreateClassFromConstructor()
         {
-            var activator = new Activator(typeof(SomeClassWithConstructor));
+            var activator = new Activator(typeof(SomeClassWithConstructor), new[] { nameof(SomeClassWithConstructor.Number), nameof(SomeClassWithConstructor.Text) });
 
             var values = new TestValueLookup(new Dictionary<string, object>
             {
@@ -39,9 +56,26 @@ namespace Debaser.Tests.Reflection
         }
 
         [Test]
+        public void SkipsPropertyWhenNotIncluded_Properties()
+        {
+            var activator = new Activator(typeof(SomeClassWithProperties), new[] { nameof(SomeClassWithProperties.Number) });
+
+            var values = new TestValueLookup(new Dictionary<string, object>
+            {
+                {nameof(SomeClassWithProperties.Number), 123 },
+                {nameof(SomeClassWithProperties.Text), "HELLO" },
+            });
+
+            var instance = (SomeClassWithProperties)activator.CreateInstance(values);
+
+            Assert.That(instance.Number, Is.EqualTo(123));
+            Assert.That(instance.Text, Is.EqualTo(null));
+        }
+
+        [Test]
         public void CanCreateClassFromProperties()
         {
-            var activator = new Activator(typeof(SomeClassWithProperties));
+            var activator = new Activator(typeof(SomeClassWithProperties), new[] { nameof(SomeClassWithProperties.Number), nameof(SomeClassWithProperties.Text) });
 
             var values = new TestValueLookup(new Dictionary<string, object>
             {

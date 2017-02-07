@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Debaser.Internals.Values;
 using FastMember;
@@ -9,11 +11,13 @@ namespace Debaser.Internals.Reflection
     {
         readonly Func<IValueLookup, object> _creationFunction;
 
-        public Activator(Type type)
+        public Activator(Type type, IEnumerable<string> includedProperties)
         {
+            var propertyNames = new HashSet<string>(includedProperties);
+
             _creationFunction = HasDefaultConstructor(type)
-                ? GetPropertyCreator(type)
-                : GetConstructorCreator(type);
+                ? GetPropertyCreator(type, propertyNames)
+                : GetConstructorCreator(type, propertyNames);
         }
 
         public object CreateInstance(IValueLookup valueLookup)
@@ -21,10 +25,11 @@ namespace Debaser.Internals.Reflection
             return _creationFunction(valueLookup);
         }
 
-        static Func<IValueLookup, object> GetPropertyCreator(Type type)
+        static Func<IValueLookup, object> GetPropertyCreator(Type type, HashSet<string> includedProperties)
         {
             var properties = type.GetProperties()
                 .Where(p => p.SetMethod != null)
+                .Where(p => includedProperties.Contains(p.Name))
                 .ToArray();
 
             var accessor = TypeAccessor.Create(type);
@@ -51,7 +56,7 @@ namespace Debaser.Internals.Reflection
             };
         }
 
-        static Func<IValueLookup, object> GetConstructorCreator(Type type)
+        static Func<IValueLookup, object> GetConstructorCreator(Type type, HashSet<string> includedProperties)
         {
             var parameters = type.GetConstructors().Single()
                 .GetParameters()
@@ -60,7 +65,17 @@ namespace Debaser.Internals.Reflection
             return lookup =>
             {
                 var parameterValues = parameters
-                    .Select(parameter => lookup.GetValue(parameter.Name, parameter.ParameterType))
+                    .Select(parameter =>
+                    {
+                        var titleCase = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(parameter.Name);
+
+                        if (includedProperties.Contains(titleCase))
+                        {
+                            return lookup.GetValue(parameter.Name, parameter.ParameterType);
+                        }
+
+                        return null;
+                    })
                     .ToArray();
 
                 try

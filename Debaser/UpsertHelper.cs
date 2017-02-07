@@ -20,7 +20,7 @@ namespace Debaser
     /// </summary>
     public class UpsertHelper<T>
     {
-        readonly Activator _activator = new Activator(typeof(T));
+        readonly Activator _activator;
         readonly SchemaManager _schemaManager;
         readonly string _connectionString;
         readonly ClassMap _classMap;
@@ -56,6 +56,8 @@ namespace Debaser
             var procedureName = $"{upsertTableName}Upsert";
 
             _schemaManager = GetSchemaCreator(schema, upsertTableName, dataTypeName, procedureName);
+
+            _activator = new Activator(typeof(T), _classMap.Properties.Select(p => p.PropertyName));
         }
 
         /// <summary>

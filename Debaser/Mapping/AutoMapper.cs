@@ -37,6 +37,7 @@ namespace Debaser.Mapping
         static IEnumerable<ClassMapProperty> GetProperties(Type type)
         {
             var properties = type.GetProperties()
+                .Where(property => !property.GetCustomAttributes<DebaserIgnoreAttribute>().Any())
                 .Select(property =>
                 {
                     var propertyName = property.Name;

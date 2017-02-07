@@ -33,4 +33,8 @@
 
 * Add mechanism to allow for configuring command timeout and transaction isolation level
 
+## 0.7.0
+
+* Add ability to completely ignore a property
+
 [FastMember]: https://github.com/mgravell/fast-member

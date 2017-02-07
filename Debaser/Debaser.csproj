@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DebaserIgnoreAttribute.cs" />
     <Compile Include="Attributes\DebaserKeyAttribute.cs" />
     <Compile Include="Attributes\DebaserMapperAttribute.cs" />
     <Compile Include="Attributes\DebaserRevisionAttribute.cs" />
