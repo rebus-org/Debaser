@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Debaser.Internals.Data;
 using Debaser.Internals.Exceptions;
@@ -26,24 +24,27 @@ namespace Debaser
         readonly SchemaManager _schemaManager;
         readonly string _connectionString;
         readonly ClassMap _classMap;
+        readonly Settings _settings;
 
         /// <summary>
         /// Creates the upsert helper
         /// </summary>
-        public UpsertHelper(string connectionStringOrConnectionStringName, string tableName = null, string schema = "dbo")
-            : this(connectionStringOrConnectionStringName, new AutoMapper().GetMap(typeof(T)), tableName, schema)
+        public UpsertHelper(string connectionStringOrConnectionStringName, string tableName = null, string schema = "dbo", Settings settings = null)
+            : this(connectionStringOrConnectionStringName, new AutoMapper().GetMap(typeof(T)), tableName, schema, settings)
         {
         }
 
         /// <summary>
         /// Creates the upsert helper
         /// </summary>
-        public UpsertHelper(string connectionStringOrConnectionStringName, ClassMap classMap, string tableName = null, string schema = "dbo")
+        public UpsertHelper(string connectionStringOrConnectionStringName, ClassMap classMap, string tableName = null, string schema = "dbo", Settings settings = null)
         {
             if (connectionStringOrConnectionStringName == null) throw new ArgumentNullException(nameof(connectionStringOrConnectionStringName));
             if (classMap == null) throw new ArgumentNullException(nameof(classMap));
 
             var connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringOrConnectionStringName];
+
+            _settings = settings ?? new Settings();
 
             _connectionString = connectionStringSettings?.ConnectionString
                                 ?? connectionStringOrConnectionStringName;
@@ -85,12 +86,12 @@ namespace Debaser
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                using (var transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
-                        command.CommandTimeout = 120;
+                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
                         command.CommandType = CommandType.StoredProcedure;
                         command.CommandText = _schemaManager.SprocName;
 
@@ -119,12 +120,12 @@ namespace Debaser
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
-                        command.CommandTimeout = 120;
+                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
                         command.CommandType = CommandType.Text;
                         command.CommandText = _schemaManager.GetQuery();
 
@@ -156,12 +157,12 @@ namespace Debaser
             {
                 await connection.OpenAsync();
 
-                using (var transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
-                        command.CommandTimeout = 120;
+                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
                         command.CommandType = CommandType.Text;
 
                         var querySql = _schemaManager.GetDeleteCommand(criteria);
@@ -207,12 +208,12 @@ namespace Debaser
             {
                 await connection.OpenAsync();
 
-                using (var transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
-                        command.CommandTimeout = 120;
+                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
                         command.CommandType = CommandType.Text;
 
                         var querySql = _schemaManager.GetQuery(criteria);

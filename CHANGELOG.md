@@ -29,4 +29,8 @@
 
 * Handle `double` (== float) and `float` (== real) properly in automapperino
 
+## 0.6.0
+
+* Add mechanism to allow for configuring command timeout and transaction isolation level
+
 [FastMember]: https://github.com/mgravell/fast-member

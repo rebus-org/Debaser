@@ -56,6 +56,7 @@
     <Compile Include="Mapping\ClassMapProperty.cs" />
     <Compile Include="Mapping\ColumnInfo.cs" />
     <Compile Include="Internals\Schema\SchemaManager.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="UpsertHelper.cs" />
     <Compile Include="Mapping\AutoMapper.cs" />
     <Compile Include="Mapping\ClassMap.cs" />
