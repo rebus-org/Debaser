@@ -18,7 +18,7 @@ namespace Debaser.Mapping
         /// Gets the name of the database column
         /// </summary>
         public string ColumnName { get; }
-        
+
         /// <summary>
         /// Gets the name of the property
         /// </summary>

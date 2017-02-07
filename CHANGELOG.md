@@ -25,4 +25,8 @@
 * Parameterize the `DropSchema` method so it can be used to e.g. drop only the data type and the procedure
 * Parameterize the `CreateSchema` method so it can be used to e.g. create only the table
 
+## 0.5.0
+
+* Handle `double` (== float) and `float` (== real) properly in automapperino
+
 [FastMember]: https://github.com/mgravell/fast-member

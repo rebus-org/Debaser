@@ -87,8 +87,8 @@ namespace Debaser.Mapping
                 {typeof(long), new ColumnInfo(SqlDbType.BigInt)},
 
                 {typeof(decimal), new ColumnInfo(SqlDbType.Decimal)},
-                {typeof(double), new ColumnInfo(SqlDbType.Decimal)},
-                {typeof(float), new ColumnInfo(SqlDbType.Decimal)},
+                {typeof(double), new ColumnInfo(SqlDbType.Float)},
+                {typeof(float), new ColumnInfo(SqlDbType.Real)},
 
                 {typeof(string), new ColumnInfo(SqlDbType.NVarChar)},
 
