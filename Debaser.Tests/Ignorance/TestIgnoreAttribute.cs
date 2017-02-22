@@ -15,7 +15,7 @@ namespace Debaser.Tests.Ignorance
             _helper = new UpsertHelper<HasIgnoredProperty>(ConnectionString);
 
             _helper.DropSchema(dropTable: true, dropType: true, dropProcedure: true);
-            _helper.CreateSchema(createType: true, createProcedure: true, createTable: true);
+            _helper.CreateSchema();
         }
 
         [Test]

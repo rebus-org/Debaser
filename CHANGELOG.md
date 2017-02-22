@@ -37,4 +37,10 @@
 
 * Add ability to completely ignore a property
 
+## 0.8.0
+
+* Make `CreateSchema` default to actually creating it
+
+
+
 [FastMember]: https://github.com/mgravell/fast-member

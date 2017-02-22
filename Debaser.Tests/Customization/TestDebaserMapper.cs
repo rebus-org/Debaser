@@ -17,7 +17,7 @@ namespace Debaser.Tests.Customization
             _upsertHelper = new UpsertHelper<RowWithJson>("db");
 
             _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            _upsertHelper.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            _upsertHelper.CreateSchema();
         }
 
         [Test]

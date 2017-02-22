@@ -13,7 +13,7 @@ namespace Debaser.Tests.Bugs
         {
             _upserter = new UpsertHelper<BricData>(ConnectionString);
             _upserter.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            _upserter.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            _upserter.CreateSchema();
         }
 
         [Test]

@@ -13,7 +13,7 @@ namespace Debaser.Tests.Corners
         {
             _upserter = new UpsertHelper<MinimalRow>(ConnectionString);
             _upserter.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            _upserter.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            _upserter.CreateSchema();
         }
 
         [Test]

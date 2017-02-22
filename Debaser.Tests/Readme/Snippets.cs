@@ -21,7 +21,7 @@ namespace Debaser.Tests.Readme
             var upsertHelper = new UpsertHelper<SomeDataRow>("db");
 
             upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            upsertHelper.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            upsertHelper.CreateSchema();
 
             await upsertHelper.Upsert(rows);
 
@@ -55,7 +55,7 @@ namespace Debaser.Tests.Readme
             var upsertHelper = new UpsertHelper<SomeDataRow>("db");
 
             upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            upsertHelper.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            upsertHelper.CreateSchema();
 
             var stopwatch = Stopwatch.StartNew();
 

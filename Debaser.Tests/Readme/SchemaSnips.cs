@@ -11,7 +11,7 @@ namespace Debaser.Tests.Readme
         {
             var helper = new UpsertHelper<Person>(ConnectionString);
             helper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            helper.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            helper.CreateSchema();
         }
 
         class Person
@@ -33,7 +33,7 @@ namespace Debaser.Tests.Readme
         {
             var helper = new UpsertHelper<TenantPerson>(ConnectionString);
             helper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            helper.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            helper.CreateSchema();
         }
 
         class TenantPerson

@@ -16,11 +16,11 @@ namespace Debaser.Tests.Revisioning
         {
             _upsertHelper = new UpsertHelper<SomeRowWithIntegerRevision>(ConnectionString);
             _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            _upsertHelper.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            _upsertHelper.CreateSchema();
 
             _upsertHelper2 = new UpsertHelper<SomeRowWithDateTimeRevision>(ConnectionString);
             _upsertHelper2.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            _upsertHelper2.CreateSchema(createType: true, createTable: true, createProcedure: true);
+            _upsertHelper2.CreateSchema();
         }
 
         [Test]

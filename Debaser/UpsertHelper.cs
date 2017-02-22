@@ -74,7 +74,7 @@ namespace Debaser
         /// Does NOT detect changes, just skips creation if it finds objects with the known names in the database.
         /// This means that you need to handle migrations yourself
         /// </summary>
-        public void CreateSchema(bool createProcedure = false, bool createType = false, bool createTable = false)
+        public void CreateSchema(bool createProcedure = true, bool createType = true, bool createTable = true)
         {
             _schemaManager.CreateSchema(createProcedure, createType, createTable);
         }
