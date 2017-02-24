@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Debaser.Attributes;
 using NUnit.Framework;
 
-namespace Debaser.Tests.Revisioning
+namespace Debaser.Tests.Ignorance
 {
     [TestFixture]
-    public class TestRevisioning : FixtureBase
+    public class TestIngoreUpdate : FixtureBase
     {
         UpsertHelper<SomeRowWithIntegerRevision> _upsertHelper;
         UpsertHelper<SomeRowWithDateTimeRevision> _upsertHelper2;

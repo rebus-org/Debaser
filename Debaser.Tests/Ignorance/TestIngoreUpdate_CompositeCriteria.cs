@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Debaser.Attributes;
 using NUnit.Framework;
 
-namespace Debaser.Tests.Revisioning
+namespace Debaser.Tests.Ignorance
 {
     [TestFixture]
-    public class TestRevisioningCompositeCriteria : FixtureBase
+    public class TestIngoreUpdate_CompositeCriteria : FixtureBase
     {
         UpsertHelper<SomeRowWithCompositeRevision> _upsertHelper;
 
@@ -79,6 +79,5 @@ namespace Debaser.Tests.Revisioning
 
             public DateTime LastUpdated { get; }
         }
-
     }
 }

@@ -59,8 +59,8 @@
     <Compile Include="Readme\Snippets.cs" />
     <Compile Include="Readme\ValueType.cs" />
     <Compile Include="Reflection\TestActivator.cs" />
-    <Compile Include="Revisioning\TestRevisioning.cs" />
-    <Compile Include="Revisioning\TestRevisioningCompositeCriteria.cs" />
+    <Compile Include="Ignorance\TestIngoreUpdate.cs" />
+    <Compile Include="Ignorance\TestIngoreUpdate_CompositeCriteria.cs" />
     <Compile Include="Schema\TestSchemaCreator.cs" />
     <Compile Include="TestUpsertHelper.cs" />
     <Compile Include="Mapping\TestAutomapper.cs" />
@@ -75,6 +75,9 @@
       <Project>{5D36E019-958A-4DD7-89FE-7D0B7D9CA3B8}</Project>
       <Name>Debaser</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Revisioning\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
