@@ -14,9 +14,8 @@ namespace Debaser.Tests.Schema
             var mapper = new AutoMapper();
             var map = mapper.GetMap(typeof(SomeClass));
             var properties = map.Properties;
-            var keyProperties = properties.Where(p => p.IsKey);
 
-            var creator = new SchemaManager(ConnectionString, "testtable", "testdata", "testproc", keyProperties, properties, schema: "bimse");
+            var creator = new SchemaManager(ConnectionString, "testtable", "testdata", "testproc", properties, schema: "bimse");
 
             creator.DropSchema(true, true, true);
             creator.CreateSchema(true, true, true);

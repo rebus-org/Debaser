@@ -27,6 +27,29 @@ namespace Debaser.Mapping
                     throw new ArgumentException(@"At least one key property needs to be specified. Either create a property named 'Id' or apply [DebaserKey] on one or more properties");
                 }
 
+                var revisionProperties = properties.Where(p => p.IsRevision).ToList();
+
+                if (revisionProperties.Count > 1)
+                {
+                    throw new ArgumentException($@"At most one property can be a revision property (i.e. be decorated with the [DebaserRevision] attribute, but the following properties currently have it: {string.Join(", ", revisionProperties.Select(p => p.PropertyName))}");
+                }
+
+                if (revisionProperties.Count == 1)
+                {
+                    var revisionProperty = revisionProperties.Single();
+
+                    var sqlDbType = revisionProperty.GetSqlMetaData().SqlDbType;
+
+                    switch (sqlDbType)
+                    {
+                        default:
+                            throw new ArgumentOutOfRangeException($"Revision property {revisionProperty.PropertyName} has SQL DB type {sqlDbType} - it must be either INT or BIGINT to work!");
+                        case SqlDbType.Int:
+                        case SqlDbType.BigInt:
+                            break;
+                    }
+                }
+
                 return new ClassMap(type, properties);
             }
             catch (Exception exception)
@@ -49,7 +72,9 @@ namespace Debaser.Mapping
                     var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
                     var fromDatabase = columnInfo.CustomFromDatabase ?? DefaultFromDatabase();
 
-                    return new ClassMapProperty(propertyName, columnInfo, columnName, isKey, toDatabase, fromDatabase, property);
+                    var isRevision = property.GetCustomAttributes<DebaserRevisionAttribute>().Any();
+
+                    return new ClassMapProperty(propertyName, columnInfo, columnName, isKey, toDatabase, fromDatabase, property, isRevision);
                 })
                 .ToList();
 

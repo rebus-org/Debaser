@@ -35,14 +35,20 @@ namespace Debaser.Mapping
         public bool IsKey { get; private set; }
 
         /// <summary>
+        /// Gets whether the property is a revision number (i.e. technically part of a composite PK)
+        /// </summary>
+        public bool IsRevision { get; }
+
+        /// <summary>
         /// Creates the property
         /// </summary>
-        public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
+        public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property, bool isRevision)
         {
             PropertyName = propertyName;
             ColumnInfo = columnInfo;
             ColumnName = columnName;
             IsKey = isKey;
+            IsRevision = isRevision;
             _toDatabase = toDatabase;
             _fromDatabase = fromDatabase;
             _accessor = TypeAccessor.Create(property.DeclaringType);
