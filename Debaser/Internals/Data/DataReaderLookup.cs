@@ -20,18 +20,30 @@ namespace Debaser.Internals.Data
 
         public object GetValue(string name, Type desiredType)
         {
-            var ordinal = _reader.GetOrdinal(name);
+            var ordinal = _reader.GetOrdinal(GetColumnName(name));
             var value = _reader.GetValue(ordinal);
 
             var property = GetProperty(name);
 
             try
             {
-                return property.FromDatabase(value);
+                return property.FromDatabase(value == DBNull.Value ? null : value);
             }
             catch (Exception exception)
             {
                 throw new ApplicationException($"Could not get value {name}", exception);
+            }
+        }
+
+        string GetColumnName(string name)
+        {
+            try
+            {
+                return _properties[name].ColumnName;
+            }
+            catch (Exception exception)
+            {
+                throw new KeyNotFoundException($"Could not find column name corresponding to property/ctor parameter named '{name}'", exception);
             }
         }
 

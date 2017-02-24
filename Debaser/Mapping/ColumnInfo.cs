@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using Microsoft.SqlServer.Server;
 // ReSharper disable ArgumentsStyleNamedExpression
+// ReSharper disable ArgumentsStyleOther
 
 namespace Debaser.Mapping
 {
@@ -32,12 +33,12 @@ namespace Debaser.Mapping
         /// Gets the SQL database column type
         /// </summary>
         public SqlDbType SqlDbType { get; }
-        
+
         /// <summary>
         /// Gets the size (or null if irrelevant)
         /// </summary>
         public int? Size { get; }
-        
+
         /// <summary>
         /// Gets the additional size (or null if irrelevant)
         /// Can be used to specify decimal places in the DECIMAL size specification
@@ -50,18 +51,27 @@ namespace Debaser.Mapping
 
         internal string GetTypeDefinition()
         {
+            var typeName = SqlDbType.ToString().ToUpper();
+
             if (Size == null)
             {
                 if (IsString)
                 {
-                    return $"{SqlDbType.ToString().ToUpper()}({DefaultNVarcharLength})";
+                    return $"{typeName}({DefaultNVarcharLength})";
                 }
-                return $"{SqlDbType.ToString().ToUpper()}";
+                return $"{typeName}";
             }
 
             var sizeString = GetSizeString(Size.Value);
 
-            return $"{SqlDbType.ToString().ToUpper()}({sizeString})";
+            if (AddSize == null)
+            {
+                return $"{typeName}({sizeString})";
+            }
+
+            var addSizeString = GetSizeString(AddSize.Value);
+
+            return $"{typeName}({sizeString},{addSizeString})";
         }
 
         string GetSizeString(int size)
@@ -81,7 +91,12 @@ namespace Debaser.Mapping
                 return new SqlMetaData(columnName, SqlDbType);
             }
 
-            return new SqlMetaData(columnName, SqlDbType, maxLength: Size.Value);
+            if (!AddSize.HasValue)
+            {
+                return new SqlMetaData(columnName, SqlDbType, maxLength: Size.Value);
+            }
+
+            return new SqlMetaData(columnName, SqlDbType, precision: (byte)Size.Value, scale: (byte)AddSize.Value);
         }
 
         static bool SizeIsMax(int size)

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using Debaser.Attributes;
+// ReSharper disable ArgumentsStyleLiteral
 
 namespace Debaser.Mapping
 {
@@ -42,7 +43,7 @@ namespace Debaser.Mapping
                 {
                     var propertyName = property.Name;
                     var columnInfo = GetColumnInfo(property);
-                    var columnName = property.Name;
+                    var columnName = GetColumnNameFromAttribute(property) ?? property.Name;
                     var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
 
                     var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
@@ -67,6 +68,11 @@ namespace Debaser.Mapping
             return properties;
         }
 
+        static string GetColumnNameFromAttribute(PropertyInfo property)
+        {
+            return property.GetCustomAttribute<DebaserColumnNameAttribute>()?.ColumnName;
+        }
+
         static Func<object, object> DefaultFromDatabase()
         {
             return obj => obj;
@@ -82,14 +88,22 @@ namespace Debaser.Mapping
             var defaultDbTypes = new Dictionary<Type, ColumnInfo>
             {
                 {typeof(bool), new ColumnInfo(SqlDbType.Bit)},
+                {typeof(bool?), new ColumnInfo(SqlDbType.Bit)},
                 {typeof(byte), new ColumnInfo(SqlDbType.TinyInt)},
+                {typeof(byte?), new ColumnInfo(SqlDbType.TinyInt)},
                 {typeof(short), new ColumnInfo(SqlDbType.SmallInt)},
+                {typeof(short?), new ColumnInfo(SqlDbType.SmallInt)},
                 {typeof(int), new ColumnInfo(SqlDbType.Int)},
+                {typeof(int?), new ColumnInfo(SqlDbType.Int)},
                 {typeof(long), new ColumnInfo(SqlDbType.BigInt)},
+                {typeof(long?), new ColumnInfo(SqlDbType.BigInt)},
 
-                {typeof(decimal), new ColumnInfo(SqlDbType.Decimal)},
+                {typeof(decimal), new ColumnInfo(SqlDbType.Decimal, size: 18, addSize: 5)},
+                {typeof(decimal?), new ColumnInfo(SqlDbType.Decimal, size: 18, addSize: 5)},
                 {typeof(double), new ColumnInfo(SqlDbType.Float)},
+                {typeof(double?), new ColumnInfo(SqlDbType.Float)},
                 {typeof(float), new ColumnInfo(SqlDbType.Real)},
+                {typeof(float?), new ColumnInfo(SqlDbType.Real)},
 
                 {typeof(string), new ColumnInfo(SqlDbType.NVarChar)},
 

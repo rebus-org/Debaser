@@ -49,10 +49,12 @@
   <ItemGroup>
     <Compile Include="Bugs\TestBricData.cs" />
     <Compile Include="Corners\InsertEmptySequence.cs" />
+    <Compile Include="Corners\UseSomeNullableTypes.cs" />
     <Compile Include="Customization\TestDebaserMapper.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="FixtureBase.cs" />
     <Compile Include="Ignorance\TestIgnoreAttribute.cs" />
+    <Compile Include="Naming\TestNameCustomization.cs" />
     <Compile Include="Query\TestDeleting.cs" />
     <Compile Include="Query\TestQueries.cs" />
     <Compile Include="Readme\SchemaSnips.cs" />
@@ -61,6 +63,7 @@
     <Compile Include="Reflection\TestActivator.cs" />
     <Compile Include="Ignorance\TestIngoreUpdate.cs" />
     <Compile Include="Ignorance\TestIngoreUpdate_CompositeCriteria.cs" />
+    <Compile Include="Revisioning\TestRevisioning.cs" />
     <Compile Include="Schema\TestSchemaCreator.cs" />
     <Compile Include="TestUpsertHelper.cs" />
     <Compile Include="Mapping\TestAutomapper.cs" />
@@ -76,9 +79,7 @@
       <Name>Debaser</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Revisioning\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -44,10 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DebaserColumnNameAttribute.cs" />
     <Compile Include="Attributes\DebaserIgnoreAttribute.cs" />
     <Compile Include="Attributes\DebaserKeyAttribute.cs" />
     <Compile Include="Attributes\DebaserMapperAttribute.cs" />
     <Compile Include="Attributes\DebaserRevisionAttribute.cs" />
+    <Compile Include="Attributes\DebaserTableNameAttribute.cs" />
     <Compile Include="Attributes\DebaserUpdateCriteriaAttribute.cs" />
     <Compile Include="Internals\Data\DataReaderLookup.cs" />
     <Compile Include="IDebaserMapper.cs" />

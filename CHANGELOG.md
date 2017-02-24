@@ -41,6 +41,11 @@
 
 * Make `CreateSchema` default to actually creating it
 
+## 0.9.0
+
+* Add ability to costumize table and column names with attributes
+* Handle nullable types properly
+* Handle decimal scale/precision properly (default to 18,5)
 
 
 [FastMember]: https://github.com/mgravell/fast-member

@@ -13,7 +13,7 @@ namespace Debaser.Internals.Reflection
 
         public Activator(Type type, IEnumerable<string> includedProperties)
         {
-            var propertyNames = new HashSet<string>(includedProperties);
+            var propertyNames = new HashSet<string>(includedProperties, StringComparer.CurrentCultureIgnoreCase);
 
             _creationFunction = HasDefaultConstructor(type)
                 ? GetPropertyCreator(type, propertyNames)
@@ -58,7 +58,8 @@ namespace Debaser.Internals.Reflection
 
         static Func<IValueLookup, object> GetConstructorCreator(Type type, HashSet<string> includedProperties)
         {
-            var parameters = type.GetConstructors().Single()
+            var constructorInfo = type.GetConstructors().Single();
+            var parameters = constructorInfo
                 .GetParameters()
                 .ToArray();
 
@@ -67,9 +68,7 @@ namespace Debaser.Internals.Reflection
                 var parameterValues = parameters
                     .Select(parameter =>
                     {
-                        var titleCase = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(parameter.Name);
-
-                        if (includedProperties.Contains(titleCase))
+                        if (includedProperties.Contains(parameter.Name))
                         {
                             return lookup.GetValue(parameter.Name, parameter.ParameterType);
                         }
@@ -80,7 +79,7 @@ namespace Debaser.Internals.Reflection
 
                 try
                 {
-                    var instance = System.Activator.CreateInstance(type, parameterValues);
+                    var instance = constructorInfo.Invoke(parameterValues);
 
                     return instance;
                 }

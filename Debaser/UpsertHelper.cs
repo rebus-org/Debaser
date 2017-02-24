@@ -4,7 +4,9 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Debaser.Attributes;
 using Debaser.Internals.Data;
 using Debaser.Internals.Exceptions;
 using Debaser.Internals.Query;
@@ -51,7 +53,7 @@ namespace Debaser
 
             _classMap = classMap;
 
-            var upsertTableName = tableName ?? typeof(T).Name;
+            var upsertTableName = tableName ?? GetTableNameFromAttribute() ?? typeof(T).Name;
             var dataTypeName = $"{upsertTableName}Type";
             var procedureName = $"{upsertTableName}Upsert";
 
@@ -131,7 +133,7 @@ namespace Debaser
                         command.CommandType = CommandType.Text;
                         command.CommandText = _schemaManager.GetQuery();
 
-                        using (var reader = command.ExecuteReader())
+                        using (var reader = ExecuteReader(command))
                         {
                             var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
                             var lookup = new DataReaderLookup(reader, classMapProperties);
@@ -143,6 +145,18 @@ namespace Debaser
                         }
                     }
                 }
+            }
+        }
+
+        static SqlDataReader ExecuteReader(SqlCommand command)
+        {
+            try
+            {
+                return command.ExecuteReader();
+            }
+            catch (Exception exception)
+            {
+                throw new ApplicationException($"Could not execute SQL {command.CommandText}", exception);
             }
         }
 
@@ -255,6 +269,11 @@ namespace Debaser
             }
 
             return results;
+        }
+
+        static string GetTableNameFromAttribute()
+        {
+            return typeof(T).GetCustomAttribute<DebaserTableNameAttribute>()?.TableName;
         }
 
         List<Parameter> GetParameters(object args)
