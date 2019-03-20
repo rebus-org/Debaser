@@ -7,7 +7,7 @@ using FastMember;
 
 namespace Debaser.Internals.Reflection
 {
-    public class Activator
+    class Activator
     {
         readonly Func<IValueLookup, object> _creationFunction;
 

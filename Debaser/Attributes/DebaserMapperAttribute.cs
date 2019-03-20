@@ -16,8 +16,7 @@ namespace Debaser.Attributes
         /// </summary>
         public DebaserMapperAttribute(Type debaserMapperType)
         {
-            if (debaserMapperType == null) throw new ArgumentNullException(nameof(debaserMapperType));
-            DebaserMapperType = debaserMapperType;
+            DebaserMapperType = debaserMapperType ?? throw new ArgumentNullException(nameof(debaserMapperType));
         }
     }
 }
