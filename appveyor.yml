@@ -1,7 +1,7 @@
 image: Visual Studio 2017
 
 services:
-  - mongodb
+  - mssql2016
 
 shallow_clone: true
 
