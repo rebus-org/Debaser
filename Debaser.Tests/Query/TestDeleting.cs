@@ -12,7 +12,7 @@ namespace Debaser.Tests.Query
 
         protected override void SetUp()
         {
-            _upsertHelper = new UpsertHelper<RowWithData>("db");
+            _upsertHelper = new UpsertHelper<RowWithData>(ConnectionString);
 
             _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
             _upsertHelper.CreateSchema();

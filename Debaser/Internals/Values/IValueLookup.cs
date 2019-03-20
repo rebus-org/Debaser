@@ -2,7 +2,7 @@
 
 namespace Debaser.Internals.Values
 {
-    interface IValueLookup
+    public interface IValueLookup
     {
         object GetValue(string name, Type desiredType);
     }

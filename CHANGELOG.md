@@ -41,6 +41,9 @@
 
 * Make `CreateSchema` default to actually creating it
 
+## 0.9.0
+
+* Target .NET Standard 2.0
 
 
 [FastMember]: https://github.com/mgravell/fast-member

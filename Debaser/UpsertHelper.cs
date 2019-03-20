@@ -29,27 +29,19 @@ namespace Debaser
         /// <summary>
         /// Creates the upsert helper
         /// </summary>
-        public UpsertHelper(string connectionStringOrConnectionStringName, string tableName = null, string schema = "dbo", Settings settings = null)
-            : this(connectionStringOrConnectionStringName, new AutoMapper().GetMap(typeof(T)), tableName, schema, settings)
+        public UpsertHelper(string connectionString, string tableName = null, string schema = "dbo", Settings settings = null)
+            : this(connectionString, new AutoMapper().GetMap(typeof(T)), tableName, schema, settings)
         {
         }
 
         /// <summary>
         /// Creates the upsert helper
         /// </summary>
-        public UpsertHelper(string connectionStringOrConnectionStringName, ClassMap classMap, string tableName = null, string schema = "dbo", Settings settings = null)
+        public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string schema = "dbo", Settings settings = null)
         {
-            if (connectionStringOrConnectionStringName == null) throw new ArgumentNullException(nameof(connectionStringOrConnectionStringName));
-            if (classMap == null) throw new ArgumentNullException(nameof(classMap));
-
-            var connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringOrConnectionStringName];
-
+            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _classMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
             _settings = settings ?? new Settings();
-
-            _connectionString = connectionStringSettings?.ConnectionString
-                                ?? connectionStringOrConnectionStringName;
-
-            _classMap = classMap;
 
             var upsertTableName = tableName ?? typeof(T).Name;
             var dataTypeName = $"{upsertTableName}Type";

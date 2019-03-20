@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Debaser.Tests.Readme
 {
     [TestFixture]
-    public class Snippets
+    public class Snippets : FixtureBase
     {
         [TestCase(100000, 10000, 10)]
         public async Task UpdateExistingRows(int count, int rowsToChange, int iterations)
@@ -18,7 +18,7 @@ namespace Debaser.Tests.Readme
                 .Select(i => new SomeDataRow(i, i * 2.3m, $"This is row {i}"))
                 .ToList();
 
-            var upsertHelper = new UpsertHelper<SomeDataRow>("db");
+            var upsertHelper = new UpsertHelper<SomeDataRow>(ConnectionString);
 
             upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
             upsertHelper.CreateSchema();
@@ -52,7 +52,7 @@ namespace Debaser.Tests.Readme
                 .Select(i => new SomeDataRow(i, i * 2.3m, $"This is row {i}"))
                 .ToList();
 
-            var upsertHelper = new UpsertHelper<SomeDataRow>("db");
+            var upsertHelper = new UpsertHelper<SomeDataRow>(ConnectionString);
 
             upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
             upsertHelper.CreateSchema();

@@ -9,7 +9,7 @@ using Debaser.Mapping;
 
 namespace Debaser.Internals.Schema
 {
-    class SchemaManager
+    public class SchemaManager
     {
         readonly string _connectionString;
         readonly string _tableName;

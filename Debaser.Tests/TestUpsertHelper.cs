@@ -11,7 +11,7 @@ namespace Debaser.Tests
 
         protected override void SetUp()
         {
-            _upsertHelper = new UpsertHelper<SimpleRow>("db");
+            _upsertHelper = new UpsertHelper<SimpleRow>(ConnectionString);
 
             _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
             _upsertHelper.CreateSchema();
