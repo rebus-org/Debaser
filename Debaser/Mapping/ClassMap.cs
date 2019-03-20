@@ -19,10 +19,8 @@ namespace Debaser.Mapping
         /// </summary>
         public ClassMap(Type type, IEnumerable<ClassMapProperty> properties)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (properties == null) throw new ArgumentNullException(nameof(properties));
-            Type = type;
-            _properties = properties.ToList();
+            Type = type ?? throw new ArgumentNullException(nameof(type));
+            _properties = properties?.ToList() ?? throw new ArgumentNullException(nameof(properties));
         }
 
         /// <summary>

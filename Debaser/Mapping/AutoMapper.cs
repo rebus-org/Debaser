@@ -17,6 +17,7 @@ namespace Debaser.Mapping
         /// </summary>
         public ClassMap GetMap(Type type)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
             try
             {
                 var properties = GetProperties(type).ToList();
@@ -36,6 +37,12 @@ namespace Debaser.Mapping
 
         static IEnumerable<ClassMapProperty> GetProperties(Type type)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
+            Func<object, object> DefaultFromDatabase() => obj => obj;
+
+            Func<object, object> DefaultToDatabase() => obj => obj;
+
             var properties = type.GetProperties()
                 .Where(property => !property.GetCustomAttributes<DebaserIgnoreAttribute>().Any())
                 .Select(property =>
@@ -67,16 +74,6 @@ namespace Debaser.Mapping
             return properties;
         }
 
-        static Func<object, object> DefaultFromDatabase()
-        {
-            return obj => obj;
-        }
-
-        static Func<object, object> DefaultToDatabase()
-        {
-            return obj => obj;
-        }
-
         static ColumnInfo GetColumnInfo(PropertyInfo property)
         {
             var defaultDbTypes = new Dictionary<Type, ColumnInfo>
@@ -99,10 +96,10 @@ namespace Debaser.Mapping
                 {typeof(Guid), new ColumnInfo(SqlDbType.UniqueIdentifier)},
             };
 
-            ColumnInfo columnInfo;
-
-            if (defaultDbTypes.TryGetValue(property.PropertyType, out columnInfo))
+            if (defaultDbTypes.TryGetValue(property.PropertyType, out var columnInfo))
+            {
                 return columnInfo;
+            }
 
             var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();
 

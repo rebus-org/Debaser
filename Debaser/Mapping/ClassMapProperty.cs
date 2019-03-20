@@ -39,12 +39,13 @@ namespace Debaser.Mapping
         /// </summary>
         public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
         {
-            PropertyName = propertyName;
-            ColumnInfo = columnInfo;
-            ColumnName = columnName;
+            if (property == null) throw new ArgumentNullException(nameof(property));
+            PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
+            ColumnInfo = columnInfo ?? throw new ArgumentNullException(nameof(columnInfo));
+            ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
             IsKey = isKey;
-            _toDatabase = toDatabase;
-            _fromDatabase = fromDatabase;
+            _toDatabase = toDatabase ?? throw new ArgumentNullException(nameof(toDatabase));
+            _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
             _accessor = TypeAccessor.Create(property.DeclaringType);
         }
 
