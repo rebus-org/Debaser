@@ -210,7 +210,7 @@ END
 
         public string GetQuery(string criteria = null)
         {
-            var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => p.ColumnName).Indented(4));
+            var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => $"[{p.ColumnName}]").Indented(4));
 
             var sql = $@"
 

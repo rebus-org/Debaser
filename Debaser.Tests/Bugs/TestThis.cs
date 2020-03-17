@@ -28,23 +28,23 @@ namespace Debaser.Tests.Bugs
             var line = roundtripped.First();
 
             Assert.That(line.SecondId, Is.EqualTo(789));
-            Assert.That(line.Firstid, Is.EqualTo(123));
+            Assert.That(line.FirstId, Is.EqualTo(123));
             Assert.That(line.DecimalNumber, Is.EqualTo(505));
             Assert.That(line.Timezone, Is.EqualTo(TimeZoneInfo.Local));
         }
 
         public class SomeKindOfLine
         {
-            public SomeKindOfLine(int firstid, int secondId, decimal decimalNumber, TimeZoneInfo timezone)
+            public SomeKindOfLine(int firstId, int secondId, decimal decimalNumber, TimeZoneInfo timezone)
             {
-                Firstid = firstid;
+                FirstId = firstId;
                 SecondId = secondId;
                 DecimalNumber = decimalNumber;
                 Timezone = timezone;
             }
 
             [DebaserKey]
-            public int Firstid { get; }
+            public int FirstId { get; }
 
             [DebaserKey]
             public int SecondId { get; }

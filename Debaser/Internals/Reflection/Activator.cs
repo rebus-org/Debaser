@@ -67,7 +67,7 @@ namespace Debaser.Internals.Reflection
                 var parameterValues = parameters
                     .Select(parameter =>
                     {
-                        var titleCase = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(parameter.Name);
+                        var titleCase = Capitalize(parameter.Name);
 
                         if (includedProperties.Contains(titleCase))
                         {
@@ -89,6 +89,13 @@ namespace Debaser.Internals.Reflection
                     throw new ApplicationException($"Could not create instance of {type} with ctor arguments {string.Join(", ", parameterValues)}", exception);
                 }
             };
+        }
+
+        static string Capitalize(string parameterName)
+        {
+            return parameterName.Length > 1 
+                ? $"{char.ToUpper(parameterName[0])}{parameterName.Substring(1)}" 
+                : $"{char.ToUpper(parameterName[0])}";
         }
 
         static bool HasDefaultConstructor(Type type)
