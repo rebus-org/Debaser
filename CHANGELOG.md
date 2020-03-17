@@ -37,6 +37,7 @@
 
 ## 0.10.0
 * Update to FastMember 1.5.0
+* Update to System.Data.SqlClient 4.8.1
 
 
 [FastMember]: https://github.com/mgravell/fast-member
