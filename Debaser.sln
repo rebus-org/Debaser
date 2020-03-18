@@ -1,17 +1,18 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.489
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stuff", "stuff", "{1ABDD7C1-1F8D-402D-8692-3E4B66962DE0}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		CHANGELOG.md = CHANGELOG.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debaser", "Debaser\Debaser.csproj", "{0D5CB199-FF80-47F7-9D9B-6588E83D6C31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debaser", "Debaser\Debaser.csproj", "{0D5CB199-FF80-47F7-9D9B-6588E83D6C31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debaser.Tests", "Debaser.Tests\Debaser.Tests.csproj", "{00842D6E-B50C-4A6B-93EE-F08BFFED5465}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debaser.Tests", "Debaser.Tests\Debaser.Tests.csproj", "{00842D6E-B50C-4A6B-93EE-F08BFFED5465}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
