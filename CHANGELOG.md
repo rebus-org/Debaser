@@ -48,4 +48,7 @@
 * Add `LoadAllAsync` that returns `IAsyncEnumerable` when targeting .NET Standard 2.1
 * Remove methods to be consistent with regards to the use of "Async"
 
+## 0.13.0
+* Add ability to easily specify SQL types with precision
+
 [FastMember]: https://github.com/mgravell/fast-member

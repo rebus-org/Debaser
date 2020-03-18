@@ -158,8 +158,7 @@ END
                     {
                         try
                         {
-                            ExecuteStatement(connection, transaction, $@"DROP PROCEDURE [{_schema}].[{_sprocName}]",
-                                wrapException: false);
+                            ExecuteStatement(connection, transaction, $@"DROP PROCEDURE [{_schema}].[{_sprocName}]", wrapException: false);
 
                             transaction.Commit();
                         }
@@ -175,8 +174,7 @@ END
                     {
                         try
                         {
-                            ExecuteStatement(connection, transaction, $@"DROP TYPE [{_schema}].[{_dataTypeName}]",
-                                wrapException: false);
+                            ExecuteStatement(connection, transaction, $@"DROP TYPE [{_schema}].[{_dataTypeName}]", wrapException: false);
 
                             transaction.Commit();
                         }
@@ -192,8 +190,7 @@ END
                     {
                         try
                         {
-                            ExecuteStatement(connection, transaction, $@"DROP TABLE [{_schema}].[{_tableName}]",
-                                wrapException: false);
+                            ExecuteStatement(connection, transaction, $@"DROP TABLE [{_schema}].[{_tableName}]", wrapException: false);
 
                             transaction.Commit();
                         }

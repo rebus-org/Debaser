@@ -96,16 +96,27 @@ namespace Debaser.Mapping
                 {typeof(Guid), new ColumnInfo(SqlDbType.UniqueIdentifier)},
             };
 
-            if (defaultDbTypes.TryGetValue(property.PropertyType, out var columnInfo))
+            var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();
+            var debaserTypeAttribute = property.GetCustomAttribute<DebaserSqlTypeAttribute>();
+
+            if (debaserTypeAttribute != null && debaserMapperAttribute != null)
             {
-                return columnInfo;
+                throw new InvalidOperationException($"Found both DebaserSqlTypeAttribute and DebaserMapperAttribute on property {property.Name} of {property.DeclaringType}, but it's only possible to use one of them");
             }
 
-            var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();
+            if (debaserTypeAttribute != null)
+            {
+                return new ColumnInfo(debaserTypeAttribute.SqlDbType, debaserTypeAttribute.Size, debaserTypeAttribute.AltSize);
+            }
 
             if (debaserMapperAttribute != null)
             {
                 return GetColumInfoFromDebaserMapper(debaserMapperAttribute.DebaserMapperType);
+            }
+
+            if (defaultDbTypes.TryGetValue(property.PropertyType, out var columnInfo))
+            {
+                return columnInfo;
             }
 
             throw new ArgumentException($"Could not automatically generate column info for {property}");

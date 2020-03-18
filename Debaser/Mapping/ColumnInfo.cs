@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using Microsoft.SqlServer.Server;
 // ReSharper disable ArgumentsStyleNamedExpression
+// ReSharper disable ArgumentsStyleOther
 
 namespace Debaser.Mapping
 {
@@ -32,12 +33,12 @@ namespace Debaser.Mapping
         /// Gets the SQL database column type
         /// </summary>
         public SqlDbType SqlDbType { get; }
-        
+
         /// <summary>
         /// Gets the size (or null if irrelevant)
         /// </summary>
         public int? Size { get; }
-        
+
         /// <summary>
         /// Gets the additional size (or null if irrelevant)
         /// Can be used to specify decimal places in the DECIMAL size specification
@@ -57,6 +58,11 @@ namespace Debaser.Mapping
                     return $"{SqlDbType.ToString().ToUpper()}({DefaultNVarcharLength})";
                 }
                 return $"{SqlDbType.ToString().ToUpper()}";
+            }
+
+            if (Size != null && AddSize != null)
+            {
+                return $"{SqlDbType.ToString().ToUpper()}({Size.Value},{AddSize.Value})";
             }
 
             var sizeString = GetSizeString(Size.Value);
@@ -79,6 +85,12 @@ namespace Debaser.Mapping
                 }
 
                 return new SqlMetaData(columnName, SqlDbType);
+            }
+
+            if (Size != null && AddSize != null)
+            {
+                return new SqlMetaData(columnName, SqlDbType, precision: (byte)Size.Value, scale: (byte)AddSize.Value);
+
             }
 
             return new SqlMetaData(columnName, SqlDbType, maxLength: Size.Value);
