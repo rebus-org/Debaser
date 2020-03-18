@@ -34,15 +34,15 @@ namespace Debaser.Tests.Query
                 new RowWithData("9", "farvel"), 
             };
 
-            await _upsertHelper.Upsert(rows);
+            await _upsertHelper.UpsertAsync(rows);
 
             var allRows = _upsertHelper.LoadAll().ToList();
 
-            await _upsertHelper.DeleteWhere("[data] = @data", new {data = "hej"});
+            await _upsertHelper.DeleteWhereAsync("[data] = @data", new {data = "hej"});
 
             var rowsAfterDeletingHej = _upsertHelper.LoadAll().ToList();
 
-            await _upsertHelper.DeleteWhere("[data] = @data", new {data = "farvel"});
+            await _upsertHelper.DeleteWhereAsync("[data] = @data", new {data = "farvel"});
 
             var rowsAfterDeletingFarvel = _upsertHelper.LoadAll().ToList();
 

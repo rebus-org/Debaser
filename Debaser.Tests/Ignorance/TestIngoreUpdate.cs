@@ -26,7 +26,7 @@ namespace Debaser.Tests.Ignorance
         [Test]
         public async Task CanCarryOutOrdinaryUpdate()
         {
-            await _upsertHelper.Upsert(new[]
+            await _upsertHelper.UpsertAsync(new[]
             {
                 new SomeRowWithIntegerRevision(1, "hej", 0),
                 new SomeRowWithIntegerRevision(2, "med", 0),
@@ -42,7 +42,7 @@ namespace Debaser.Tests.Ignorance
         [Test]
         public async Task CanCarryOutConditionalUpdate()
         {
-            await _upsertHelper.Upsert(new[]
+            await _upsertHelper.UpsertAsync(new[]
             {
                 new SomeRowWithIntegerRevision(1, "hej", 0),
                 new SomeRowWithIntegerRevision(2, "med", 0),
@@ -51,7 +51,7 @@ namespace Debaser.Tests.Ignorance
 
             Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "dig" }));
 
-            await _upsertHelper.Upsert(new[]
+            await _upsertHelper.UpsertAsync(new[]
             {
                 new SomeRowWithIntegerRevision(1, "hej", 1),
                 new SomeRowWithIntegerRevision(2, "med", 1),
@@ -60,7 +60,7 @@ namespace Debaser.Tests.Ignorance
 
             Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "mig" }));
 
-            await _upsertHelper.Upsert(new[]
+            await _upsertHelper.UpsertAsync(new[]
             {
                 new SomeRowWithIntegerRevision(1, "hej", 2),
                 new SomeRowWithIntegerRevision(2, "med", 2),
@@ -93,15 +93,15 @@ namespace Debaser.Tests.Ignorance
             var t1 = t0.AddSeconds(1);
             var tminus1 = t0.AddSeconds(-1);
 
-            await _upsertHelper2.Upsert(new[] { new SomeRowWithDateTimeRevision(1, "hej", t0) });
+            await _upsertHelper2.UpsertAsync(new[] { new SomeRowWithDateTimeRevision(1, "hej", t0) });
 
             Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej"));
 
-            await _upsertHelper2.Upsert(new[] { new SomeRowWithDateTimeRevision(1, "hej igen", t1) });
+            await _upsertHelper2.UpsertAsync(new[] { new SomeRowWithDateTimeRevision(1, "hej igen", t1) });
 
             Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej igen"));
 
-            await _upsertHelper2.Upsert(new[] { new SomeRowWithDateTimeRevision(1, "DEN HER SKAL IKKE IGENNEM", tminus1) });
+            await _upsertHelper2.UpsertAsync(new[] { new SomeRowWithDateTimeRevision(1, "DEN HER SKAL IKKE IGENNEM", tminus1) });
 
             Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej igen"));
         }

@@ -19,13 +19,13 @@ namespace Debaser.Tests.Corners
         [Test]
         public async Task DoesNotDieWhenUpsertingEmptySequence()
         {
-            await _upserter.Upsert(Enumerable.Empty<MinimalRow>());
+            await _upserter.UpsertAsync(Enumerable.Empty<MinimalRow>());
         }
 
         [Test]
         public async Task DoesNotDieWhenUpsertingMinimalRows()
         {
-            await _upserter.Upsert(new[]
+            await _upserter.UpsertAsync(new[]
             {
                 new MinimalRow(1),
                 new MinimalRow(2),

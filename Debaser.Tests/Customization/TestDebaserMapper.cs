@@ -30,7 +30,7 @@ namespace Debaser.Tests.Customization
                 new RowWithJson(3, new Json("json3")),
             };
 
-            await _upsertHelper.Upsert(rows);
+            await _upsertHelper.UpsertAsync(rows);
 
             var roundtrippedRows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 

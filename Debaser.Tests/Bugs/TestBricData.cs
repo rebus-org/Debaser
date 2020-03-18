@@ -19,7 +19,7 @@ namespace Debaser.Tests.Bugs
         [Test]
         public async Task CanWriteDoublesAndFloats()
         {
-            await _upserter.Upsert(new[]
+            await _upserter.UpsertAsync(new[]
             {
                 new BricData {CellId = "hg03jg93", GnsHstIndk2010 = 24, GnsPersIndkHigh2010 = 3435}
             });

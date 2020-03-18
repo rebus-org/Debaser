@@ -23,7 +23,7 @@ namespace Debaser.Tests.Readme
             upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
             upsertHelper.CreateSchema();
 
-            await upsertHelper.Upsert(rows);
+            await upsertHelper.UpsertAsync(rows);
 
             var recordedExecutionTimes = new Queue<TimeSpan>();
 
@@ -34,7 +34,7 @@ namespace Debaser.Tests.Readme
                 var updatedRows = rows.InRandomOrder().Take(rowsToChange)
                     .Select(row => new SomeDataRow(row.Id, row.Number + 1, string.Concat(row.Text, "-HEJ")));
 
-                await upsertHelper.Upsert(updatedRows);
+                await upsertHelper.UpsertAsync(updatedRows);
 
                 var elapsed = stopwatch.Elapsed;
                 recordedExecutionTimes.Enqueue(elapsed);
@@ -59,7 +59,7 @@ namespace Debaser.Tests.Readme
 
             var stopwatch = Stopwatch.StartNew();
 
-            await upsertHelper.Upsert(rows);
+            await upsertHelper.UpsertAsync(rows);
 
             var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
 

@@ -27,7 +27,7 @@ namespace Debaser.Tests.Ignorance
                 new HasIgnoredProperty{Id = "002", Data="this is more data", IgnoredData = "this is ignored data"},
             };
 
-            await _helper.Upsert(rows);
+            await _helper.UpsertAsync(rows);
 
             var roundtrippedRows = _helper.LoadAll().OrderBy(r => r.Id).ToList();
 

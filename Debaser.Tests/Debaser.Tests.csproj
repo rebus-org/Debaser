@@ -1,14 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Revisioning\**" />
-    <EmbeddedResource Remove="Revisioning\**" />
-    <None Remove="Revisioning\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="microsoft.net.test.sdk" Version="16.5.0" />

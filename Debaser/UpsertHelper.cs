@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Debaser.Internals.Data;
@@ -74,10 +73,11 @@ namespace Debaser
         /// <summary>
         /// Upserts the given sequence of <typeparamref name="T"/> instances
         /// </summary>
-        public async Task Upsert(IEnumerable<T> rows)
+        public async Task UpsertAsync(IEnumerable<T> rows)
         {
             if (rows == null) throw new ArgumentNullException(nameof(rows));
-            using (var connection = OpenSqlConnection())
+            
+            using (var connection = _factory.OpenSqlConnection())
             {
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
@@ -110,7 +110,7 @@ namespace Debaser
         /// </summary>
         public IEnumerable<T> LoadAll()
         {
-            using (var connection = OpenSqlConnection())
+            using (var connection = _factory.OpenSqlConnection())
             {
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
@@ -136,16 +136,42 @@ namespace Debaser
             }
         }
 
+        #if HAS_ASYNC_ENUMERABLE
+
+        public async IAsyncEnumerable<T> LoadAllAsync()
+        {
+            await using var connection = _factory.OpenSqlConnection();
+            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+            await using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandTimeout = _settings.CommandTimeoutSeconds;
+            command.CommandType = CommandType.Text;
+            command.CommandText = _schemaManager.GetQuery();
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
+            var lookup = new DataReaderLookup(reader, classMapProperties);
+
+            while (await reader.ReadAsync())
+            {
+                yield return (T)_activator.CreateInstance(lookup);
+            }
+        }
+
+        #endif
+
         /// <summary>
         /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
         /// <code>new { someValue = "hej" }</code>
         /// </summary>
-        public async Task DeleteWhere(string criteria, object args = null)
+        public async Task DeleteWhereAsync(string criteria, object args = null)
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
-            using (var connection = OpenSqlConnection())
+            using (var connection = _factory.OpenSqlConnection())
             {
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
@@ -188,13 +214,13 @@ namespace Debaser
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
         /// <code>new { someValue = "hej" }</code>
         /// </summary>
-        public async Task<List<T>> LoadWhere(string criteria, object args = null)
+        public async Task<List<T>> LoadWhereAsync(string criteria, object args = null)
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
             var results = new List<T>();
 
-            using (var connection = OpenSqlConnection())
+            using (var connection = _factory.OpenSqlConnection())
             {
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
@@ -243,12 +269,7 @@ namespace Debaser
             return results;
         }
 
-        SqlConnection OpenSqlConnection()
-        {
-            return _factory.OpenSqlConnection();
-        }
-
-        List<Parameter> GetParameters(object args)
+        static List<Parameter> GetParameters(object args)
         {
             if (args == null) return new List<Parameter>();
 

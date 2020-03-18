@@ -29,27 +29,27 @@ namespace Debaser.Tests.Ignorance
             var r1 = 1;
             var rminus1 = -1;
 
-            await _upsertHelper.Upsert(new[] { new SomeRowWithCompositeRevision(1, "original", r0, t0) });
+            await _upsertHelper.UpsertAsync(new[] { new SomeRowWithCompositeRevision(1, "original", r0, t0) });
 
             AssertDataIs("original");
 
-            await _upsertHelper.Upsert(new[] { new SomeRowWithCompositeRevision(1, "time not incremented", r1, t0) });
+            await _upsertHelper.UpsertAsync(new[] { new SomeRowWithCompositeRevision(1, "time not incremented", r1, t0) });
 
             AssertDataIs("original");
 
-            await _upsertHelper.Upsert(new[] { new SomeRowWithCompositeRevision(1, "time decremented", r1, tminus1) });
+            await _upsertHelper.UpsertAsync(new[] { new SomeRowWithCompositeRevision(1, "time decremented", r1, tminus1) });
 
             AssertDataIs("original");
 
-            await _upsertHelper.Upsert(new[] { new SomeRowWithCompositeRevision(1, "revision not incremented", r0, t1) });
+            await _upsertHelper.UpsertAsync(new[] { new SomeRowWithCompositeRevision(1, "revision not incremented", r0, t1) });
 
             AssertDataIs("original");
 
-            await _upsertHelper.Upsert(new[] { new SomeRowWithCompositeRevision(1, "revision decrements", rminus1, t1) });
+            await _upsertHelper.UpsertAsync(new[] { new SomeRowWithCompositeRevision(1, "revision decrements", rminus1, t1) });
 
             AssertDataIs("original");
 
-            await _upsertHelper.Upsert(new[] { new SomeRowWithCompositeRevision(1, "FINALLY", r1, t1) });
+            await _upsertHelper.UpsertAsync(new[] { new SomeRowWithCompositeRevision(1, "FINALLY", r1, t1) });
 
             AssertDataIs("FINALLY");
         }

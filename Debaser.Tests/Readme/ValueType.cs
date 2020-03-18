@@ -22,7 +22,7 @@ namespace Debaser.Tests.Readme
         [Test]
         public async Task ItWorks()
         {
-            await _upsertHelper.Upsert(new[]
+            await _upsertHelper.UpsertAsync(new[]
             {
                 new CurrencyCrossRates(new Date(2017, 1, 17), "EUR", "USD", 5.5m),
             });

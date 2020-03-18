@@ -19,7 +19,7 @@ namespace Debaser.Tests.Bugs
             helper.DropSchema(dropProcedure: true, dropTable: true, dropType: true);
             helper.CreateSchema();
 
-            await helper.Upsert(new[] { new SomeKindOfLine(123, 789, 505, TimeZoneInfo.Local) });
+            await helper.UpsertAsync(new[] { new SomeKindOfLine(123, 789, 505, TimeZoneInfo.Local) });
 
             var roundtripped = helper.LoadAll().ToList();
 

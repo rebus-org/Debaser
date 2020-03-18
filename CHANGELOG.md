@@ -44,6 +44,8 @@
 
 ## 0.12.0
 * Add support for Azure integrated auth
-
+* Also target .NET Standard 2.1
+* Add `LoadAllAsync` that returns `IAsyncEnumerable` when targeting .NET Standard 2.1
+* Remove methods to be consistent with regards to the use of "Async"
 
 [FastMember]: https://github.com/mgravell/fast-member
