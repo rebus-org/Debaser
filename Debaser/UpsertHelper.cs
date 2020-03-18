@@ -8,6 +8,7 @@ using Debaser.Internals.Data;
 using Debaser.Internals.Exceptions;
 using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
+using Debaser.Internals.Sql;
 using Debaser.Mapping;
 using Microsoft.SqlServer.Server;
 using Activator = Debaser.Internals.Reflection.Activator;
@@ -21,9 +22,9 @@ namespace Debaser
     {
         readonly Activator _activator;
         readonly SchemaManager _schemaManager;
-        readonly string _connectionString;
         readonly ClassMap _classMap;
         readonly Settings _settings;
+        readonly SqlConnectionFactory _factory;
 
         /// <summary>
         /// Creates the upsert helper
@@ -38,7 +39,7 @@ namespace Debaser
         /// </summary>
         public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string schema = "dbo", Settings settings = null)
         {
-            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _factory = new SqlConnectionFactory(connectionString);
             _classMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
             _settings = settings ?? new Settings();
 
@@ -76,9 +77,8 @@ namespace Debaser
         public async Task Upsert(IEnumerable<T> rows)
         {
             if (rows == null) throw new ArgumentNullException(nameof(rows));
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = OpenSqlConnection())
             {
-                await connection.OpenAsync();
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
@@ -110,9 +110,8 @@ namespace Debaser
         /// </summary>
         public IEnumerable<T> LoadAll()
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = OpenSqlConnection())
             {
-                connection.Open();
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
@@ -146,10 +145,8 @@ namespace Debaser
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = OpenSqlConnection())
             {
-                await connection.OpenAsync();
-
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
@@ -197,10 +194,8 @@ namespace Debaser
 
             var results = new List<T>();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = OpenSqlConnection())
             {
-                await connection.OpenAsync();
-
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
                 {
                     using (var command = connection.CreateCommand())
@@ -246,6 +241,11 @@ namespace Debaser
             }
 
             return results;
+        }
+
+        SqlConnection OpenSqlConnection()
+        {
+            return _factory.OpenSqlConnection();
         }
 
         List<Parameter> GetParameters(object args)
@@ -297,7 +297,7 @@ namespace Debaser
             var keyProperties = properties.Where(p => p.IsKey);
             var extraCriteria = _classMap.GetExtraCriteria();
 
-            return new SchemaManager(_connectionString, tableName, dataTypeName, procedureName, keyProperties, properties, schema, extraCriteria);
+            return new SchemaManager(_factory, tableName, dataTypeName, procedureName, keyProperties, properties, schema, extraCriteria);
         }
     }
 }

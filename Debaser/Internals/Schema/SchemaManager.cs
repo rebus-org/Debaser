@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using Debaser.Internals.Ex;
+using Debaser.Internals.Sql;
 using Debaser.Mapping;
 
 // ReSharper disable ArgumentsStyleLiteral
@@ -11,7 +12,6 @@ namespace Debaser.Internals.Schema
 {
     class SchemaManager
     {
-        readonly string _connectionString;
         readonly string _tableName;
         readonly string _dataTypeName;
         readonly string _sprocName;
@@ -20,10 +20,11 @@ namespace Debaser.Internals.Schema
         readonly List<ClassMapProperty> _mutableProperties;
         readonly List<ClassMapProperty> _keyProperties;
         readonly List<ClassMapProperty> _properties;
+        readonly SqlConnectionFactory _factory;
 
-        public SchemaManager(string connectionString, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo", string extraCriteria = null)
+        public SchemaManager(SqlConnectionFactory factory, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo", string extraCriteria = null)
         {
-            _connectionString = connectionString;
+            _factory = factory;
             _tableName = tableName;
             _dataTypeName = dataTypeName;
             _sprocName = sprocName;
@@ -40,10 +41,8 @@ namespace Debaser.Internals.Schema
 
         public void CreateSchema(bool createProcedure, bool createType, bool createTable)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = OpenSqlConnection())
             {
-                connection.Open();
-
                 using (var transaction = connection.BeginTransaction())
                 {
                     ExecuteStatement(connection, transaction, $@"
@@ -151,10 +150,8 @@ END
             const int objectNotFound = 3701;
             const int typeNotFound = 218;
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = OpenSqlConnection())
             {
-                connection.Open();
-
                 if (dropProcedure)
                 {
                     using (var transaction = connection.BeginTransaction())
@@ -234,6 +231,11 @@ FROM [{_schema}].[{_tableName}]
 
             return string.Join("," + Environment.NewLine,
                 _mutableProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]").Indented(indentation));
+        }
+
+        SqlConnection OpenSqlConnection()
+        {
+            return _factory.OpenSqlConnection();
         }
 
         string GetInsertSql(int indentation)

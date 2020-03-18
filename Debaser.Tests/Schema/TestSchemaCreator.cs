@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Debaser.Internals.Schema;
+using Debaser.Internals.Sql;
 using Debaser.Mapping;
 using NUnit.Framework;
 
@@ -16,7 +17,7 @@ namespace Debaser.Tests.Schema
             var properties = map.Properties;
             var keyProperties = properties.Where(p => p.IsKey);
 
-            var creator = new SchemaManager(ConnectionString, "testtable", "testdata", "testproc", keyProperties, properties, schema: "bimse");
+            var creator = new SchemaManager(new SqlConnectionFactory(ConnectionString), "testtable", "testdata", "testproc", keyProperties, properties, schema: "bimse");
 
             creator.DropSchema(true, true, true);
             creator.CreateSchema(true, true, true);
