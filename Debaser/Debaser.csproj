@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="fastmember" Version="1.5.0" />
+    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.4.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
   </ItemGroup>
 

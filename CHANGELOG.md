@@ -42,5 +42,8 @@
 ## 0.11.0
 * Fix roundtrip bug
 
+## 0.12.0
+* Add support for Azure integrated auth
+
 
 [FastMember]: https://github.com/mgravell/fast-member
