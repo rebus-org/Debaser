@@ -51,4 +51,7 @@
 ## 0.13.0
 * Add ability to easily specify SQL types with precision
 
+## 0.14.0
+* Enable customization of data type and sproc names
+
 [FastMember]: https://github.com/mgravell/fast-member

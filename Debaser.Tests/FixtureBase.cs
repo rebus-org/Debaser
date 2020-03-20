@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data.SqlClient;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Debaser.Tests
@@ -17,6 +19,15 @@ namespace Debaser.Tests
 
         protected virtual void SetUp()
         {
+        }
+
+        protected static async Task<SqlConnection> OpenSqlConnection()
+        {
+            var connection = new SqlConnection(ConnectionString);
+
+            await connection.OpenAsync();
+
+            return connection;
         }
     }
 }

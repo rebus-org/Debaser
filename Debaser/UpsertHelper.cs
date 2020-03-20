@@ -28,23 +28,23 @@ namespace Debaser
         /// <summary>
         /// Creates the upsert helper
         /// </summary>
-        public UpsertHelper(string connectionString, string tableName = null, string schema = "dbo", Settings settings = null)
-            : this(connectionString, new AutoMapper().GetMap(typeof(T)), tableName, schema, settings)
+        public UpsertHelper(string connectionString, string tableName = null, string typeName = null, string procName = null, string schema = "dbo", Settings settings = null)
+            : this(connectionString, new AutoMapper().GetMap(typeof(T)), tableName, typeName, procName, schema, settings)
         {
         }
 
         /// <summary>
         /// Creates the upsert helper
         /// </summary>
-        public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string schema = "dbo", Settings settings = null)
+        public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string typeName = null, string procName = null, string schema = "dbo", Settings settings = null)
         {
             _factory = new SqlConnectionFactory(connectionString);
             _classMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
             _settings = settings ?? new Settings();
 
             var upsertTableName = tableName ?? typeof(T).Name;
-            var dataTypeName = $"{upsertTableName}Type";
-            var procedureName = $"{upsertTableName}Upsert";
+            var dataTypeName = typeName ?? $"{upsertTableName}Type";
+            var procedureName = procName ?? $"{upsertTableName}Upsert";
 
             _schemaManager = GetSchemaCreator(schema, upsertTableName, dataTypeName, procedureName);
 
@@ -76,7 +76,7 @@ namespace Debaser
         public async Task UpsertAsync(IEnumerable<T> rows)
         {
             if (rows == null) throw new ArgumentNullException(nameof(rows));
-            
+
             using (var connection = _factory.OpenSqlConnection())
             {
                 using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
@@ -136,7 +136,7 @@ namespace Debaser
             }
         }
 
-        #if HAS_ASYNC_ENUMERABLE
+#if HAS_ASYNC_ENUMERABLE
 
         public async IAsyncEnumerable<T> LoadAllAsync()
         {
@@ -160,7 +160,7 @@ namespace Debaser
             }
         }
 
-        #endif
+#endif
 
         /// <summary>
         /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
