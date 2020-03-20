@@ -104,7 +104,12 @@ namespace Debaser.Internals.Reflection
 
             if (constructors.Length > 1)
             {
-                throw new ArgumentException($"Cannot use {type} in the activator because it has more than one constructor. Please supply either a) a constructor with named parameters matching the type's properties, or b) a default constructor and properties with setters");
+                throw new ArgumentException($@"Cannot use {type} in the activator because it has more than one constructor. Please supply either 
+
+a) a constructor with named parameters matching the type's properties, or 
+b) a default constructor and properties with setters,
+
+this way making it possible in an unambiguous way for Debaser to instantiate instances of {type}.");
             }
 
             var ctor = constructors.Single();

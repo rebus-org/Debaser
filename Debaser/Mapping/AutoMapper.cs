@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using Debaser.Attributes;
+// ReSharper disable ArgumentsStyleNamedExpression
 
 namespace Debaser.Mapping
 {
@@ -21,11 +22,6 @@ namespace Debaser.Mapping
             try
             {
                 var properties = GetProperties(type).ToList();
-
-                if (!properties.Any(p => p.IsKey))
-                {
-                    throw new ArgumentException(@"At least one key property needs to be specified. Either create a property named 'Id' or apply [DebaserKey] on one or more properties");
-                }
 
                 return new ClassMap(type, properties);
             }
@@ -65,7 +61,13 @@ namespace Debaser.Mapping
 
                 if (defaultKeyProperty == null)
                 {
-                    throw new ArgumentException("Could not find property named 'Id'");
+                    throw new ArgumentException(@"Could not find property named 'Id' - please either 
+
+* add a property called 'Id', or
+* decorate one or more properties with the [DebaserKey] attribute, or
+* pass a class map to the UpsertHelper ctor with one or more properties designated as keys
+
+so Debaser will know how to identity each row.");
                 }
 
                 defaultKeyProperty.MakeKey();
@@ -101,12 +103,28 @@ namespace Debaser.Mapping
 
             if (debaserTypeAttribute != null && debaserMapperAttribute != null)
             {
-                throw new InvalidOperationException($"Found both DebaserSqlTypeAttribute and DebaserMapperAttribute on property {property.Name} of {property.DeclaringType}, but it's only possible to use one of them");
+                throw new InvalidOperationException($@"Found both [DebaserSqlType(...)] and [DebaserMapper(...)] on property {property.Name} of {property.DeclaringType}, but it's only possible to use one of them.
+
+Please use [DebaserSqlType(...)] if you simply want to
+
+* specify VARCHAR or NVARCHAR
+* specify length of VARCNAR/NVARCHAR
+* explicitly coerce into SQL types like [Date], [DateTime], etc.
+
+Please use [DebaserMapper(...)] if you want to 
+
+* have actual mapping between e.g. your domain's value types, like PostalCode, Currency, Money, etc., or
+* map back and forth between value domains (could e.g. encrypt data at rest or serialize to/from JSON), or
+* do whatever you like");
             }
 
             if (debaserTypeAttribute != null)
             {
-                return new ColumnInfo(debaserTypeAttribute.SqlDbType, debaserTypeAttribute.Size, debaserTypeAttribute.AltSize);
+                return new ColumnInfo(
+                    sqlDbType: debaserTypeAttribute.SqlDbType,
+                    size: debaserTypeAttribute.Size,
+                    addSize: debaserTypeAttribute.AltSize
+                );
             }
 
             if (debaserMapperAttribute != null)
@@ -119,21 +137,43 @@ namespace Debaser.Mapping
                 return columnInfo;
             }
 
-            throw new ArgumentException($"Could not automatically generate column info for {property}");
+            throw new ArgumentException($@"Could not automatically generate column info for {property}. Please use one of the types supported out-of-the-box:
+
+{string.Join(Environment.NewLine, defaultDbTypes.Select(kvp => $"* {kvp.Key} => {kvp.Value.GetTypeDefinition()}"))}
+
+or decorate the property with either
+
+* [DebaserSqlType(...)] attribute (to specify database type for values that can be automatically converted/coerced), or
+* [DebaserMapper(...)] attribute (to achieve more complex mapping and have even more control),
+
+so Debaser can tell how a given value is to be saved.");
         }
 
         static ColumnInfo GetColumInfoFromDebaserMapper(Type type)
         {
             var mapper = CreateInstance(type);
 
-            return new ColumnInfo(mapper.SqlDbType, mapper.SizeOrNull, mapper.AdditionalSizeOrNull, mapper.ToDatabase, mapper.FromDatabase);
+            return new ColumnInfo(
+                sqlDbType: mapper.SqlDbType,
+                size: mapper.SizeOrNull,
+                addSize: mapper.AdditionalSizeOrNull,
+                customToDatabase: mapper.ToDatabase,
+                customFromDatabase: mapper.FromDatabase
+            );
         }
 
         static IDebaserMapper CreateInstance(Type type)
         {
             try
             {
-                return (IDebaserMapper)Activator.CreateInstance(type);
+                var instance = Activator.CreateInstance(type);
+
+                if (instance is IDebaserMapper debaserMapper)
+                {
+                    return debaserMapper;
+                }
+
+                throw new ArgumentException($"Mapper does not implement the required {typeof(IDebaserMapper)} interface");
             }
             catch (Exception exception)
             {

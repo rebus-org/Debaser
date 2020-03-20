@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -9,8 +10,12 @@ using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
+using FastMember;
 using Microsoft.SqlServer.Server;
 using Activator = Debaser.Internals.Reflection.Activator;
+// ReSharper disable LoopCanBeConvertedToQuery
+// ReSharper disable ForCanBeConvertedToForeach
+// ReSharper disable UnusedMember.Global
 
 namespace Debaser
 {
@@ -19,11 +24,13 @@ namespace Debaser
     /// </summary>
     public class UpsertHelper<T>
     {
-        readonly Activator _activator;
+        readonly ConcurrentDictionary<Type, Func<object, List<Parameter>>> _parametersGetters = new ConcurrentDictionary<Type, Func<object, List<Parameter>>>();
+        readonly List<Parameter> _emptyList = new List<Parameter>();
+        readonly SqlConnectionFactory _factory;
         readonly SchemaManager _schemaManager;
+        readonly Activator _activator;
         readonly ClassMap _classMap;
         readonly Settings _settings;
-        readonly SqlConnectionFactory _factory;
 
         /// <summary>
         /// Creates the upsert helper
@@ -268,16 +275,35 @@ namespace Debaser
 
             return results;
         }
-
-        static List<Parameter> GetParameters(object args)
+        
+        List<Parameter> GetParameters(object args)
         {
-            if (args == null) return new List<Parameter>();
+            if (args == null) return _emptyList;
 
-            var properties = args.GetType().GetProperties();
+            var getter = _parametersGetters.GetOrAdd(args.GetType(), GetGetter);
 
-            return properties
-                .Select(p => new Parameter(p.Name, p.GetValue(args)))
-                .ToList();
+            return getter(args);
+        }
+
+        static Func<object, List<Parameter>> GetGetter(Type type)
+        {
+            var accessor = TypeAccessor.Create(type);
+            var members = accessor.GetMembers();
+
+            return args =>
+            {
+                var parameters = new List<Parameter>(members.Count);
+
+                for (var index = 0; index < members.Count; index++)
+                {
+                    var member = members[index];
+                    var name = member.Name;
+
+                    parameters.Add(new Parameter(name, accessor[args, name]));
+                }
+
+                return parameters;
+            };
         }
 
         IEnumerable<SqlDataRecord> GetData(IEnumerable<T> rows)

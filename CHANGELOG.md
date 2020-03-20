@@ -53,5 +53,6 @@
 
 ## 0.14.0
 * Enable customization of data type and sproc names
+* Even faster extraction of query parameter values
 
 [FastMember]: https://github.com/mgravell/fast-member

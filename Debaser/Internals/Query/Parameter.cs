@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace Debaser.Internals.Query
 {
@@ -48,12 +49,20 @@ namespace Debaser.Internals.Query
 
         SqlDbType GetSqlDbType()
         {
-            SqlDbType sqlDbType;
             var type = Value.GetType();
 
-            if (KnownTypes.TryGetValue(type, out sqlDbType)) return sqlDbType;
+            if (KnownTypes.TryGetValue(type, out var sqlDbType)) return sqlDbType;
 
-            throw new ArgumentException($"Does not know which SqlDbType to use for {type}");
+            throw new ArgumentException($@"Don't not know which SqlDbType to use for value {Value} of type {type}. Please use one of the supported types
+
+{string.Join(Environment.NewLine, KnownTypes.Select(kvp => $"* {kvp.Key} => {kvp.Value}"))}
+
+or map the value to be saved in the database to another type, either by
+
+* adding a [DebaserMapper(...)] attribute to the property, or
+* add a class map with an appropriate mapper function in the ClassMapProperty for this field
+
+this way enabling mapping the column to/from the database.");
         }
     }
 }

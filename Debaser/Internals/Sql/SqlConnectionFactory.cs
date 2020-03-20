@@ -4,7 +4,6 @@ using System.Linq;
 using Debaser.Internals.Ex;
 using Debaser.Internals.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
-
 // ReSharper disable ArgumentsStyleNamedExpression
 
 namespace Debaser.Internals.Sql
@@ -28,7 +27,7 @@ namespace Debaser.Internals.Sql
                 if (mutator.HasElement("Integrated Security", "SSPI", comparison: StringComparison.OrdinalIgnoreCase)
                     || mutator.HasElement("Integrated Security", "true", comparison: StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new ArgumentException("The connection string cannot be used with Authentication=ManagedIdentity, because it also contains Integrated Security = true or SSPI");
+                    throw new ArgumentException("The connection string cannot be used with Authentication = Active Directory Interactive, because it also contains Integrated Security = true or SSPI");
                 }
 
                 var fullDatabaseHostName = mutator.GetElement("server") ?? mutator.GetElement("data source");
