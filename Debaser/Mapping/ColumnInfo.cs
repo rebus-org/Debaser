@@ -77,7 +77,7 @@ namespace Debaser.Mapping
 
         internal SqlMetaData GetSqlMetaData(string columnName)
         {
-            if (!Size.HasValue || SizeIsMax(Size.Value))
+            if (!Size.HasValue)
             {
                 if (IsString)
                 {
@@ -87,19 +87,20 @@ namespace Debaser.Mapping
                 return new SqlMetaData(columnName, SqlDbType);
             }
 
+            if (SizeIsMax(Size.Value) && IsString)
+            {
+                return new SqlMetaData(columnName, SqlDbType, maxLength: SqlMetaData.Max);
+            }
+
             if (Size != null && AddSize != null)
             {
                 return new SqlMetaData(columnName, SqlDbType, precision: (byte)Size.Value, scale: (byte)AddSize.Value);
-
             }
 
             return new SqlMetaData(columnName, SqlDbType, maxLength: Size.Value);
         }
 
-        static bool SizeIsMax(int size)
-        {
-            return size == int.MaxValue;
-        }
+        static bool SizeIsMax(int size) => size == int.MaxValue;
 
         bool IsString => new[] { SqlDbType.NVarChar, SqlDbType.VarChar }.Contains(SqlDbType);
     }
