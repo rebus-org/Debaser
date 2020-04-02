@@ -35,7 +35,7 @@ namespace Debaser.Mapping
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            Func<object, object> DefaultFromDatabase() => obj => obj;
+            Func<object, object> DefaultFromDatabase() => obj => obj == DBNull.Value ? null : obj;
 
             Func<object, object> DefaultToDatabase() => obj => obj;
 

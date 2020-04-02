@@ -56,4 +56,7 @@
 * Even faster extraction of query parameter values
 * Fix bug that would sometimes result in truncating string values
 
+## 0.15.0
+* Fix nullable-value-type-in-ctor edge case
+
 [FastMember]: https://github.com/mgravell/fast-member
