@@ -4,6 +4,8 @@ using System.Linq;
 using Debaser.Internals.Ex;
 using Debaser.Internals.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Data.SqlClient;
+
 // ReSharper disable ArgumentsStyleNamedExpression
 
 namespace Debaser.Internals.Sql

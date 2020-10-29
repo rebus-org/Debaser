@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using Debaser.Internals.Values;
 using Debaser.Mapping;
+using Microsoft.Data.SqlClient;
 
 namespace Debaser.Internals.Data
 {

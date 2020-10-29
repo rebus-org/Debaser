@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using FastMember;
-using Microsoft.SqlServer.Server;
+using Microsoft.Data.SqlClient.Server;
 
 namespace Debaser.Mapping
 {

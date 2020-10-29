@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using Debaser.Internals.Ex;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
+using Microsoft.Data.SqlClient;
 
 // ReSharper disable ArgumentsStyleLiteral
 
