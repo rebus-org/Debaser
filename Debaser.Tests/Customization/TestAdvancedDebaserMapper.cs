@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Debaser.Attributes;
@@ -24,7 +26,7 @@ namespace Debaser.Tests.Customization
         {
             var originalRow = new RowWithMoney(1, new Money(100, new Currency("DKK")));
 
-            await _upsertHelper.UpsertAsync(new[] {originalRow});
+            await _upsertHelper.UpsertAsync(new[] { originalRow });
 
             var roundtrippedRow = _upsertHelper.LoadAll().First();
 
@@ -39,12 +41,46 @@ namespace Debaser.Tests.Customization
             [DebaserKey]
             public int Id { get; }
 
+            [DebaserMapper(typeof(MoneyMapper))]
             public Money Amount { get; }
 
             public RowWithMoney(int id, Money amount)
             {
                 Id = id;
                 Amount = amount;
+            }
+        }
+
+        class MoneyMapper : IDebaserMapper2
+        {
+            const string AmountColumnName = "Amount";
+            const string CurrencyColumnName = "Currency";
+
+            public IEnumerable<ColumnSpec> GetColumnSpecs()
+            {
+                return new[]
+                {
+                    new ColumnSpec(AmountColumnName, SqlDbType.Decimal, sizeOrNull: 15, additionalSizeOrNull: 5),
+                    new ColumnSpec(CurrencyColumnName, SqlDbType.NVarChar, sizeOrNull: 3),
+                };
+            }
+
+            public Dictionary<string, object> ToDatabase(object arg)
+            {
+                var money = arg as Money ?? throw new ArgumentException($"Argument {arg} is not a Money");
+
+                return new Dictionary<string, object>
+                {
+                    [AmountColumnName] = money.Amount,
+                    [CurrencyColumnName] = money.Currency.CurrencyCode
+                };
+            }
+
+            public object FromDatabase(Dictionary<string, object> arg)
+            {
+                var amount = (decimal)arg[AmountColumnName];
+                var currency = (string)arg[CurrencyColumnName];
+                return new Money(amount, new Currency(currency));
             }
         }
 
