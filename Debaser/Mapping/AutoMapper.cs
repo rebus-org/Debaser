@@ -151,29 +151,51 @@ so Debaser can tell how a given value is to be saved.");
 
         static ColumnInfo GetColumInfoFromDebaserMapper(Type type)
         {
-            var mapper = CreateInstance(type);
+            var interfaces = type.GetInterfaces();
 
-            return new ColumnInfo(
-                sqlDbType: mapper.SqlDbType,
-                size: mapper.SizeOrNull,
-                addSize: mapper.AdditionalSizeOrNull,
-                customToDatabase: mapper.ToDatabase,
-                customFromDatabase: mapper.FromDatabase
-            );
+            if (interfaces.Any(i => i == typeof(IDebaserMapper)))
+            {
+                var mapper = CreateInstance<IDebaserMapper>(type);
+
+                return new ColumnInfo(
+                    sqlDbType: mapper.SqlDbType,
+                    size: mapper.SizeOrNull,
+                    addSize: mapper.AdditionalSizeOrNull,
+                    customToDatabase: mapper.ToDatabase,
+                    customFromDatabase: mapper.FromDatabase
+                );
+            }
+
+            if (interfaces.Any(i => i == typeof(IDebaserMapper2)))
+            {
+                var mapper = CreateInstance<IDebaserMapper2>(type);
+
+                var columnSpecs = mapper.GetColumnSpecs();
+
+                //return columnSpecs
+                //    .Select(column => new ColumnInfo(
+                //        column.SqlDbType,
+                //        column.SizeOrNull,
+                //        column.AdditionalSizeOrNull));
+
+            }
+
+            throw new NotImplementedException("Multi-column debaser mapper not implemented yet");
+
         }
 
-        static IDebaserMapper CreateInstance(Type type)
+        static TMapper CreateInstance<TMapper>(Type type)
         {
             try
             {
                 var instance = Activator.CreateInstance(type);
 
-                if (instance is IDebaserMapper debaserMapper)
+                if (instance is TMapper mapper)
                 {
-                    return debaserMapper;
+                    return mapper;
                 }
 
-                throw new ArgumentException($"Mapper does not implement the required {typeof(IDebaserMapper)} interface");
+                throw new ArgumentException($"Mapper does not implement the required {typeof(TMapper)} interface");
             }
             catch (Exception exception)
             {
