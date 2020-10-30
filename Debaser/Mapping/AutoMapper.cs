@@ -35,23 +35,16 @@ namespace Debaser.Mapping
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            Func<object, object> DefaultFromDatabase() => obj => obj == DBNull.Value ? null : obj;
-
-            Func<object, object> DefaultToDatabase() => obj => obj;
-
             var properties = type.GetProperties()
                 .Where(property => !property.GetCustomAttributes<DebaserIgnoreAttribute>().Any())
                 .Select(property =>
                 {
                     var propertyName = property.Name;
-                    var columnInfo = GetColumnInfo(property);
+                    var columns = GetColumnInfo(property);
                     var columnName = property.Name;
                     var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
 
-                    var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
-                    var fromDatabase = columnInfo.CustomFromDatabase ?? DefaultFromDatabase();
-
-                    return new ClassMapProperty(propertyName, columnInfo, columnName, isKey, toDatabase, fromDatabase, property);
+                    return new ClassMapProperty(propertyName, columns, columnName, isKey, property);
                 })
                 .ToList();
 
@@ -76,7 +69,7 @@ so Debaser will know how to identity each row.");
             return properties;
         }
 
-        static ColumnInfo GetColumnInfo(PropertyInfo property)
+        static IEnumerable<ColumnInfo> GetColumnInfo(PropertyInfo property)
         {
             var defaultDbTypes = new Dictionary<Type, ColumnInfo>
             {
@@ -120,11 +113,14 @@ Please use [DebaserMapper(...)] if you want to
 
             if (debaserTypeAttribute != null)
             {
-                return new ColumnInfo(
-                    sqlDbType: debaserTypeAttribute.SqlDbType,
-                    size: debaserTypeAttribute.Size,
-                    addSize: debaserTypeAttribute.AltSize
-                );
+                return new[]
+                {
+                    new ColumnInfo(
+                        sqlDbType: debaserTypeAttribute.SqlDbType,
+                        size: debaserTypeAttribute.Size,
+                        addSize: debaserTypeAttribute.AltSize
+                    )
+                };
             }
 
             if (debaserMapperAttribute != null)
@@ -134,7 +130,7 @@ Please use [DebaserMapper(...)] if you want to
 
             if (defaultDbTypes.TryGetValue(property.PropertyType, out var columnInfo))
             {
-                return columnInfo;
+                return new[] { columnInfo };
             }
 
             throw new ArgumentException($@"Could not automatically generate column info for {property}. Please use one of the types supported out-of-the-box:
@@ -149,7 +145,7 @@ or decorate the property with either
 so Debaser can tell how a given value is to be saved.");
         }
 
-        static ColumnInfo GetColumInfoFromDebaserMapper(Type type)
+        static IEnumerable<ColumnInfo> GetColumInfoFromDebaserMapper(Type type)
         {
             var interfaces = type.GetInterfaces();
 
@@ -157,13 +153,13 @@ so Debaser can tell how a given value is to be saved.");
             {
                 var mapper = CreateInstance<IDebaserMapper>(type);
 
-                return new ColumnInfo(
+                return new[]{new ColumnInfo(
                     sqlDbType: mapper.SqlDbType,
                     size: mapper.SizeOrNull,
                     addSize: mapper.AdditionalSizeOrNull,
                     customToDatabase: mapper.ToDatabase,
                     customFromDatabase: mapper.FromDatabase
-                );
+                )};
             }
 
             if (interfaces.Any(i => i == typeof(IDebaserMapper2)))
@@ -172,11 +168,12 @@ so Debaser can tell how a given value is to be saved.");
 
                 var columnSpecs = mapper.GetColumnSpecs();
 
-                //return columnSpecs
-                //    .Select(column => new ColumnInfo(
-                //        column.SqlDbType,
-                //        column.SizeOrNull,
-                //        column.AdditionalSizeOrNull));
+                return columnSpecs
+                    .Select(column => new ColumnInfo(
+                        column.SqlDbType,
+                        column.SizeOrNull,
+                        column.AdditionalSizeOrNull
+                    ));
 
             }
 

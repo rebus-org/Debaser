@@ -25,9 +25,11 @@ namespace Debaser.Mapping
             SqlDbType = sqlDbType;
             Size = size;
             AddSize = addSize;
-            CustomToDatabase = customToDatabase;
-            CustomFromDatabase = customFromDatabase;
+            ToDatabase = customToDatabase ?? DefaultToDatabase();
+            FromDatabase = customFromDatabase ?? DefaultFromDatabase();
         }
+
+        public string ColumnName { get; }
 
         /// <summary>
         /// Gets the SQL database column type
@@ -45,9 +47,9 @@ namespace Debaser.Mapping
         /// </summary>
         public int? AddSize { get; }
 
-        internal Func<object, object> CustomToDatabase { get; }
+        internal Func<object, object> ToDatabase { get; }
 
-        internal Func<object, object> CustomFromDatabase { get; }
+        internal Func<object, object> FromDatabase { get; }
 
         internal string GetTypeDefinition()
         {
@@ -103,5 +105,9 @@ namespace Debaser.Mapping
         static bool SizeIsMax(int size) => size == int.MaxValue;
 
         bool IsString => new[] { SqlDbType.NVarChar, SqlDbType.VarChar }.Contains(SqlDbType);
+
+        static Func<object, object> DefaultFromDatabase() => obj => obj == DBNull.Value ? null : obj;
+
+        static Func<object, object> DefaultToDatabase() => obj => obj;
     }
 }

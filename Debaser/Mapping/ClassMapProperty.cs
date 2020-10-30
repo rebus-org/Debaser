@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using FastMember;
 using Microsoft.Data.SqlClient.Server;
@@ -10,14 +12,12 @@ namespace Debaser.Mapping
     /// </summary>
     public class ClassMapProperty
     {
-        readonly Func<object, object> _toDatabase;
-        readonly Func<object, object> _fromDatabase;
         readonly TypeAccessor _accessor;
 
         /// <summary>
         /// Gets the name of the database column
         /// </summary>
-        public string ColumnName { get; }
+        public IReadOnlyList<string> ColumnNames { get; }
 
         /// <summary>
         /// Gets the name of the property
@@ -25,9 +25,9 @@ namespace Debaser.Mapping
         public string PropertyName { get; }
 
         /// <summary>
-        /// Gets the database column information for this property
+        /// Gets the columns to which this propert should be mapped
         /// </summary>
-        public ColumnInfo ColumnInfo { get; }
+        public IReadOnlyList<ColumnInfo> Columns { get; }
 
         /// <summary>
         /// Gets whether the property is to be PK (or part of a composite PK) for the table
@@ -37,15 +37,13 @@ namespace Debaser.Mapping
         /// <summary>
         /// Creates the property
         /// </summary>
-        public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
+        public ClassMapProperty(string propertyName, IEnumerable<ColumnInfo> columns, string columnName, bool isKey, PropertyInfo property)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
-            ColumnInfo = columnInfo ?? throw new ArgumentNullException(nameof(columnInfo));
-            ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
+            Columns = columns?.ToList() ?? throw new ArgumentNullException(nameof(columns));
+            ColumnNames = Columns.Select(c => c.ColumnName).ToArray();
             IsKey = isKey;
-            _toDatabase = toDatabase ?? throw new ArgumentNullException(nameof(toDatabase));
-            _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
             _accessor = TypeAccessor.Create(property.DeclaringType);
         }
 
@@ -62,16 +60,21 @@ namespace Debaser.Mapping
         /// </summary>
         public string GetColumnDefinition()
         {
-            return $"[{ColumnName}] {ColumnInfo.GetTypeDefinition()}";
+            return string.Join(", ", Columns.Select(info => $"[{info.ColumnName}] {info.GetTypeDefinition()}");
         }
 
         internal void WriteTo(SqlDataRecord record, object row)
         {
-            var ordinal = record.GetOrdinal(ColumnName);
-            var value = _accessor[row, PropertyName];
-            var valueToWrite = ToDatabase(value);
+            foreach (var column in Columns)
+            {
+                var name = column.ColumnName;
+                var toDatabase = column.ToDatabase;
+                var ordinal = record.GetOrdinal(name);
+                var value = _accessor[row, PropertyName];
+                var valueToWrite = toDatabase(value);
 
-            record.SetValue(ordinal, valueToWrite);
+                record.SetValue(ordinal, valueToWrite);
+            }
         }
 
         internal object FromDatabase(object value)
