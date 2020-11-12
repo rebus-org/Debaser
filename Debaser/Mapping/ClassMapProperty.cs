@@ -37,7 +37,7 @@ namespace Debaser.Mapping
         /// <summary>
         /// Creates the property
         /// </summary>
-        public ClassMapProperty(string propertyName, IEnumerable<ColumnInfo> columns, string columnName, bool isKey, PropertyInfo property)
+        public ClassMapProperty(string propertyName, IEnumerable<ColumnInfo> columns, bool isKey, PropertyInfo property)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
@@ -60,7 +60,7 @@ namespace Debaser.Mapping
         /// </summary>
         public string GetColumnDefinition()
         {
-            return string.Join(", ", Columns.Select(info => $"[{info.ColumnName}] {info.GetTypeDefinition()}");
+            return string.Join(", ", Columns.Select(info => $"[{info.ColumnName}] {info.GetTypeDefinition()}"));
         }
 
         internal void WriteTo(SqlDataRecord record, object row)
@@ -89,19 +89,18 @@ namespace Debaser.Mapping
             return _toDatabase(target);
         }
 
-        internal SqlMetaData GetSqlMetaData()
-        {
-            return ColumnInfo.GetSqlMetaData(ColumnName);
-        }
+        internal IEnumerable<SqlMetaData> GetSqlMetaData() => Columns.Select(column => column.GetSqlMetaData());
 
         /// <summary>
         /// Gets a nice string that represents the property
         /// </summary>
         public override string ToString()
         {
+            var columnNamesString = string.Join(", ", ColumnNames.Select(columnName => $"[{columnName}]"));
+
             return IsKey
-                ? $"{PropertyName} ([{ColumnName}] PK)"
-                : $"{PropertyName} ([{ColumnName}])";
+                ? $"{PropertyName} ({columnNamesString} PK)"
+                : $"{PropertyName} ({columnNamesString})";
         }
     }
 }

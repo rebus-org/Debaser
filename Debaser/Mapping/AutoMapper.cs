@@ -41,10 +41,9 @@ namespace Debaser.Mapping
                 {
                     var propertyName = property.Name;
                     var columns = GetColumnInfo(property);
-                    var columnName = property.Name;
                     var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
 
-                    return new ClassMapProperty(propertyName, columns, columnName, isKey, property);
+                    return new ClassMapProperty(propertyName, columns, isKey, property);
                 })
                 .ToList();
 

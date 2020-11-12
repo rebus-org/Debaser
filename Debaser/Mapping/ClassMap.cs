@@ -39,7 +39,7 @@ namespace Debaser.Mapping
         public SqlMetaData[] GetSqlMetaData()
         {
             return Properties
-                .Select(p => p.GetSqlMetaData())
+                .SelectMany(p => p.GetSqlMetaData())
                 .ToArray();
         }
 

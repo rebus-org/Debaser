@@ -77,8 +77,10 @@ namespace Debaser.Mapping
             return SizeIsMax(size) ? "MAX" : size.ToString();
         }
 
-        internal SqlMetaData GetSqlMetaData(string columnName)
+        internal SqlMetaData GetSqlMetaData()
         {
+            var columnName = ColumnName;
+
             if (!Size.HasValue)
             {
                 if (IsString)

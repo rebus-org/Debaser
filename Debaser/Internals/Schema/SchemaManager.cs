@@ -65,7 +65,7 @@ SELECT [schema_id] FROM sys.schemas WHERE [name]='{_schema}'
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE [name]='{_tableName}' AND [type]='U' AND [schema_id]={schemaId})
     CREATE TABLE [{_schema}].[{_tableName}] (
 {GetColumnDefinitionSql(8)},
-        PRIMARY KEY({string.Join(", ", _keyProperties.Select(p => $"[{p.ColumnName}]"))})
+        PRIMARY KEY({string.Join(", ", _keyProperties.SelectMany(p => p.ColumnNames).Select(columnName => $"[{columnName}]"))})
     )
 
 ");
@@ -204,7 +204,7 @@ END
 
         public string GetQuery(string criteria = null)
         {
-            var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => $"[{p.ColumnName}]").Indented(4));
+            var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => p.ColumnNames).Select(columnName => $"[{columnName}]").Indented(4));
 
             var sql = $@"
 
@@ -219,38 +219,15 @@ FROM [{_schema}].[{_tableName}]
             return $"{sql} WHERE {criteria}";
         }
 
-        string GetUpdateSql(int indentation)
-        {
-            if (!_mutableProperties.Any())
-            {
-                return "@dummy=0";
-            }
+        string GetUpdateSql(int indentation) => !_mutableProperties.Any() ? "@dummy=0" : string.Join("," + Environment.NewLine, _mutableProperties.SelectMany(p => p.ColumnNames).Select(columnName => $"[T].[{columnName}] = [S].[{columnName}]").Indented(indentation));
 
-            return string.Join("," + Environment.NewLine,
-                _mutableProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]").Indented(indentation));
-        }
+        SqlConnection OpenSqlConnection() => _factory.OpenSqlConnection();
 
-        SqlConnection OpenSqlConnection()
-        {
-            return _factory.OpenSqlConnection();
-        }
+        string GetInsertSql(int indentation) => string.Join(", " + Environment.NewLine, _properties.SelectMany(p => p.ColumnNames).Select(columnName => $"[S].[{columnName}]").Indented(indentation));
 
-        string GetInsertSql(int indentation)
-        {
-            return string.Join(", " + Environment.NewLine,
-                _properties.Select(p => $"[S].[{p.ColumnName}]").Indented(indentation));
-        }
+        string GetColumnDefinitionSql(int indentation) => string.Join("," + Environment.NewLine, _properties.Select(p => $"{p.GetColumnDefinition()}").Indented(indentation));
 
-        string GetColumnDefinitionSql(int indentation)
-        {
-            return string.Join("," + Environment.NewLine,
-                _properties.Select(p => $"{p.GetColumnDefinition()}").Indented(indentation));
-        }
-
-        string GetKeyComparison()
-        {
-            return string.Join(" AND ", _keyProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]"));
-        }
+        string GetKeyComparison() => string.Join(" AND ", _keyProperties.SelectMany(p => p.ColumnNames).Select(columnName => $"[T].[{columnName}] = [S].[{columnName}]"));
 
         static void ExecuteStatement(SqlConnection connection, SqlTransaction transaction, string sql, bool wrapException = true)
         {
