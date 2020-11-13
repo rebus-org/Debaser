@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
@@ -34,9 +33,9 @@ namespace Debaser.Tests.Transactions
 
                 await using var transaction = connection.BeginTransaction();
 
-                await _helper.UpsertAsync(connection, new[] { new SomethingToSave("id2", "some text"), },
+                await _helper.UpsertAsync(connection, new[] { new SomethingToSave("id2"), },
                     transaction: transaction);
-                await _helper.UpsertAsync(connection, new[] { new SomethingToSave("id3", "some text"), },
+                await _helper.UpsertAsync(connection, new[] { new SomethingToSave("id3"), },
                     transaction: transaction);
 
                 if (shouldCommit)
@@ -46,7 +45,7 @@ namespace Debaser.Tests.Transactions
             }
 
             // insert row
-            await _helper.UpsertAsync(new[] { new SomethingToSave("id1", "some text"), });
+            await _helper.UpsertAsync(new[] { new SomethingToSave("id1"), });
 
             await DoStuffWithTransaction(shouldCommit: commit);
 
@@ -67,13 +66,8 @@ namespace Debaser.Tests.Transactions
         class SomethingToSave
         {
             public string Id { get; }
-            public string Text { get; }
 
-            public SomethingToSave(string id, string text)
-            {
-                Id = id;
-                Text = text;
-            }
+            public SomethingToSave(string id) => Id = id;
         }
     }
 }
