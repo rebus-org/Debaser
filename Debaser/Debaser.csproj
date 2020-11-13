@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>mookid8000</Authors>
+    <Company>Rebus FM</Company>
+    <Description>Library that helps with performing the nifty upsert-from-temp-table-streaming trick 🚀</Description>
   </PropertyGroup>
 
   <ItemGroup>

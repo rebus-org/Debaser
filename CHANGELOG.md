@@ -64,4 +64,7 @@
 * Add overloads of all methods on `UpsertHelper` that accept an `SqlConnection` and an optional `SqlTransaction` from the outside, enabling enlisting multiple operations in the same transaction
 * Remove .NET Standard 2.0 target because it was in the way
 
+## 0.17.0
+* Cuddle NuGet package manifest a little bit
+
 [FastMember]: https://github.com/mgravell/fast-member
