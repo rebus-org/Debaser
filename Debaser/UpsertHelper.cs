@@ -11,6 +11,7 @@ using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
 using FastMember;
+using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
 using Activator = Debaser.Internals.Reflection.Activator;
 // ReSharper disable LoopCanBeConvertedToQuery
@@ -84,30 +85,36 @@ namespace Debaser
         {
             if (rows == null) throw new ArgumentNullException(nameof(rows));
 
-            using (var connection = _factory.OpenSqlConnection())
+            await using var connection = _factory.OpenSqlConnection();
+            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+
+            await UpsertAsync(connection, rows, transaction);
+
+            transaction.Commit();
+        }
+
+        /// <summary>
+        /// Upserts the given sequence of <typeparamref name="T"/> instances using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// </summary>
+        public async Task UpsertAsync(SqlConnection connection, IEnumerable<T> rows, SqlTransaction transaction = null)
+        {
+            await using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandTimeout = _settings.CommandTimeoutSeconds;
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = _schemaManager.SprocName;
+
+            var parameter = command.Parameters.AddWithValue("data", GetData(rows));
+            parameter.SqlDbType = SqlDbType.Structured;
+            parameter.TypeName = _schemaManager.DataTypeName;
+
+            try
             {
-                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
-                {
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.Transaction = transaction;
-                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.CommandText = _schemaManager.SprocName;
-
-                        var parameter = command.Parameters.AddWithValue("data", GetData(rows));
-                        parameter.SqlDbType = SqlDbType.Structured;
-                        parameter.TypeName = _schemaManager.DataTypeName;
-
-                        try
-                        {
-                            await command.ExecuteNonQueryAsync();
-                        }
-                        catch (EmptySequenceException) { }
-                    }
-
-                    transaction.Commit();
-                }
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (EmptySequenceException)
+            {
             }
         }
 
@@ -117,38 +124,62 @@ namespace Debaser
         /// </summary>
         public IEnumerable<T> LoadAll()
         {
-            using (var connection = _factory.OpenSqlConnection())
+            using var connection = _factory.OpenSqlConnection();
+            using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+
+            // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
+            foreach (var instance in LoadAll(connection, transaction))
             {
-                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
-                {
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.Transaction = transaction;
-                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
-                        command.CommandType = CommandType.Text;
-                        command.CommandText = _schemaManager.GetQuery();
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
-                            var lookup = new DataReaderLookup(reader, classMapProperties);
-
-                            while (reader.Read())
-                            {
-                                yield return (T)_activator.CreateInstance(lookup);
-                            }
-                        }
-                    }
-                }
+                yield return instance;
             }
         }
 
-#if HAS_ASYNC_ENUMERABLE
+        /// <summary>
+        /// Loads all rows from the database (in a streaming fashion, allows you to traverse all
+        /// objects without worrying about memory usage) using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// </summary>
+        public IEnumerable<T> LoadAll(SqlConnection connection, SqlTransaction transaction = null)
+        {
+            using var command = connection.CreateCommand();
 
+            command.Transaction = transaction;
+            command.CommandTimeout = _settings.CommandTimeoutSeconds;
+            command.CommandType = CommandType.Text;
+            command.CommandText = _schemaManager.GetQuery();
+
+            using var reader = command.ExecuteReader();
+
+            var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
+            var lookup = new DataReaderLookup(reader, classMapProperties);
+
+            while (reader.Read())
+            {
+                yield return (T)_activator.CreateInstance(lookup);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously loads all rows from the database (in a streaming fashion, allows you to traverse all
+        /// objects without worrying about memory usage) 
+        /// </summary>
         public async IAsyncEnumerable<T> LoadAllAsync()
         {
             await using var connection = _factory.OpenSqlConnection();
             await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+
+            // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
+            await foreach (var instance in LoadAllAsync(connection, transaction))
+            {
+                yield return instance;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously loads all rows from the database (in a streaming fashion, allows you to traverse all
+        /// objects without worrying about memory usage) using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// </summary>
+        public async IAsyncEnumerable<T> LoadAllAsync(SqlConnection connection, SqlTransaction transaction = null)
+        {
             await using var command = connection.CreateCommand();
 
             command.Transaction = transaction;
@@ -167,8 +198,6 @@ namespace Debaser
             }
         }
 
-#endif
-
         /// <summary>
         /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
@@ -178,41 +207,46 @@ namespace Debaser
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
-            using (var connection = _factory.OpenSqlConnection())
+            await using var connection = _factory.OpenSqlConnection();
+            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+            await DeleteWhereAsync(connection, criteria, args, transaction);
+
+            transaction.Commit();
+        }
+
+        /// <summary>
+        /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+        /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+        /// <code>new { someValue = "hej" }</code> using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// </summary>
+        public async Task DeleteWhereAsync(SqlConnection connection, string criteria, object args, SqlTransaction transaction = null)
+        {
+            await using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandTimeout = _settings.CommandTimeoutSeconds;
+            command.CommandType = CommandType.Text;
+
+            var querySql = _schemaManager.GetDeleteCommand(criteria);
+            var parameters = GetParameters(args);
+
+            if (parameters.Any())
             {
-                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
+                foreach (var parameter in parameters)
                 {
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.Transaction = transaction;
-                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
-                        command.CommandType = CommandType.Text;
-
-                        var querySql = _schemaManager.GetDeleteCommand(criteria);
-                        var parameters = GetParameters(args);
-
-                        if (parameters.Any())
-                        {
-                            foreach (var parameter in parameters)
-                            {
-                                parameter.AddTo(command);
-                            }
-                        }
-
-                        command.CommandText = querySql;
-
-                        try
-                        {
-                            await command.ExecuteNonQueryAsync();
-                        }
-                        catch (Exception exception)
-                        {
-                            throw new ApplicationException($"Could not execute SQL {querySql}", exception);
-                        }
-                    }
-
-                    transaction.Commit();
+                    parameter.AddTo(command);
                 }
+            }
+
+            command.CommandText = querySql;
+
+            try
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (Exception exception)
+            {
+                throw new ApplicationException($"Could not execute SQL {querySql}", exception);
             }
         }
 
@@ -221,61 +255,66 @@ namespace Debaser
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
         /// <code>new { someValue = "hej" }</code>
         /// </summary>
-        public async Task<List<T>> LoadWhereAsync(string criteria, object args = null)
+        public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null)
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
+            await using var connection = _factory.OpenSqlConnection();
+            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+
+            return await LoadWhereAsync(connection, criteria, args, transaction);
+        }
+
+        /// <summary>
+        /// Loads all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+        /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+        /// <code>new { someValue = "hej" }</code>  using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// </summary>
+        public async Task<IReadOnlyList<T>> LoadWhereAsync(SqlConnection connection, string criteria, object args = null, SqlTransaction transaction = null)
+        {
             var results = new List<T>();
 
-            using (var connection = _factory.OpenSqlConnection())
+            await using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandTimeout = _settings.CommandTimeoutSeconds;
+            command.CommandType = CommandType.Text;
+
+            var querySql = _schemaManager.GetQuery(criteria);
+            var parameters = GetParameters(args);
+
+            if (parameters.Any())
             {
-                using (var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel))
+                foreach (var parameter in parameters)
                 {
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.Transaction = transaction;
-                        command.CommandTimeout = _settings.CommandTimeoutSeconds;
-                        command.CommandType = CommandType.Text;
-
-                        var querySql = _schemaManager.GetQuery(criteria);
-                        var parameters = GetParameters(args);
-
-                        if (parameters.Any())
-                        {
-                            foreach (var parameter in parameters)
-                            {
-                                parameter.AddTo(command);
-                            }
-                        }
-
-                        command.CommandText = querySql;
-
-                        try
-                        {
-                            using (var reader = await command.ExecuteReaderAsync())
-                            {
-                                var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
-                                var lookup = new DataReaderLookup(reader, classMapProperties);
-
-                                while (reader.Read())
-                                {
-                                    var instance = (T)_activator.CreateInstance(lookup);
-
-                                    results.Add(instance);
-                                }
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            throw new ApplicationException($"Could not execute SQL {querySql}", exception);
-                        }
-                    }
+                    parameter.AddTo(command);
                 }
+            }
+
+            command.CommandText = querySql;
+
+            try
+            {
+                await using var reader = await command.ExecuteReaderAsync();
+
+                var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
+                var lookup = new DataReaderLookup(reader, classMapProperties);
+
+                while (reader.Read())
+                {
+                    var instance = (T)_activator.CreateInstance(lookup);
+
+                    results.Add(instance);
+                }
+            }
+            catch (Exception exception)
+            {
+                throw new ApplicationException($"Could not execute SQL {querySql}", exception);
             }
 
             return results;
         }
-        
+
         List<Parameter> GetParameters(object args)
         {
             if (args == null) return _emptyList;

@@ -74,7 +74,6 @@ does not look like a valid URL, so apparently it wasn't possible to automaticall
                 });
             }
 
-
             connection.Open();
             return connection;
         }
