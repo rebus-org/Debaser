@@ -62,5 +62,6 @@
 ## 0.16.0
 * Replace System.Data.SqlClient dep with Microsoft.Data.SqlClient
 * Add overloads of all methods on `UpsertHelper` that accept an `SqlConnection` and an optional `SqlTransaction` from the outside, enabling enlisting multiple operations in the same transaction
+* Remove .NET Standard 2.0 target because it was in the way
 
 [FastMember]: https://github.com/mgravell/fast-member
