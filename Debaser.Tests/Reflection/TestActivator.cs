@@ -110,7 +110,7 @@ namespace Debaser.Tests.Reflection
                 {
                     var value = _values[name];
 
-                    return Convert.ChangeType(value, desiredType);
+                    return new[] { Convert.ChangeType(value, desiredType) };
                 }
                 catch (Exception exception)
                 {

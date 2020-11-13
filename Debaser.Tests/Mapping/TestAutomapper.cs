@@ -30,7 +30,7 @@ namespace Debaser.Tests.Mapping
                 nameof(Poco.Decimal),
                 nameof(Poco.DateTime),
             }));
-            Assert.That(classMap.Properties.Select(p => p.ColumnInfo.SqlDbType), Is.EqualTo(new[]
+            Assert.That(classMap.Properties.SelectMany(p => p.Columns).Select(p => p.SqlDbType), Is.EqualTo(new[]
             {
                 SqlDbType.Int,
                 SqlDbType.Decimal,

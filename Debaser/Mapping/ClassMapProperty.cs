@@ -12,6 +12,8 @@ namespace Debaser.Mapping
     /// </summary>
     public class ClassMapProperty
     {
+        readonly Func<object, object[]> _toDatabase;
+        readonly Func<object, object> _fromDatabase;
         readonly TypeAccessor _accessor;
 
         /// <summary>
@@ -37,9 +39,11 @@ namespace Debaser.Mapping
         /// <summary>
         /// Creates the property
         /// </summary>
-        public ClassMapProperty(string propertyName, IEnumerable<ColumnInfo> columns, bool isKey, PropertyInfo property)
+        public ClassMapProperty(string propertyName, IEnumerable<ColumnInfo> columns, bool isKey, PropertyInfo property, Func<object, object[]> toDatabase, Func<object, object> fromDatabase)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
+            _toDatabase = toDatabase ?? throw new ArgumentNullException(nameof(toDatabase));
+            _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
             PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
             Columns = columns?.ToList() ?? throw new ArgumentNullException(nameof(columns));
             ColumnNames = Columns.Select(c => c.ColumnName).ToArray();
@@ -50,28 +54,28 @@ namespace Debaser.Mapping
         /// <summary>
         /// Changes the property to be PK (or part of a composite PK) for the table
         /// </summary>
-        public void MakeKey()
-        {
-            IsKey = true;
-        }
+        public void MakeKey() => IsKey = true;
 
         /// <summary>
         /// Gets the necessary SQL to make out a single column definition line in a 'CREATE TABLE (...)' statement
         /// </summary>
-        public string GetColumnDefinition()
-        {
-            return string.Join(", ", Columns.Select(info => $"[{info.ColumnName}] {info.GetTypeDefinition()}"));
-        }
+        public string GetColumnDefinition() => string.Join(", ", Columns.Select(info => $"[{info.ColumnName}] {info.GetTypeDefinition()}"));
 
         internal void WriteTo(SqlDataRecord record, object row)
         {
-            foreach (var column in Columns)
+            var value = _accessor[row, PropertyName];
+            var valuesToWrite = _toDatabase(value);
+
+            AssertLength(valuesToWrite);
+
+            for (var index = 0; index < Columns.Count; index++)
             {
-                var name = column.ColumnName;
+                var column = Columns[index];
                 var toDatabase = column.ToDatabase;
+                var valueToWrite = toDatabase(valuesToWrite[index]);
+
+                var name = column.ColumnName;
                 var ordinal = record.GetOrdinal(name);
-                var value = _accessor[row, PropertyName];
-                var valueToWrite = toDatabase(value);
 
                 record.SetValue(ordinal, valueToWrite);
             }
@@ -84,12 +88,17 @@ namespace Debaser.Mapping
             return valueToSet;
         }
 
-        object ToDatabase(object target)
-        {
-            return _toDatabase(target);
-        }
-
         internal IEnumerable<SqlMetaData> GetSqlMetaData() => Columns.Select(column => column.GetSqlMetaData());
+
+        void AssertLength(object[] valuesToWrite)
+        {
+            if (valuesToWrite.Length == Columns.Count) return;
+
+            var valuesString = string.Join(", ", valuesToWrite);
+            var columnsString = string.Join(", ", ColumnNames);
+            throw new InvalidOperationException(
+                $"Class map property for {PropertyName} returned {valuesToWrite.Length} values ({valuesString}), but {Columns.Count} were expected ({columnsString})");
+        }
 
         /// <summary>
         /// Gets a nice string that represents the property
