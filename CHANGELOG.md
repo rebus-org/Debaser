@@ -67,4 +67,7 @@
 ## 0.17.0
 * Cuddle NuGet package manifest a little bit
 
+## 0.18.0
+* Add ability to output schema generation scripts
+
 [FastMember]: https://github.com/mgravell/fast-member

@@ -12,15 +12,15 @@ namespace Debaser.Internals.Schema
 {
     class SchemaManager
     {
+        readonly List<ClassMapProperty> _mutableProperties;
+        readonly List<ClassMapProperty> _keyProperties;
+        readonly List<ClassMapProperty> _properties;
+        readonly SqlConnectionFactory _factory;
         readonly string _tableName;
         readonly string _dataTypeName;
         readonly string _sprocName;
         readonly string _schema;
         readonly string _extraCriteria;
-        readonly List<ClassMapProperty> _mutableProperties;
-        readonly List<ClassMapProperty> _keyProperties;
-        readonly List<ClassMapProperty> _properties;
-        readonly SqlConnectionFactory _factory;
 
         public SchemaManager(SqlConnectionFactory factory, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo", string extraCriteria = null)
         {
@@ -41,60 +41,84 @@ namespace Debaser.Internals.Schema
 
         public void CreateSchema(bool createProcedure, bool createType, bool createTable)
         {
-            using (var connection = OpenSqlConnection())
+            using var connection = OpenSqlConnection();
+
+            using var transaction = connection.BeginTransaction();
+
+            var (createProcedureScript, createTypeScript, createTableScript) = GetCreateSchemaScript();
+
+            if (createTable)
             {
-                using (var transaction = connection.BeginTransaction())
+                ExecuteStatement(connection, transaction, createTableScript);
+            }
+
+            if (createType)
+            {
+                ExecuteStatement(connection, transaction, createTypeScript);
+            }
+
+            if (createProcedure)
+            {
+                ExecuteStatement(connection, transaction, createProcedureScript);
+            }
+
+            transaction.Commit();
+        }
+
+        public string GetDeleteCommand(string criteria)
+        {
+            var sql = $@"DELETE FROM [{_schema}].[{_tableName}]";
+
+            if (string.IsNullOrWhiteSpace(criteria)) return sql;
+
+            return $"{sql} WHERE {criteria}";
+        }
+
+        public void DropSchema(bool dropProcedure, bool dropType, bool dropTable)
+        {
+            const int objectNotFound = 3701;
+            const int typeNotFound = 218;
+
+            using var connection = OpenSqlConnection();
+
+            void ExecuteScript(string sql, int exceptionNumberToIgnore)
+            {
+                using var transaction = connection.BeginTransaction();
+
+                try
                 {
-                    ExecuteStatement(connection, transaction, $@"
+                    ExecuteStatement(connection, transaction, sql, wrapException: false);
 
-IF NOT EXISTS (SELECT * FROM sys.schemas WHERE [name]='{_schema}')
-	EXEC('CREATE SCHEMA [{_schema}]')
+                    transaction.Commit();
+                }
+                catch (SqlException exception) when (exception.Number == exceptionNumberToIgnore)
+                {
+                }
+            }
 
-");
+            var (dropProcedureScript, dropTypeScript, dropTableScript) = GetDropSchemaScript();
 
-                    var schemaId = ExecuteQuery(connection, transaction, $@"
+            if (dropProcedure)
+            {
+                ExecuteScript(dropProcedureScript, objectNotFound);
+            }
 
-SELECT [schema_id] FROM sys.schemas WHERE [name]='{_schema}'
+            if (dropType)
+            {
+                ExecuteScript(dropTypeScript, typeNotFound);
+            }
 
-");
+            if (dropTable)
+            {
+                ExecuteScript(dropTableScript, objectNotFound);
+            }
+        }
 
-                    if (createTable)
-                    {
-                        ExecuteStatement(connection, transaction, $@"
+        public (string procedure, string type, string table) GetCreateSchemaScript() =>
+        (
+            procedure: $@"
 
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE [name]='{_tableName}' AND [type]='U' AND [schema_id]={schemaId})
-    CREATE TABLE [{_schema}].[{_tableName}] (
-{GetColumnDefinitionSql(8)},
-        PRIMARY KEY({string.Join(", ", _keyProperties.Select(p => $"[{p.ColumnName}]"))})
-    )
-
-");
-                    }
-
-                    if (createType)
-                    {
-                        ExecuteStatement(connection, transaction, $@"
-
-IF NOT EXISTS (SELECT * FROM sys.types WHERE [name]='{_dataTypeName}' AND [is_user_defined] = 1 AND [schema_id]={schemaId})
-    CREATE TYPE [{_schema}].[{_dataTypeName}] AS TABLE (
-{GetColumnDefinitionSql(8)}
-    )
-
-");
-                    }
-
-                    if (createProcedure)
-                    {
-                        ExecuteStatement(connection, transaction, $@"
-
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE [name]='{_sprocName}' AND [type]='P' AND [schema_id]={schemaId})
-    EXEC('CREATE PROCEDURE [{_schema}].[{_sprocName}] AS BEGIN SET NOCOUNT ON; END')
-
-");
-
-                        ExecuteStatement(connection, transaction, $@"
-
-ALTER PROCEDURE [{_schema}].[{_sprocName}] (
+CREATE PROCEDURE [{_schema}].[{_sprocName}] (
     @data [{_schema}].[{_dataTypeName}] READONLY
 )
 AS
@@ -125,81 +149,42 @@ BEGIN
     ;
     
 END
+",
 
-");
-                    }
+            type: $@"
+
+CREATE TYPE [{_schema}].[{_dataTypeName}] AS TABLE (
+{GetColumnDefinitionSql(8)}
+)
+
+",
+
+            table: $@"
 
 
-                    transaction.Commit();
-                }
-            }
-        }
+CREATE TABLE [{_schema}].[{_tableName}] (
+{GetColumnDefinitionSql(8)},
+        PRIMARY KEY({string.Join(", ", _keyProperties.Select(p => $"[{p.ColumnName}]"))})
+    )
+
+"
+        );
+
+        public (string procedure, string type, string table) GetDropSchemaScript() =>
+        (
+            procedure: $@"DROP PROCEDURE [{_schema}].[{_sprocName}]",
+            type: $@"DROP TYPE [{_schema}].[{_dataTypeName}]",
+            table: $@"DROP TABLE [{_schema}].[{_tableName}]"
+        );
 
         static int ExecuteQuery(SqlConnection connection, SqlTransaction transaction, string sql)
         {
-            using (var command = connection.CreateCommand())
-            {
-                command.Transaction = transaction;
-                command.CommandText = sql;
-                return (int)command.ExecuteScalar();
-            }
-        }
+            using var command = connection.CreateCommand();
 
-        public void DropSchema(bool dropProcedure, bool dropType, bool dropTable)
-        {
-            const int objectNotFound = 3701;
-            const int typeNotFound = 218;
+            command.Transaction = transaction;
+            command.CommandText = sql;
 
-            using (var connection = OpenSqlConnection())
-            {
-                if (dropProcedure)
-                {
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            ExecuteStatement(connection, transaction, $@"DROP PROCEDURE [{_schema}].[{_sprocName}]", wrapException: false);
-
-                            transaction.Commit();
-                        }
-                        catch (SqlException exception) when (exception.Number == objectNotFound)
-                        {
-                        }
-                    }
-                }
-
-                if (dropType)
-                {
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            ExecuteStatement(connection, transaction, $@"DROP TYPE [{_schema}].[{_dataTypeName}]", wrapException: false);
-
-                            transaction.Commit();
-                        }
-                        catch (SqlException exception) when (exception.Number == typeNotFound)
-                        {
-                        }
-                    }
-                }
-
-                if (dropTable)
-                {
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            ExecuteStatement(connection, transaction, $@"DROP TABLE [{_schema}].[{_tableName}]", wrapException: false);
-
-                            transaction.Commit();
-                        }
-                        catch (SqlException exception) when (exception.Number == objectNotFound)
-                        {
-                        }
-                    }
-                }
-            }
+            return (int)command.ExecuteScalar();
         }
 
         public string GetQuery(string criteria = null)
@@ -272,15 +257,6 @@ FROM [{_schema}].[{_tableName}]
 {sql}
 ", exception);
             }
-        }
-
-        public string GetDeleteCommand(string criteria)
-        {
-            var sql = $@"DELETE FROM [{_schema}].[{_tableName}]";
-
-            if (string.IsNullOrWhiteSpace(criteria)) return sql;
-
-            return $"{sql} WHERE {criteria}";
         }
     }
 }

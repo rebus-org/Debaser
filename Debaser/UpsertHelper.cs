@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Debaser.Internals.Data;
+using Debaser.Internals.Ex;
 using Debaser.Internals.Exceptions;
 using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
@@ -60,22 +61,55 @@ namespace Debaser
         }
 
         /// <summary>
-        /// Immediately executes DROP statements for the things you select by setting <paramref name="dropProcedure"/>,
-        /// <paramref name="dropType"/>, and/or <paramref name="dropTable"/> to <code>true</code>.
-        /// </summary>
-        public void DropSchema(bool dropProcedure = false, bool dropType = false, bool dropTable = false)
-        {
-            _schemaManager.DropSchema(dropProcedure, dropType, dropTable);
-        }
-
-        /// <summary>
         /// Ensures that the necessary schema is created (i.e. table, custom data type, and stored procedure).
         /// Does NOT detect changes, just skips creation if it finds objects with the known names in the database.
         /// This means that you need to handle migrations yourself
         /// </summary>
-        public void CreateSchema(bool createProcedure = true, bool createType = true, bool createTable = true)
+        public void CreateSchema(bool createProcedure = true, bool createType = true, bool createTable = true) => _schemaManager.CreateSchema(createProcedure, createType, createTable);
+
+        public string GetCreateSchemaScript(bool createProcedure = true, bool createType = true, bool createTable = true)
         {
-            _schemaManager.CreateSchema(createProcedure, createType, createTable);
+            var (procedure, type, table) = _schemaManager.GetCreateSchemaScript();
+
+            return JoinScripts(new[]
+            {
+                createTable ? table : null,
+                createType ? type : null,
+                createProcedure ? procedure : null,
+            });
+        }
+
+        /// <summary>
+        /// Immediately executes DROP statements for the things you select by setting <paramref name="dropProcedure"/>,
+        /// <paramref name="dropType"/>, and/or <paramref name="dropTable"/> to <code>true</code>.
+        /// </summary>
+        public void DropSchema(bool dropProcedure = false, bool dropType = false, bool dropTable = false) => _schemaManager.DropSchema(dropProcedure, dropType, dropTable);
+
+        public string GetDropSchemaScript(bool dropProcedure = false, bool dropType = false, bool dropTable = false)
+        {
+            var (procedure, type, table) = _schemaManager.GetDropSchemaScript();
+
+            return JoinScripts(new[]
+            {
+                dropProcedure ? procedure : null,
+                dropType ? type : null,
+                dropTable ? table : null,
+            });
+        }
+
+        static string JoinScripts(IEnumerable<string> scripts)
+        {
+            var scriptsToInclude = scripts
+                .Where(script => script != null)
+                .Select(script => script.TrimEmptyLines())
+                .Where(script => !string.IsNullOrWhiteSpace(script));
+
+            return string.Join(@"
+
+GO
+
+",
+                scriptsToInclude);
         }
 
         /// <summary>
