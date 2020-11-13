@@ -11,7 +11,7 @@ using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
 using FastMember;
-using Microsoft.SqlServer.Server;
+using Microsoft.Data.SqlClient.Server;
 using Activator = Debaser.Internals.Reflection.Activator;
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable ForCanBeConvertedToForeach

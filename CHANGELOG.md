@@ -59,4 +59,8 @@
 ## 0.15.0
 * Fix nullable-value-type-in-ctor edge case
 
+## 0.16.0
+* Replace System.Data.SqlClient dep with Microsoft.Data.SqlClient
+
+
 [FastMember]: https://github.com/mgravell/fast-member
