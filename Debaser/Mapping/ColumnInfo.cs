@@ -97,6 +97,11 @@ namespace Debaser.Mapping
                 return new SqlMetaData(columnName, SqlDbType, precision: (byte)Size.Value, scale: (byte)AddSize.Value);
             }
 
+            if (SqlDbType == SqlDbType.DateTimeOffset)
+            {
+                return new SqlMetaData(columnName, SqlDbType, precision: 0, scale: (byte)Size.Value);
+            }
+
             return new SqlMetaData(columnName, SqlDbType, maxLength: Size.Value);
         }
 

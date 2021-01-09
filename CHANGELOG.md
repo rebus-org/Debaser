@@ -70,4 +70,8 @@
 ## 0.18.0
 * Add ability to output schema generation scripts
 
+## 0.19.0
+* Fix ability to specify precision of `DateTimeOffset` properties
+
+
 [FastMember]: https://github.com/mgravell/fast-member
