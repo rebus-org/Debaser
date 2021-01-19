@@ -236,6 +236,7 @@ GO
         /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
         /// <code>new { someValue = "hej" }</code>
+        /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
         /// </summary>
         public async Task DeleteWhereAsync(string criteria, object args = null)
         {
@@ -252,6 +253,7 @@ GO
         /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
         /// <code>new { someValue = "hej" }</code> using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
         /// </summary>
         public async Task DeleteWhereAsync(SqlConnection connection, string criteria, object args, SqlTransaction transaction = null)
         {
@@ -287,7 +289,8 @@ GO
         /// <summary>
         /// Loads all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
-        /// <code>new { someValue = "hej" }</code>
+        /// <code>new { someValue = "hej" }</code>.
+        /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
         /// </summary>
         public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null)
         {
@@ -303,6 +306,7 @@ GO
         /// Loads all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
         /// <code>[someColumn] = @someValue</code> where the accompanying <paramref name="args"/> would be something like
         /// <code>new { someValue = "hej" }</code>  using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+        /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
         /// </summary>
         public async Task<IReadOnlyList<T>> LoadWhereAsync(SqlConnection connection, string criteria, object args = null, SqlTransaction transaction = null)
         {
@@ -360,6 +364,18 @@ GO
 
         static Func<object, List<Parameter>> GetGetter(Type type)
         {
+            if (typeof(IDictionary<string, object>).IsAssignableFrom(type))
+            {
+                return args =>
+                {
+                    var dictionary = (IDictionary<string, object>) args;
+
+                    return dictionary
+                        .Select(kvp => new Parameter(kvp.Key, kvp.Value))
+                        .ToList();
+                };
+            }
+
             var accessor = TypeAccessor.Create(type);
             var members = accessor.GetMembers();
 

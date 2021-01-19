@@ -73,5 +73,8 @@
 ## 0.19.0
 * Fix ability to specify precision of `DateTimeOffset` properties
 
+## 0.20.0
+* Add abilty to query by a dictionary of args and not only anonymous objects. This is useful in cases where the arguments vary, e.g. when implementing query builders and stuff
+* Update Microsoft.Data.SqlClient to 2.1.1
 
 [FastMember]: https://github.com/mgravell/fast-member

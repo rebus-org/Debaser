@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Debaser.Attributes;
 using NUnit.Framework;
 
@@ -18,7 +19,7 @@ namespace Debaser.Tests.Query
         }
 
         [Test]
-        public async Task CanQueryRows()
+        public async Task CanQueryRows_Args()
         {
             var rows = new[]
             {
@@ -32,7 +33,31 @@ namespace Debaser.Tests.Query
             await _upsertHelper.UpsertAsync(rows);
 
             var results1 = await _upsertHelper.LoadWhereAsync("[Data] = 'number4'");
-            var results2 = await _upsertHelper.LoadWhereAsync("[Data] = @data", new {data = "number4"});
+            var results2 = await _upsertHelper.LoadWhereAsync("[Data] = @data", new { data = "number4" });
+
+            Assert.That(results1.Count, Is.EqualTo(1));
+            Assert.That(results2.Count, Is.EqualTo(1));
+
+            Assert.That(results1[0].Id, Is.EqualTo(4));
+            Assert.That(results2[0].Id, Is.EqualTo(4));
+        }
+
+        [Test]
+        public async Task CanQueryRows_Dictionary()
+        {
+            var rows = new[]
+            {
+                new RowWithData(1, "number1"),
+                new RowWithData(2, "number2"),
+                new RowWithData(3, "number3"),
+                new RowWithData(4, "number4"),
+                new RowWithData(5, "number5"),
+            };
+
+            await _upsertHelper.UpsertAsync(rows);
+
+            var results1 = await _upsertHelper.LoadWhereAsync("[Data] = 'number4'");
+            var results2 = await _upsertHelper.LoadWhereAsync("[Data] = @data", new Dictionary<string, object> { ["data"] = "number4" });
 
             Assert.That(results1.Count, Is.EqualTo(1));
             Assert.That(results2.Count, Is.EqualTo(1));
