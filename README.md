@@ -14,51 +14,61 @@ Did you know that Debaser can do these things for you?
 
 Create a class that looks the way you want it to look:
 
-    class SomeDataRow
+```csharp
+class SomeDataRow
+{
+    public SomeDataRow(int id, decimal number, string text)
     {
-        public SomeDataRow(int id, decimal number, string text)
-        {
-            Id = id;
-            Number = number;
-            Text = text;
-        }
-
-        public int Id { get; }
-        public decimal Number { get; }
-        public string Text { get; }
+        Id = id;
+        Number = number;
+        Text = text;
     }
+
+    public int Id { get; }
+    public decimal Number { get; }
+    public string Text { get; }
+}
+```
 
 (Debaser supports using a default constructor and properties with setters, or using a constructor with parameters matching the properties like this example shows)
 
 and then you create the `UpsertHelper` for it:
 
-    var upsertHelper = new UpsertHelper<SomeDataRow>("db");
+```csharp
+var upsertHelper = new UpsertHelper<SomeDataRow>("db");
+```
 
 (where `db` in this case is the name of a connection string in the current app.config)
 
 and then you do this once:
 
-	upsertHelper.CreateSchema();
+```csharp
+upsertHelper.CreateSchema();
+```
 
 (which will create a table, a table data type, and a stored procedure)
 
 and then you insert 100k rows like this:
 
-	var rows = Enumerable.Range(1, 100000)
-		.Select(i => new SomeDataRow(i, i*2.3m, $"This is row {i}"))
-		.ToList();
+```csharp
+var rows = Enumerable.Range(1, 100000)
+	.Select(i => new SomeDataRow(i, i*2.3m, $"This is row {i}"))
+	.ToList();
 
-	var stopwatch = Stopwatch.StartNew();
+var stopwatch = Stopwatch.StartNew();
 
-	await upsertHelper.Upsert(rows);
+await upsertHelper.Upsert(rows);
 
-	var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
+var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
 
-	Console.WriteLine($"Upserting {rows.Count} rows took {elapsedSeconds} - that's {rows.Count / elapsedSeconds:0.0} rows/s");
+Console.WriteLine($"Upserting {rows.Count} rows took {elapsedSeconds} - that's {rows.Count / elapsedSeconds:0.0} rows/s");
+```
 
 which on my machine yields this:
 
-	Upserting 100000 rows took 0.753394 - that's 132732.7 rows/s
+```csharp
+Upserting 100000 rows took 0.753394 - that's 132732.7 rows/s
+```
 
 which I think is fair.
 
@@ -68,27 +78,33 @@ By default each row is identified by its ID property. This means that any IDs ma
 
 Let's hurl 100k rows into the database again:
 
-	var rows = Enumerable.Range(1, 100000)
-		.Select(i => new SomeDataRow(i, i*2.3m, $"This is row {i}"))
-		.ToList();
+```csharp
+var rows = Enumerable.Range(1, 100000)
+	.Select(i => new SomeDataRow(i, i*2.3m, $"This is row {i}"))
+	.ToList();
 
-	await upsertHelper.Upsert(rows);
+await upsertHelper.Upsert(rows);
+```
 
 and then let's perform some iterations where we pick 10k random rows, mutate them, and upsert them:
 
-    var stopwatch = Stopwatch.StartNew();
+```csharp
+var stopwatch = Stopwatch.StartNew();
 
-    var updatedRows = rows.InRandomOrder().Take(rowsToChange)
-        .Select(row => new SomeDataRow(row.Id, row.Number + 1, string.Concat(row.Text, "-HEJ")));
+var updatedRows = rows.InRandomOrder().Take(rowsToChange)
+    .Select(row => new SomeDataRow(row.Id, row.Number + 1, string.Concat(row.Text, "-HEJ")));
 
-    await upsertHelper.Upsert(updatedRows);
+await upsertHelper.Upsert(updatedRows);
+```
 
 which on my machine yields this:
 
-	Updating 10000 random rows in dataset of 100000 took average of 0.2 s - that's 57191.1 rows/s
+```csharp
+Updating 10000 random rows in dataset of 100000 took average of 0.2 s - that's 57191.1 rows/s
+```
 
 which (again) I think is OK.
 
 ## Maturity
 
-Debaser is not mature. For now, it's just an experiment, and there's probably a bunch of data types that cannot be handled. Please use with caution.
+Debaser is fairly mature. It's been used for some serious things already, but please back your Debaser-based stuff up by some nice integration tests.
