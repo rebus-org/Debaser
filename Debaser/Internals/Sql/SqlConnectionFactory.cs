@@ -19,8 +19,9 @@ namespace Debaser.Internals.Sql
             var mutator = new ConnectionStringMutator(connectionString ?? throw new ArgumentNullException(nameof(connectionString)));
 
             var authentication = mutator.GetElement("Authentication", comparison: StringComparison.OrdinalIgnoreCase);
-            
-            _useManagedIdentity = string.Equals(authentication, "Active Directory Interactive", StringComparison.OrdinalIgnoreCase);
+
+            _useManagedIdentity = string.Equals(authentication, "Active Directory Interactive", StringComparison.OrdinalIgnoreCase)
+                                  || string.Equals(authentication, "Active Directory Integrated", StringComparison.OrdinalIgnoreCase);
 
             if (_useManagedIdentity)
             {
