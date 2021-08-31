@@ -77,4 +77,10 @@
 * Add abilty to query by a dictionary of args and not only anonymous objects. This is useful in cases where the arguments vary, e.g. when implementing query builders and stuff
 * Update Microsoft.Data.SqlClient to 2.1.1
 
+## 0.21.0
+* Update Microsoft.Data.SqlClient to 3.0.0
+* Update Microsoft.Azure.Services.AppAuthentication to 1.6.1
+* Tolerate `Authentication=Active Directory Integrated` in the connection string to support managed identity
+
+
 [FastMember]: https://github.com/mgravell/fast-member
