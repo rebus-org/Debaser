@@ -119,8 +119,8 @@ GO
         {
             if (rows == null) throw new ArgumentNullException(nameof(rows));
 
-            await using var connection = _factory.OpenSqlConnection();
-            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+            using var connection = _factory.OpenSqlConnection();
+            using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
             await UpsertAsync(connection, rows, transaction);
 
@@ -132,7 +132,7 @@ GO
         /// </summary>
         public async Task UpsertAsync(SqlConnection connection, IEnumerable<T> rows, SqlTransaction transaction = null)
         {
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
 
             command.Transaction = transaction;
             command.CommandTimeout = _settings.CommandTimeoutSeconds;
@@ -198,8 +198,8 @@ GO
         /// </summary>
         public async IAsyncEnumerable<T> LoadAllAsync()
         {
-            await using var connection = _factory.OpenSqlConnection();
-            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+            using var connection = _factory.OpenSqlConnection();
+            using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
             // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
             await foreach (var instance in LoadAllAsync(connection, transaction))
@@ -214,14 +214,14 @@ GO
         /// </summary>
         public async IAsyncEnumerable<T> LoadAllAsync(SqlConnection connection, SqlTransaction transaction = null)
         {
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
 
             command.Transaction = transaction;
             command.CommandTimeout = _settings.CommandTimeoutSeconds;
             command.CommandType = CommandType.Text;
             command.CommandText = _schemaManager.GetQuery();
 
-            await using var reader = await command.ExecuteReaderAsync();
+            using var reader = await command.ExecuteReaderAsync();
 
             var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
             var lookup = new DataReaderLookup(reader, classMapProperties);
@@ -242,8 +242,8 @@ GO
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
-            await using var connection = _factory.OpenSqlConnection();
-            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+            using var connection = _factory.OpenSqlConnection();
+            using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
             await DeleteWhereAsync(connection, criteria, args, transaction);
 
             transaction.Commit();
@@ -257,7 +257,7 @@ GO
         /// </summary>
         public async Task DeleteWhereAsync(SqlConnection connection, string criteria, object args, SqlTransaction transaction = null)
         {
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
 
             command.Transaction = transaction;
             command.CommandTimeout = _settings.CommandTimeoutSeconds;
@@ -296,8 +296,8 @@ GO
         {
             if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
-            await using var connection = _factory.OpenSqlConnection();
-            await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+            using var connection = _factory.OpenSqlConnection();
+            using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
             return await LoadWhereAsync(connection, criteria, args, transaction);
         }
@@ -312,7 +312,7 @@ GO
         {
             var results = new List<T>();
 
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
 
             command.Transaction = transaction;
             command.CommandTimeout = _settings.CommandTimeoutSeconds;
@@ -333,7 +333,7 @@ GO
 
             try
             {
-                await using var reader = await command.ExecuteReaderAsync();
+                using var reader = await command.ExecuteReaderAsync();
 
                 var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
                 var lookup = new DataReaderLookup(reader, classMapProperties);

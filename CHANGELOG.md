@@ -82,5 +82,8 @@
 * Update Microsoft.Azure.Services.AppAuthentication to 1.6.1
 * Tolerate `Authentication=Active Directory Integrated` in the connection string to support managed identity
 
+## 0.22.0
+* Target .NET Standard 2.0 because it's the right thing to do
+
 
 [FastMember]: https://github.com/mgravell/fast-member
