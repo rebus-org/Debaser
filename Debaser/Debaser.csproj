@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>mookid8000</Authors>
     <Company>Rebus FM</Company>
@@ -11,8 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="fastmember" Version="1.5.0" />
-    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.1" />
-    <PackageReference Include="microsoft.data.sqlclient" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="4.0.0" />
   </ItemGroup>
 
 </Project>
