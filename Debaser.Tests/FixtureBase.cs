@@ -9,7 +9,7 @@ namespace Debaser.Tests
     {
         const int DatabaseAlreadyExists = 1801;
 
-        protected static string ConnectionString => Environment.GetEnvironmentVariable("testdb") ?? "server=.; database=debaser_test; trusted_connection=true";
+        protected static string ConnectionString => Environment.GetEnvironmentVariable("testdb") ?? "server=.; database=debaser_test; trusted_connection=true; encrypt=false";
 
         [SetUp]
         public void InnerSetUp()

@@ -87,7 +87,6 @@
 
 ## 0.23.0
 * Update Microsoft.Data.SqlClient to 4.0.0
-* Add additional targets for .NET 5 and .NET 6
 
 
 [FastMember]: https://github.com/mgravell/fast-member
