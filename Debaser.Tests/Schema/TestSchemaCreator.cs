@@ -2,6 +2,7 @@
 using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 
 namespace Debaser.Tests.Schema
@@ -12,6 +13,15 @@ namespace Debaser.Tests.Schema
         [Test]
         public void CanCreateSchema()
         {
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+if not exists (select top 1 * from [sys].[schemas] where [name] = 'bimse')
+	exec('create schema bimse');
+";
+            command.ExecuteNonQuery();
+
             var mapper = new AutoMapper();
             var map = mapper.GetMap(typeof(SomeClass));
             var properties = map.Properties;
