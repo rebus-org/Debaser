@@ -1,6 +1,6 @@
 # Debaser
 
-![](https://raw.githubusercontent.com/rebus-org/Debaser/master/artwork/logo3-200.png)
+![](https://raw.githubusercontent.com/rebus-org/Debaser/master/artwork/new_logo_250.png)
 
 Have you ever had the need to insert/update many rows in SQL Server? (i.e. "upsert" them)
 
