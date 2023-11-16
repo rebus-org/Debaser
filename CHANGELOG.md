@@ -91,6 +91,9 @@
 ## 0.24.0
 * Update Microsoft.Data.SqlClient to 5.0.1
 
+## 0.25.0
+* Update Microsoft.Data.SqlClient to 5.1.2
+
 
 
 [FastMember]: https://github.com/mgravell/fast-member

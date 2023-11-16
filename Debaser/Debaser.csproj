@@ -7,12 +7,25 @@
     <Company>Rebus FM</Company>
     <LangVersion>latest</LangVersion>
     <Description>Library that helps with performing the nifty upsert-from-temp-table-streaming trick 🚀</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>new_logo_250.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\artwork\new_logo_250.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="fastmember" Version="1.5.0" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
-    <PackageReference Include="microsoft.data.sqlclient" Version="5.0.1" />
+    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.2" />
   </ItemGroup>
 
 </Project>
