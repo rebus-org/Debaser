@@ -8,115 +8,115 @@ using Debaser.Mapping;
 
 // ReSharper disable ArgumentsStyleLiteral
 
-namespace Debaser.Internals.Schema
-{
-    class SchemaManager
-    {
-        readonly List<ClassMapProperty> _mutableProperties;
-        readonly List<ClassMapProperty> _keyProperties;
-        readonly List<ClassMapProperty> _properties;
-        readonly SqlConnectionFactory _factory;
-        readonly string _tableName;
-        readonly string _dataTypeName;
-        readonly string _sprocName;
-        readonly string _schema;
-        readonly string _extraCriteria;
+namespace Debaser.Internals.Schema;
 
-        public SchemaManager(SqlConnectionFactory factory, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo", string extraCriteria = null)
+class SchemaManager
+{
+    readonly List<ClassMapProperty> _mutableProperties;
+    readonly List<ClassMapProperty> _keyProperties;
+    readonly List<ClassMapProperty> _properties;
+    readonly SqlConnectionFactory _factory;
+    readonly string _tableName;
+    readonly string _dataTypeName;
+    readonly string _sprocName;
+    readonly string _schema;
+    readonly string _extraCriteria;
+
+    public SchemaManager(SqlConnectionFactory factory, string tableName, string dataTypeName, string sprocName, IEnumerable<ClassMapProperty> keyProperties, IEnumerable<ClassMapProperty> properties, string schema = "dbo", string extraCriteria = null)
+    {
+        _factory = factory;
+        _tableName = tableName;
+        _dataTypeName = dataTypeName;
+        _sprocName = sprocName;
+        _schema = schema;
+        _extraCriteria = extraCriteria;
+        _keyProperties = keyProperties.ToList();
+        _properties = properties.ToList();
+        _mutableProperties = _properties.Except(_keyProperties).ToList();
+    }
+
+    public string SprocName => _sprocName;
+
+    public string DataTypeName => _dataTypeName;
+
+    public void CreateSchema(bool createProcedure, bool createType, bool createTable)
+    {
+        using var connection = OpenSqlConnection();
+
+        using var transaction = connection.BeginTransaction();
+
+        var (createProcedureScript, createTypeScript, createTableScript) = GetCreateSchemaScript();
+
+        if (createTable)
         {
-            _factory = factory;
-            _tableName = tableName;
-            _dataTypeName = dataTypeName;
-            _sprocName = sprocName;
-            _schema = schema;
-            _extraCriteria = extraCriteria;
-            _keyProperties = keyProperties.ToList();
-            _properties = properties.ToList();
-            _mutableProperties = _properties.Except(_keyProperties).ToList();
+            ExecuteStatement(connection, transaction, createTableScript);
         }
 
-        public string SprocName => _sprocName;
-
-        public string DataTypeName => _dataTypeName;
-
-        public void CreateSchema(bool createProcedure, bool createType, bool createTable)
+        if (createType)
         {
-            using var connection = OpenSqlConnection();
+            ExecuteStatement(connection, transaction, createTypeScript);
+        }
 
+        if (createProcedure)
+        {
+            ExecuteStatement(connection, transaction, createProcedureScript);
+        }
+
+        transaction.Commit();
+    }
+
+    public string GetDeleteCommand(string criteria)
+    {
+        var sql = $@"DELETE FROM [{_schema}].[{_tableName}]";
+
+        if (string.IsNullOrWhiteSpace(criteria)) return sql;
+
+        return $"{sql} WHERE {criteria}";
+    }
+
+    public void DropSchema(bool dropProcedure, bool dropType, bool dropTable)
+    {
+        const int objectNotFound = 3701;
+        const int typeNotFound = 218;
+
+        using var connection = OpenSqlConnection();
+
+        void ExecuteScript(string sql, int exceptionNumberToIgnore)
+        {
             using var transaction = connection.BeginTransaction();
 
-            var (createProcedureScript, createTypeScript, createTableScript) = GetCreateSchemaScript();
-
-            if (createTable)
+            try
             {
-                ExecuteStatement(connection, transaction, createTableScript);
-            }
+                ExecuteStatement(connection, transaction, sql, wrapException: false);
 
-            if (createType)
+                transaction.Commit();
+            }
+            catch (SqlException exception) when (exception.Number == exceptionNumberToIgnore)
             {
-                ExecuteStatement(connection, transaction, createTypeScript);
             }
-
-            if (createProcedure)
-            {
-                ExecuteStatement(connection, transaction, createProcedureScript);
-            }
-
-            transaction.Commit();
         }
 
-        public string GetDeleteCommand(string criteria)
+        var (dropProcedureScript, dropTypeScript, dropTableScript) = GetDropSchemaScript();
+
+        if (dropProcedure)
         {
-            var sql = $@"DELETE FROM [{_schema}].[{_tableName}]";
-
-            if (string.IsNullOrWhiteSpace(criteria)) return sql;
-
-            return $"{sql} WHERE {criteria}";
+            ExecuteScript(dropProcedureScript, objectNotFound);
         }
 
-        public void DropSchema(bool dropProcedure, bool dropType, bool dropTable)
+        if (dropType)
         {
-            const int objectNotFound = 3701;
-            const int typeNotFound = 218;
-
-            using var connection = OpenSqlConnection();
-
-            void ExecuteScript(string sql, int exceptionNumberToIgnore)
-            {
-                using var transaction = connection.BeginTransaction();
-
-                try
-                {
-                    ExecuteStatement(connection, transaction, sql, wrapException: false);
-
-                    transaction.Commit();
-                }
-                catch (SqlException exception) when (exception.Number == exceptionNumberToIgnore)
-                {
-                }
-            }
-
-            var (dropProcedureScript, dropTypeScript, dropTableScript) = GetDropSchemaScript();
-
-            if (dropProcedure)
-            {
-                ExecuteScript(dropProcedureScript, objectNotFound);
-            }
-
-            if (dropType)
-            {
-                ExecuteScript(dropTypeScript, typeNotFound);
-            }
-
-            if (dropTable)
-            {
-                ExecuteScript(dropTableScript, objectNotFound);
-            }
+            ExecuteScript(dropTypeScript, typeNotFound);
         }
 
-        public (string procedure, string type, string table) GetCreateSchemaScript() =>
-        (
-            procedure: $@"
+        if (dropTable)
+        {
+            ExecuteScript(dropTableScript, objectNotFound);
+        }
+    }
+
+    public (string procedure, string type, string table) GetCreateSchemaScript() =>
+    (
+        procedure: $@"
 
 CREATE PROCEDURE [{_schema}].[{_sprocName}] (
     @data [{_schema}].[{_dataTypeName}] READONLY
@@ -151,7 +151,7 @@ BEGIN
 END
 ",
 
-            type: $@"
+        type: $@"
 
 CREATE TYPE [{_schema}].[{_dataTypeName}] AS TABLE (
 {GetColumnDefinitionSql(8)}
@@ -159,7 +159,7 @@ CREATE TYPE [{_schema}].[{_dataTypeName}] AS TABLE (
 
 ",
 
-            table: $@"
+        table: $@"
 
 
 CREATE TABLE [{_schema}].[{_tableName}] (
@@ -168,30 +168,30 @@ CREATE TABLE [{_schema}].[{_tableName}] (
     )
 
 "
-        );
+    );
 
-        public (string procedure, string type, string table) GetDropSchemaScript() =>
-        (
-            procedure: $@"DROP PROCEDURE [{_schema}].[{_sprocName}]",
-            type: $@"DROP TYPE [{_schema}].[{_dataTypeName}]",
-            table: $@"DROP TABLE [{_schema}].[{_tableName}]"
-        );
+    public (string procedure, string type, string table) GetDropSchemaScript() =>
+    (
+        procedure: $@"DROP PROCEDURE [{_schema}].[{_sprocName}]",
+        type: $@"DROP TYPE [{_schema}].[{_dataTypeName}]",
+        table: $@"DROP TABLE [{_schema}].[{_tableName}]"
+    );
 
-        static int ExecuteQuery(SqlConnection connection, SqlTransaction transaction, string sql)
-        {
-            using var command = connection.CreateCommand();
+    static int ExecuteQuery(SqlConnection connection, SqlTransaction transaction, string sql)
+    {
+        using var command = connection.CreateCommand();
 
-            command.Transaction = transaction;
-            command.CommandText = sql;
+        command.Transaction = transaction;
+        command.CommandText = sql;
 
-            return (int)command.ExecuteScalar();
-        }
+        return (int)command.ExecuteScalar();
+    }
 
-        public string GetQuery(string criteria = null)
-        {
-            var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => $"[{p.ColumnName}]").Indented(4));
+    public string GetQuery(string criteria = null)
+    {
+        var columnList = string.Join("," + Environment.NewLine, _properties.Select(p => $"[{p.ColumnName}]").Indented(4));
 
-            var sql = $@"
+        var sql = $@"
 
 SELECT 
 {columnList}
@@ -199,64 +199,63 @@ FROM [{_schema}].[{_tableName}]
 
 ";
 
-            if (string.IsNullOrWhiteSpace(criteria)) return sql;
+        if (string.IsNullOrWhiteSpace(criteria)) return sql;
 
-            return $"{sql} WHERE {criteria}";
+        return $"{sql} WHERE {criteria}";
+    }
+
+    string GetUpdateSql(int indentation)
+    {
+        if (!_mutableProperties.Any())
+        {
+            return "@dummy=0";
         }
 
-        string GetUpdateSql(int indentation)
+        return string.Join("," + Environment.NewLine,
+            _mutableProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]").Indented(indentation));
+    }
+
+    SqlConnection OpenSqlConnection()
+    {
+        return _factory.OpenSqlConnection();
+    }
+
+    string GetInsertSql(int indentation)
+    {
+        return string.Join(", " + Environment.NewLine,
+            _properties.Select(p => $"[S].[{p.ColumnName}]").Indented(indentation));
+    }
+
+    string GetColumnDefinitionSql(int indentation)
+    {
+        return string.Join("," + Environment.NewLine,
+            _properties.Select(p => $"{p.GetColumnDefinition()}").Indented(indentation));
+    }
+
+    string GetKeyComparison()
+    {
+        return string.Join(" AND ", _keyProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]"));
+    }
+
+    static void ExecuteStatement(SqlConnection connection, SqlTransaction transaction, string sql, bool wrapException = true)
+    {
+        try
         {
-            if (!_mutableProperties.Any())
+            using (var command = connection.CreateCommand())
             {
-                return "@dummy=0";
+                command.Transaction = transaction;
+                command.CommandText = sql;
+                command.ExecuteNonQuery();
             }
-
-            return string.Join("," + Environment.NewLine,
-                _mutableProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]").Indented(indentation));
         }
-
-        SqlConnection OpenSqlConnection()
+        catch (Exception exception)
         {
-            return _factory.OpenSqlConnection();
-        }
+            if (!wrapException) throw;
 
-        string GetInsertSql(int indentation)
-        {
-            return string.Join(", " + Environment.NewLine,
-                _properties.Select(p => $"[S].[{p.ColumnName}]").Indented(indentation));
-        }
-
-        string GetColumnDefinitionSql(int indentation)
-        {
-            return string.Join("," + Environment.NewLine,
-                _properties.Select(p => $"{p.GetColumnDefinition()}").Indented(indentation));
-        }
-
-        string GetKeyComparison()
-        {
-            return string.Join(" AND ", _keyProperties.Select(p => $"[T].[{p.ColumnName}] = [S].[{p.ColumnName}]"));
-        }
-
-        static void ExecuteStatement(SqlConnection connection, SqlTransaction transaction, string sql, bool wrapException = true)
-        {
-            try
-            {
-                using (var command = connection.CreateCommand())
-                {
-                    command.Transaction = transaction;
-                    command.CommandText = sql;
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception exception)
-            {
-                if (!wrapException) throw;
-
-                throw new ApplicationException($@"Could not execute SQL: 
+            throw new ApplicationException($@"Could not execute SQL: 
 
 {sql}
 ", exception);
-            }
         }
     }
 }

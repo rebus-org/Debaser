@@ -2,50 +2,49 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Debaser.Tests.Corners
+namespace Debaser.Tests.Corners;
+
+[TestFixture]
+public class InsertEmptySequence : FixtureBase
 {
-    [TestFixture]
-    public class InsertEmptySequence : FixtureBase
+    UpsertHelper<MinimalRow> _upserter;
+
+    protected override void SetUp()
     {
-        UpsertHelper<MinimalRow> _upserter;
+        _upserter = new UpsertHelper<MinimalRow>(ConnectionString);
+        _upserter.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
+        _upserter.CreateSchema();
+    }
 
-        protected override void SetUp()
+    [Test]
+    public async Task DoesNotDieWhenUpsertingEmptySequence()
+    {
+        await _upserter.UpsertAsync(Enumerable.Empty<MinimalRow>());
+    }
+
+    [Test]
+    public async Task DoesNotDieWhenUpsertingMinimalRows()
+    {
+        await _upserter.UpsertAsync(new[]
         {
-            _upserter = new UpsertHelper<MinimalRow>(ConnectionString);
-            _upserter.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
-            _upserter.CreateSchema();
+            new MinimalRow(1),
+            new MinimalRow(2),
+            new MinimalRow(3),
+            new MinimalRow(4),
+        });
+
+        var allRows = _upserter.LoadAll().OrderBy(r => r.Id).ToList();
+
+        Assert.That(allRows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2, 3, 4 }));
+    }
+
+    class MinimalRow
+    {
+        public MinimalRow(int id)
+        {
+            Id = id;
         }
 
-        [Test]
-        public async Task DoesNotDieWhenUpsertingEmptySequence()
-        {
-            await _upserter.UpsertAsync(Enumerable.Empty<MinimalRow>());
-        }
-
-        [Test]
-        public async Task DoesNotDieWhenUpsertingMinimalRows()
-        {
-            await _upserter.UpsertAsync(new[]
-            {
-                new MinimalRow(1),
-                new MinimalRow(2),
-                new MinimalRow(3),
-                new MinimalRow(4),
-            });
-
-            var allRows = _upserter.LoadAll().OrderBy(r => r.Id).ToList();
-
-            Assert.That(allRows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2, 3, 4 }));
-        }
-
-        class MinimalRow
-        {
-            public MinimalRow(int id)
-            {
-                Id = id;
-            }
-
-            public int Id { get; }
-        }
+        public int Id { get; }
     }
 }

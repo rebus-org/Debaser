@@ -97,5 +97,7 @@
 ## 0.26.0
 * Fix package metadata
 
+## 0.27.0
+* Fix bug that would choke on passwords containing an equals sign
 
 [FastMember]: https://github.com/mgravell/fast-member

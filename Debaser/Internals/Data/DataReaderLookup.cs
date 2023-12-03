@@ -5,46 +5,45 @@ using System.Linq;
 using Debaser.Internals.Values;
 using Debaser.Mapping;
 
-namespace Debaser.Internals.Data
+namespace Debaser.Internals.Data;
+
+class DataReaderLookup : IValueLookup
 {
-    class DataReaderLookup : IValueLookup
+    readonly SqlDataReader _reader;
+    readonly Dictionary<string, ClassMapProperty> _properties;
+
+    public DataReaderLookup(SqlDataReader reader, Dictionary<string, ClassMapProperty> properties)
     {
-        readonly SqlDataReader _reader;
-        readonly Dictionary<string, ClassMapProperty> _properties;
+        _reader = reader;
+        _properties = new Dictionary<string, ClassMapProperty>(properties, StringComparer.CurrentCultureIgnoreCase);
+    }
 
-        public DataReaderLookup(SqlDataReader reader, Dictionary<string, ClassMapProperty> properties)
+    public object GetValue(string name, Type desiredType)
+    {
+        var ordinal = _reader.GetOrdinal(name);
+        var value = _reader.GetValue(ordinal);
+
+        var property = GetProperty(name);
+
+        try
         {
-            _reader = reader;
-            _properties = new Dictionary<string, ClassMapProperty>(properties, StringComparer.CurrentCultureIgnoreCase);
+            return property.FromDatabase(value);
         }
-
-        public object GetValue(string name, Type desiredType)
+        catch (Exception exception)
         {
-            var ordinal = _reader.GetOrdinal(name);
-            var value = _reader.GetValue(ordinal);
-
-            var property = GetProperty(name);
-
-            try
-            {
-                return property.FromDatabase(value);
-            }
-            catch (Exception exception)
-            {
-                throw new ApplicationException($"Could not get value {name}", exception);
-            }
+            throw new ApplicationException($"Could not get value {name}", exception);
         }
+    }
 
-        ClassMapProperty GetProperty(string name)
+    ClassMapProperty GetProperty(string name)
+    {
+        try
         {
-            try
-            {
-                return _properties[name];
-            }
-            catch (Exception exception)
-            {
-                throw new ApplicationException($"Could not get property named {name} - have these properties: {string.Join(", ", _properties.Select(p => p.Key))}", exception);
-            }
+            return _properties[name];
+        }
+        catch (Exception exception)
+        {
+            throw new ApplicationException($"Could not get property named {name} - have these properties: {string.Join(", ", _properties.Select(p => p.Key))}", exception);
         }
     }
 }

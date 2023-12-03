@@ -5,116 +5,115 @@ using System.Linq;
 using Debaser.Internals.Values;
 using FastMember;
 
-namespace Debaser.Internals.Reflection
+namespace Debaser.Internals.Reflection;
+
+class Activator
 {
-    class Activator
+    readonly Func<IValueLookup, object> _creationFunction;
+
+    public Activator(Type type, IEnumerable<string> includedProperties)
     {
-        readonly Func<IValueLookup, object> _creationFunction;
+        var propertyNames = new HashSet<string>(includedProperties);
 
-        public Activator(Type type, IEnumerable<string> includedProperties)
-        {
-            var propertyNames = new HashSet<string>(includedProperties);
+        _creationFunction = HasDefaultConstructor(type)
+            ? GetPropertyCreator(type, propertyNames)
+            : GetConstructorCreator(type, propertyNames);
+    }
 
-            _creationFunction = HasDefaultConstructor(type)
-                ? GetPropertyCreator(type, propertyNames)
-                : GetConstructorCreator(type, propertyNames);
-        }
+    public object CreateInstance(IValueLookup valueLookup)
+    {
+        return _creationFunction(valueLookup);
+    }
 
-        public object CreateInstance(IValueLookup valueLookup)
-        {
-            return _creationFunction(valueLookup);
-        }
+    static Func<IValueLookup, object> GetPropertyCreator(Type type, HashSet<string> includedProperties)
+    {
+        var properties = type.GetProperties()
+            .Where(p => p.SetMethod != null)
+            .Where(p => includedProperties.Contains(p.Name))
+            .ToArray();
 
-        static Func<IValueLookup, object> GetPropertyCreator(Type type, HashSet<string> includedProperties)
-        {
-            var properties = type.GetProperties()
-                .Where(p => p.SetMethod != null)
-                .Where(p => includedProperties.Contains(p.Name))
-                .ToArray();
-
-            var accessor = TypeAccessor.Create(type);
+        var accessor = TypeAccessor.Create(type);
             
-            return lookup =>
-            {
-                var instance = System.Activator.CreateInstance(type);
-
-                foreach (var property in properties)
-                {
-                    var propertyName = property.Name;
-                    var value = lookup.GetValue(propertyName, property.PropertyType);
-                    try
-                    {
-                        accessor[instance, propertyName] = value;
-                    }
-                    catch (Exception exception)
-                    {
-                        throw new ApplicationException($"Could not set value of property {propertyName} to {value}", exception);
-                    }
-                }
-
-                return instance;
-            };
-        }
-
-        static Func<IValueLookup, object> GetConstructorCreator(Type type, HashSet<string> includedProperties)
+        return lookup =>
         {
-            var parameters = type.GetConstructors().Single()
-                .GetParameters()
-                .ToArray();
+            var instance = System.Activator.CreateInstance(type);
 
-            return lookup =>
+            foreach (var property in properties)
             {
-                var parameterValues = parameters
-                    .Select(parameter =>
-                    {
-                        var titleCase = Capitalize(parameter.Name);
-
-                        if (includedProperties.Contains(titleCase))
-                        {
-                            return lookup.GetValue(parameter.Name, parameter.ParameterType);
-                        }
-
-                        return null;
-                    })
-                    .ToArray();
-
+                var propertyName = property.Name;
+                var value = lookup.GetValue(propertyName, property.PropertyType);
                 try
                 {
-                    var instance = System.Activator.CreateInstance(type, parameterValues);
-
-                    return instance;
+                    accessor[instance, propertyName] = value;
                 }
                 catch (Exception exception)
                 {
-                    throw new ApplicationException($"Could not create instance of {type} with ctor arguments {string.Join(", ", parameterValues)}", exception);
+                    throw new ApplicationException($"Could not set value of property {propertyName} to {value}", exception);
                 }
-            };
-        }
+            }
 
-        static string Capitalize(string parameterName)
+            return instance;
+        };
+    }
+
+    static Func<IValueLookup, object> GetConstructorCreator(Type type, HashSet<string> includedProperties)
+    {
+        var parameters = type.GetConstructors().Single()
+            .GetParameters()
+            .ToArray();
+
+        return lookup =>
         {
-            return parameterName.Length > 1 
-                ? $"{char.ToUpper(parameterName[0])}{parameterName.Substring(1)}" 
-                : $"{char.ToUpper(parameterName[0])}";
-        }
+            var parameterValues = parameters
+                .Select(parameter =>
+                {
+                    var titleCase = Capitalize(parameter.Name);
 
-        static bool HasDefaultConstructor(Type type)
-        {
-            var constructors = type.GetConstructors();
+                    if (includedProperties.Contains(titleCase))
+                    {
+                        return lookup.GetValue(parameter.Name, parameter.ParameterType);
+                    }
 
-            if (constructors.Length > 1)
+                    return null;
+                })
+                .ToArray();
+
+            try
             {
-                throw new ArgumentException($@"Cannot use {type} in the activator because it has more than one constructor. Please supply either 
+                var instance = System.Activator.CreateInstance(type, parameterValues);
+
+                return instance;
+            }
+            catch (Exception exception)
+            {
+                throw new ApplicationException($"Could not create instance of {type} with ctor arguments {string.Join(", ", parameterValues)}", exception);
+            }
+        };
+    }
+
+    static string Capitalize(string parameterName)
+    {
+        return parameterName.Length > 1 
+            ? $"{char.ToUpper(parameterName[0])}{parameterName.Substring(1)}" 
+            : $"{char.ToUpper(parameterName[0])}";
+    }
+
+    static bool HasDefaultConstructor(Type type)
+    {
+        var constructors = type.GetConstructors();
+
+        if (constructors.Length > 1)
+        {
+            throw new ArgumentException($@"Cannot use {type} in the activator because it has more than one constructor. Please supply either 
 
 a) a constructor with named parameters matching the type's properties, or 
 b) a default constructor and properties with setters,
 
 this way making it possible in an unambiguous way for Debaser to instantiate instances of {type}.");
-            }
-
-            var ctor = constructors.Single();
-
-            return ctor.GetParameters().Length == 0;
         }
+
+        var ctor = constructors.Single();
+
+        return ctor.GetParameters().Length == 0;
     }
 }

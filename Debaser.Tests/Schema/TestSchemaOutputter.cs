@@ -2,24 +2,23 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Debaser.Tests.Schema
+namespace Debaser.Tests.Schema;
+
+[TestFixture]
+public class TestSchemaOutputter : FixtureBase
 {
-    [TestFixture]
-    public class TestSchemaOutputter : FixtureBase
+    [Test]
+    public async Task CanGetCreationSchema()
     {
-        [Test]
-        public async Task CanGetCreationSchema()
-        {
-            var helper = new UpsertHelper<Something>(ConnectionString);
+        var helper = new UpsertHelper<Something>(ConnectionString);
 
-            Console.WriteLine(helper.GetCreateSchemaScript());
+        Console.WriteLine(helper.GetCreateSchemaScript());
 
-            Console.WriteLine(helper.GetDropSchemaScript(dropProcedure: true, dropTable: true, dropType: true));
-        }
+        Console.WriteLine(helper.GetDropSchemaScript(dropProcedure: true, dropTable: true, dropType: true));
+    }
 
-        class Something
-        {
-            public string Id { get; set; }
-        }
+    class Something
+    {
+        public string Id { get; set; }
     }
 }

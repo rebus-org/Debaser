@@ -3,102 +3,101 @@ using System.Reflection;
 using FastMember;
 using Microsoft.Data.SqlClient.Server;
 
-namespace Debaser.Mapping
+namespace Debaser.Mapping;
+
+/// <summary>
+/// Represents a single mapped property
+/// </summary>
+public class ClassMapProperty
 {
+    readonly Func<object, object> _toDatabase;
+    readonly Func<object, object> _fromDatabase;
+    readonly TypeAccessor _accessor;
+
     /// <summary>
-    /// Represents a single mapped property
+    /// Gets the name of the database column
     /// </summary>
-    public class ClassMapProperty
+    public string ColumnName { get; }
+
+    /// <summary>
+    /// Gets the name of the property
+    /// </summary>
+    public string PropertyName { get; }
+
+    /// <summary>
+    /// Gets the database column information for this property
+    /// </summary>
+    public ColumnInfo ColumnInfo { get; }
+
+    /// <summary>
+    /// Gets whether the property is to be PK (or part of a composite PK) for the table
+    /// </summary>
+    public bool IsKey { get; private set; }
+
+    /// <summary>
+    /// Creates the property
+    /// </summary>
+    public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
     {
-        readonly Func<object, object> _toDatabase;
-        readonly Func<object, object> _fromDatabase;
-        readonly TypeAccessor _accessor;
+        if (property == null) throw new ArgumentNullException(nameof(property));
+        PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
+        ColumnInfo = columnInfo ?? throw new ArgumentNullException(nameof(columnInfo));
+        ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
+        IsKey = isKey;
+        _toDatabase = toDatabase ?? throw new ArgumentNullException(nameof(toDatabase));
+        _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
+        _accessor = TypeAccessor.Create(property.DeclaringType);
+    }
 
-        /// <summary>
-        /// Gets the name of the database column
-        /// </summary>
-        public string ColumnName { get; }
+    /// <summary>
+    /// Changes the property to be PK (or part of a composite PK) for the table
+    /// </summary>
+    public void MakeKey()
+    {
+        IsKey = true;
+    }
 
-        /// <summary>
-        /// Gets the name of the property
-        /// </summary>
-        public string PropertyName { get; }
+    /// <summary>
+    /// Gets the necessary SQL to make out a single column definition line in a 'CREATE TABLE (...)' statement
+    /// </summary>
+    public string GetColumnDefinition()
+    {
+        return $"[{ColumnName}] {ColumnInfo.GetTypeDefinition()}";
+    }
 
-        /// <summary>
-        /// Gets the database column information for this property
-        /// </summary>
-        public ColumnInfo ColumnInfo { get; }
+    internal void WriteTo(SqlDataRecord record, object row)
+    {
+        var ordinal = record.GetOrdinal(ColumnName);
+        var value = _accessor[row, PropertyName];
+        var valueToWrite = ToDatabase(value);
 
-        /// <summary>
-        /// Gets whether the property is to be PK (or part of a composite PK) for the table
-        /// </summary>
-        public bool IsKey { get; private set; }
+        record.SetValue(ordinal, valueToWrite);
+    }
 
-        /// <summary>
-        /// Creates the property
-        /// </summary>
-        public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
-        {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-            PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
-            ColumnInfo = columnInfo ?? throw new ArgumentNullException(nameof(columnInfo));
-            ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
-            IsKey = isKey;
-            _toDatabase = toDatabase ?? throw new ArgumentNullException(nameof(toDatabase));
-            _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
-            _accessor = TypeAccessor.Create(property.DeclaringType);
-        }
+    internal object FromDatabase(object value)
+    {
+        var valueToSet = _fromDatabase(value);
 
-        /// <summary>
-        /// Changes the property to be PK (or part of a composite PK) for the table
-        /// </summary>
-        public void MakeKey()
-        {
-            IsKey = true;
-        }
+        return valueToSet;
+    }
 
-        /// <summary>
-        /// Gets the necessary SQL to make out a single column definition line in a 'CREATE TABLE (...)' statement
-        /// </summary>
-        public string GetColumnDefinition()
-        {
-            return $"[{ColumnName}] {ColumnInfo.GetTypeDefinition()}";
-        }
+    object ToDatabase(object target)
+    {
+        return _toDatabase(target);
+    }
 
-        internal void WriteTo(SqlDataRecord record, object row)
-        {
-            var ordinal = record.GetOrdinal(ColumnName);
-            var value = _accessor[row, PropertyName];
-            var valueToWrite = ToDatabase(value);
+    internal SqlMetaData GetSqlMetaData()
+    {
+        return ColumnInfo.GetSqlMetaData(ColumnName);
+    }
 
-            record.SetValue(ordinal, valueToWrite);
-        }
-
-        internal object FromDatabase(object value)
-        {
-            var valueToSet = _fromDatabase(value);
-
-            return valueToSet;
-        }
-
-        object ToDatabase(object target)
-        {
-            return _toDatabase(target);
-        }
-
-        internal SqlMetaData GetSqlMetaData()
-        {
-            return ColumnInfo.GetSqlMetaData(ColumnName);
-        }
-
-        /// <summary>
-        /// Gets a nice string that represents the property
-        /// </summary>
-        public override string ToString()
-        {
-            return IsKey
-                ? $"{PropertyName} ([{ColumnName}] PK)"
-                : $"{PropertyName} ([{ColumnName}])";
-        }
+    /// <summary>
+    /// Gets a nice string that represents the property
+    /// </summary>
+    public override string ToString()
+    {
+        return IsKey
+            ? $"{PropertyName} ([{ColumnName}] PK)"
+            : $"{PropertyName} ([{ColumnName}])";
     }
 }

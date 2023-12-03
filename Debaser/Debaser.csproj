@@ -1,35 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Authors>mookid8000</Authors>
-    <Company>Rebus FM ApS</Company>
-    <LangVersion>latest</LangVersion>
-    <Description>Library that helps with performing the nifty upsert-from-temp-table-streaming trick 🚀</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>new_logo_250.png</PackageIcon>
-    <Copyright>Copyright Rebus FM ApS 2012</Copyright>
-    <RepositoryUrl>https://github.com/rebus-org/Debaser</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/rebus-org/Debaser/wiki</PackageProjectUrl>
-    <PackageTags>mssql; sqlserver; microsoft sql server; upsert</PackageTags>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>12</LangVersion>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Authors>mookid8000</Authors>
+		<Company>Rebus FM ApS</Company>
+		<LangVersion>latest</LangVersion>
+		<Description>Library that helps with performing the nifty upsert-from-temp-table-streaming trick 🚀</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>new_logo_250.png</PackageIcon>
+		<Copyright>Copyright Rebus FM ApS 2012</Copyright>
+		<RepositoryUrl>https://github.com/rebus-org/Debaser</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/rebus-org/Debaser/wiki</PackageProjectUrl>
+		<PackageTags>mssql; sqlserver; microsoft sql server; upsert</PackageTags>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\artwork\new_logo_250.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\artwork\new_logo_250.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="fastmember" Version="1.5.0" />
-    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
-    <PackageReference Include="microsoft.data.sqlclient" Version="5.1.2" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="fastmember" Version="1.5.0" />
+		<PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
+		<PackageReference Include="microsoft.data.sqlclient" Version="5.1.2" />
+	</ItemGroup>
 
 </Project>

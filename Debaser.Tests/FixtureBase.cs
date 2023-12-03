@@ -3,31 +3,30 @@ using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Debaser.Tests
+namespace Debaser.Tests;
+
+public abstract class FixtureBase
 {
-    public abstract class FixtureBase
+    const int DatabaseAlreadyExists = 1801;
+
+    protected static string ConnectionString => Environment.GetEnvironmentVariable("testdb") ?? "server=.; database=debaser_test; trusted_connection=true; encrypt=false";
+
+    [SetUp]
+    public void InnerSetUp()
     {
-        const int DatabaseAlreadyExists = 1801;
+        SetUp();
+    }
 
-        protected static string ConnectionString => Environment.GetEnvironmentVariable("testdb") ?? "server=.; database=debaser_test; trusted_connection=true; encrypt=false";
+    protected virtual void SetUp()
+    {
+    }
 
-        [SetUp]
-        public void InnerSetUp()
-        {
-            SetUp();
-        }
+    protected static async Task<SqlConnection> OpenSqlConnection()
+    {
+        var connection = new SqlConnection(ConnectionString);
 
-        protected virtual void SetUp()
-        {
-        }
+        await connection.OpenAsync();
 
-        protected static async Task<SqlConnection> OpenSqlConnection()
-        {
-            var connection = new SqlConnection(ConnectionString);
-
-            await connection.OpenAsync();
-
-            return connection;
-        }
+        return connection;
     }
 }

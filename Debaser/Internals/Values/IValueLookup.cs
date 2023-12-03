@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Debaser.Internals.Values
+namespace Debaser.Internals.Values;
+
+interface IValueLookup
 {
-    interface IValueLookup
-    {
-        object GetValue(string name, Type desiredType);
-    }
+    object GetValue(string name, Type desiredType);
 }
