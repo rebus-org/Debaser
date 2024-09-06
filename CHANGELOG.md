@@ -102,5 +102,7 @@
 
 ## 0.28.0
 * Update Microsoft.Data.SqlClient to 5.2.2
+* Add additional compilation targets because why not
+
 
 [FastMember]: https://github.com/mgravell/fast-member
