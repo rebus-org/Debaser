@@ -20,12 +20,11 @@ public class TestDateTimeOffsetPrecision : FixtureBase
 
         var now = DateTimeOffset.Now;
 
-        await helper.UpsertAsync(new[]
-        {
+        await helper.UpsertAsync([
             new SomeClassWithDateTimeOffset {Id = "1", Time = now},
             new SomeClassWithDateTimeOffset {Id = "2", Time = now},
-            new SomeClassWithDateTimeOffset {Id = "3", Time = now},
-        });
+            new SomeClassWithDateTimeOffset {Id = "3", Time = now}
+        ]);
 
         var all = helper.LoadAll();
 

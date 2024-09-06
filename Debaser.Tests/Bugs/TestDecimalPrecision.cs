@@ -19,8 +19,7 @@ public class TestDecimalPrecision : FixtureBase
         helper.DropSchema(dropType: true, dropTable: true, dropProcedure: true);
         helper.CreateSchema();
 
-        await helper.UpsertAsync(new[]
-        {
+        await helper.UpsertAsync([
             new SomeClassWithDecimal {Decimal = 1.1m, Id = Guid.NewGuid().ToString()},
             new SomeClassWithDecimal {Decimal = 1.12m, Id = Guid.NewGuid().ToString()},
             new SomeClassWithDecimal {Decimal = 1.123m, Id = Guid.NewGuid().ToString()},
@@ -30,8 +29,8 @@ public class TestDecimalPrecision : FixtureBase
             new SomeClassWithDecimal {Decimal = 1.1234567m, Id = Guid.NewGuid().ToString()},
             new SomeClassWithDecimal {Decimal = 1.12345678m, Id = Guid.NewGuid().ToString()},
             new SomeClassWithDecimal {Decimal = 1.123456789m, Id = Guid.NewGuid().ToString()},
-            new SomeClassWithDecimal {Decimal = 1.1234567891m, Id = Guid.NewGuid().ToString()},
-        });
+            new SomeClassWithDecimal {Decimal = 1.1234567891m, Id = Guid.NewGuid().ToString()}
+        ]);
 
         var all = helper.LoadAll().OrderBy(d => d.Decimal).ToList();
 

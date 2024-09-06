@@ -10,13 +10,7 @@ namespace Debaser.Attributes;
 /// is greater than that of the target row
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DebaserUpdateCriteriaAttribute : Attribute
+public class DebaserUpdateCriteriaAttribute(string updateCriteria) : Attribute
 {
-    public DebaserUpdateCriteriaAttribute(string updateCriteria)
-    {
-        if (updateCriteria == null) throw new ArgumentNullException(nameof(updateCriteria));
-        UpdateCriteria = updateCriteria;
-    }
-
-    public string UpdateCriteria { get; }
+    public string UpdateCriteria { get; } = updateCriteria ?? throw new ArgumentNullException(nameof(updateCriteria));
 }

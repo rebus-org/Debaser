@@ -22,10 +22,9 @@ public class ValueType : FixtureBase
     [Test]
     public async Task ItWorks()
     {
-        await _upsertHelper.UpsertAsync(new[]
-        {
-            new CurrencyCrossRates(new Date(2017, 1, 17), "EUR", "USD", 5.5m),
-        });
+        await _upsertHelper.UpsertAsync([
+            new CurrencyCrossRates(new Date(2017, 1, 17), "EUR", "USD", 5.5m)
+        ]);
 
         var rows = _upsertHelper.LoadAll().ToList();
             

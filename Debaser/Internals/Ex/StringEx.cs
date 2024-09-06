@@ -9,7 +9,7 @@ static class StringEx
 {
     public static string TrimEmptyLines(this string str)
     {
-        var lines = str.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+        var lines = str.Split([Environment.NewLine], StringSplitOptions.None);
         var linesWithoutEmptyLeadingLines = lines.SkipWhile(string.IsNullOrWhiteSpace).ToList();
         var linesWithoutEmptyLines = Enumerable.Reverse(linesWithoutEmptyLeadingLines).SkipWhile(string.IsNullOrWhiteSpace).Reverse().ToList();
         return string.Join(Environment.NewLine, linesWithoutEmptyLines);

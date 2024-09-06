@@ -19,19 +19,18 @@ public class InsertEmptySequence : FixtureBase
     [Test]
     public async Task DoesNotDieWhenUpsertingEmptySequence()
     {
-        await _upserter.UpsertAsync(Enumerable.Empty<MinimalRow>());
+        await _upserter.UpsertAsync([]);
     }
 
     [Test]
     public async Task DoesNotDieWhenUpsertingMinimalRows()
     {
-        await _upserter.UpsertAsync(new[]
-        {
+        await _upserter.UpsertAsync([
             new MinimalRow(1),
             new MinimalRow(2),
             new MinimalRow(3),
-            new MinimalRow(4),
-        });
+            new MinimalRow(4)
+        ]);
 
         var allRows = _upserter.LoadAll().OrderBy(r => r.Id).ToList();
 

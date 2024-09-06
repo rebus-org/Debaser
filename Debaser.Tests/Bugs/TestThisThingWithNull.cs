@@ -26,7 +26,7 @@ public class TestThisThingWithNull : FixtureBase
         var row1 = new CanContainNullValue("id1", 123);
         var row2 = new CanContainNullValue("id2", null);
 
-        await _helper.UpsertAsync(new[] {row1, row2});
+        await _helper.UpsertAsync([row1, row2]);
 
         var rows = _helper.LoadAll().OrderBy(r => r.Id).ToList();
 

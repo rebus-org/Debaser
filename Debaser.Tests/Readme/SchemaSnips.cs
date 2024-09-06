@@ -14,18 +14,12 @@ public class SchemaSnips : FixtureBase
         helper.CreateSchema();
     }
 
-    class Person
+    class Person(string ssn, string fullName)
     {
-        public Person(string ssn, string fullName)
-        {
-            Ssn = ssn;
-            FullName = fullName;
-        }
-
         [DebaserKey]
-        public string Ssn { get; }
+        public string Ssn { get; } = ssn;
 
-        public string FullName { get; }
+        public string FullName { get; } = fullName;
     }
 
     [Test]
@@ -36,21 +30,14 @@ public class SchemaSnips : FixtureBase
         helper.CreateSchema();
     }
 
-    class TenantPerson
+    class TenantPerson(string tenantId, string ssn, string fullName)
     {
-        public TenantPerson(string tenantId, string ssn, string fullName)
-        {
-            TenantId = tenantId;
-            Ssn = ssn;
-            FullName = fullName;
-        }
+        [DebaserKey]
+        public string TenantId { get; } = tenantId;
 
         [DebaserKey]
-        public string TenantId { get; }
+        public string Ssn { get; } = ssn;
 
-        [DebaserKey]
-        public string Ssn { get; }
-
-        public string FullName { get; }
+        public string FullName { get; } = fullName;
     }
 }

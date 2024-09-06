@@ -100,4 +100,7 @@
 ## 0.27.0
 * Fix bug that would choke on passwords containing an equals sign
 
+## 0.28.0
+* Update Microsoft.Data.SqlClient to 5.2.2
+
 [FastMember]: https://github.com/mgravell/fast-member

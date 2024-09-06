@@ -27,7 +27,7 @@ namespace Debaser;
 public class UpsertHelper<T>
 {
     readonly ConcurrentDictionary<Type, Func<object, List<Parameter>>> _parametersGetters = new();
-    readonly List<Parameter> _emptyList = new();
+    readonly List<Parameter> _emptyList = [];
     readonly SqlConnectionFactory _factory;
     readonly SchemaManager _schemaManager;
     readonly Activator _activator;
@@ -71,12 +71,11 @@ public class UpsertHelper<T>
     {
         var (procedure, type, table) = _schemaManager.GetCreateSchemaScript();
 
-        return JoinScripts(new[]
-        {
+        return JoinScripts([
             createTable ? table : null,
             createType ? type : null,
-            createProcedure ? procedure : null,
-        });
+            createProcedure ? procedure : null
+        ]);
     }
 
     /// <summary>
@@ -89,12 +88,11 @@ public class UpsertHelper<T>
     {
         var (procedure, type, table) = _schemaManager.GetDropSchemaScript();
 
-        return JoinScripts(new[]
-        {
+        return JoinScripts([
             dropProcedure ? procedure : null,
             dropType ? type : null,
-            dropTable ? table : null,
-        });
+            dropTable ? table : null
+        ]);
     }
 
     static string JoinScripts(IEnumerable<string> scripts)

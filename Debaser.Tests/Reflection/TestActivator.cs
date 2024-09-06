@@ -12,7 +12,7 @@ public class TestActivator : FixtureBase
     [Test]
     public void SkipsPropertyWhenNotIncluded_Constructor()
     {
-        var activator = new Activator(typeof(SomeClassWithConstructor), new[] { nameof(SomeClassWithConstructor.Number) });
+        var activator = new Activator(typeof(SomeClassWithConstructor), [nameof(SomeClassWithConstructor.Number)]);
 
         var values = new TestValueLookup(new Dictionary<string, object>
         {
@@ -29,7 +29,8 @@ public class TestActivator : FixtureBase
     [Test]
     public void CanCreateClassFromConstructor()
     {
-        var activator = new Activator(typeof(SomeClassWithConstructor), new[] { nameof(SomeClassWithConstructor.Number), nameof(SomeClassWithConstructor.Text) });
+        var activator = new Activator(typeof(SomeClassWithConstructor), [nameof(SomeClassWithConstructor.Number), nameof(SomeClassWithConstructor.Text)
+        ]);
 
         var values = new TestValueLookup(new Dictionary<string, object>
         {
@@ -58,7 +59,7 @@ public class TestActivator : FixtureBase
     [Test]
     public void SkipsPropertyWhenNotIncluded_Properties()
     {
-        var activator = new Activator(typeof(SomeClassWithProperties), new[] { nameof(SomeClassWithProperties.Number) });
+        var activator = new Activator(typeof(SomeClassWithProperties), [nameof(SomeClassWithProperties.Number)]);
 
         var values = new TestValueLookup(new Dictionary<string, object>
         {
@@ -75,7 +76,8 @@ public class TestActivator : FixtureBase
     [Test]
     public void CanCreateClassFromProperties()
     {
-        var activator = new Activator(typeof(SomeClassWithProperties), new[] { nameof(SomeClassWithProperties.Number), nameof(SomeClassWithProperties.Text) });
+        var activator = new Activator(typeof(SomeClassWithProperties), [nameof(SomeClassWithProperties.Number), nameof(SomeClassWithProperties.Text)
+        ]);
 
         var values = new TestValueLookup(new Dictionary<string, object>
         {

@@ -22,14 +22,13 @@ public class WannabeDocDb : FixtureBase
         upsertHelper.DropSchema(dropType: true, dropTable: true, dropProcedure: true);
         upsertHelper.CreateSchema();
 
-        await upsertHelper.UpsertAsync(new[]
-        {
-            new TeamRow(new Team("team1", "Team c0ffeebada55", new List<string> {"t-team1-1", "t-team1-2"})),
-            new TeamRow(new Team("team2", "Team c0ffeebada55", new List<string> {"t-team2-1"})),
-            new TeamRow(new Team("team3", "Team c0ffeebada55", new List<string> {"t-team3-1", "t-team3-2", "t-team3-3"})),
+        await upsertHelper.UpsertAsync([
+            new TeamRow(new Team("team1", "Team c0ffeebada55", ["t-team1-1", "t-team1-2"])),
+            new TeamRow(new Team("team2", "Team c0ffeebada55", ["t-team2-1"])),
+            new TeamRow(new Team("team3", "Team c0ffeebada55", ["t-team3-1", "t-team3-2", "t-team3-3"])),
             new TeamRow(new Team("team4", "Team c0ffeebada55", Enumerable.Range(1, 200).Select(n => $"t-team4-{n}").ToList())),
-            new TeamRow(new Team("team5", "Team c0ffeebada55", new List<string> {"t-team5-1", "t-team5-2"})),
-        });
+            new TeamRow(new Team("team5", "Team c0ffeebada55", ["t-team5-1", "t-team5-2"]))
+        ]);
 
         var team = (await upsertHelper.LoadWhereAsync("[AccountIds] like '%;t-team4-200;%'")).FirstOrDefault();
 

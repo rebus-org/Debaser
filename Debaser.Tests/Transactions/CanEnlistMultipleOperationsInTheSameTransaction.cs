@@ -33,9 +33,9 @@ public class CanEnlistMultipleOperationsInTheSameTransaction : FixtureBase
 
             await using var transaction = connection.BeginTransaction();
 
-            await _helper.UpsertAsync(connection, new[] { new SomethingToSave("id2"), },
+            await _helper.UpsertAsync(connection, [new SomethingToSave("id2")],
                 transaction: transaction);
-            await _helper.UpsertAsync(connection, new[] { new SomethingToSave("id3"), },
+            await _helper.UpsertAsync(connection, [new SomethingToSave("id3")],
                 transaction: transaction);
 
             if (shouldCommit)
@@ -45,7 +45,7 @@ public class CanEnlistMultipleOperationsInTheSameTransaction : FixtureBase
         }
 
         // insert row
-        await _helper.UpsertAsync(new[] { new SomethingToSave("id1"), });
+        await _helper.UpsertAsync([new SomethingToSave("id1")]);
 
         await DoStuffWithTransaction(shouldCommit: commit);
 

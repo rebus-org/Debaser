@@ -26,12 +26,11 @@ public class TestIngoreUpdate : FixtureBase
     [Test]
     public async Task CanCarryOutOrdinaryUpdate()
     {
-        await _upsertHelper.UpsertAsync(new[]
-        {
+        await _upsertHelper.UpsertAsync([
             new SomeRowWithIntegerRevision(1, "hej", 0),
             new SomeRowWithIntegerRevision(2, "med", 0),
             new SomeRowWithIntegerRevision(3, "dig", 0)
-        });
+        ]);
 
         var rows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 
@@ -42,30 +41,27 @@ public class TestIngoreUpdate : FixtureBase
     [Test]
     public async Task CanCarryOutConditionalUpdate()
     {
-        await _upsertHelper.UpsertAsync(new[]
-        {
+        await _upsertHelper.UpsertAsync([
             new SomeRowWithIntegerRevision(1, "hej", 0),
             new SomeRowWithIntegerRevision(2, "med", 0),
             new SomeRowWithIntegerRevision(3, "dig", 0)
-        });
+        ]);
 
         Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "dig" }));
 
-        await _upsertHelper.UpsertAsync(new[]
-        {
+        await _upsertHelper.UpsertAsync([
             new SomeRowWithIntegerRevision(1, "hej", 1),
             new SomeRowWithIntegerRevision(2, "med", 1),
             new SomeRowWithIntegerRevision(3, "mig", 1)
-        });
+        ]);
 
         Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "mig" }));
 
-        await _upsertHelper.UpsertAsync(new[]
-        {
+        await _upsertHelper.UpsertAsync([
             new SomeRowWithIntegerRevision(1, "hej", 2),
             new SomeRowWithIntegerRevision(2, "med", 2),
             new SomeRowWithIntegerRevision(3, "Frank Frank", 1)
-        });
+        ]);
 
         Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "mig" }));
     }
@@ -93,15 +89,15 @@ public class TestIngoreUpdate : FixtureBase
         var t1 = t0.AddSeconds(1);
         var tminus1 = t0.AddSeconds(-1);
 
-        await _upsertHelper2.UpsertAsync(new[] { new SomeRowWithDateTimeRevision(1, "hej", t0) });
+        await _upsertHelper2.UpsertAsync([new SomeRowWithDateTimeRevision(1, "hej", t0)]);
 
         Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej"));
 
-        await _upsertHelper2.UpsertAsync(new[] { new SomeRowWithDateTimeRevision(1, "hej igen", t1) });
+        await _upsertHelper2.UpsertAsync([new SomeRowWithDateTimeRevision(1, "hej igen", t1)]);
 
         Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej igen"));
 
-        await _upsertHelper2.UpsertAsync(new[] { new SomeRowWithDateTimeRevision(1, "DEN HER SKAL IKKE IGENNEM", tminus1) });
+        await _upsertHelper2.UpsertAsync([new SomeRowWithDateTimeRevision(1, "DEN HER SKAL IKKE IGENNEM", tminus1)]);
 
         Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej igen"));
     }

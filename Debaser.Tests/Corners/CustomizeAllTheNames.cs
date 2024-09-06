@@ -23,7 +23,7 @@ public class CustomizeAllTheNames : FixtureBase
         helper.DropSchema(dropType: true, dropTable: true, dropProcedure: true);
         helper.CreateSchema();
 
-        await helper.UpsertAsync(new[] { new SomeModel { Id = 123, Text = "nummer 123" } });
+        await helper.UpsertAsync([new SomeModel { Id = 123, Text = "nummer 123" }]);
 
         var rows = helper.LoadAll().ToList();
 

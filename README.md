@@ -15,24 +15,19 @@ Did you know that Debaser can do these things for you?
 Create a class that looks the way you want it to look:
 
 ```csharp
-class SomeDataRow
+class SomeDataRow(int id, decimal number, string text)
 {
-    public SomeDataRow(int id, decimal number, string text)
-    {
-        Id = id;
-        Number = number;
-        Text = text;
-    }
-
-    public int Id { get; }
-    public decimal Number { get; }
-    public string Text { get; }
+    public int Id { get; } = id;
+    public decimal Number { get; } = number;
+	public string Text { get; } = text;
 }
 ```
 
-(Debaser supports using a default constructor and properties with setters, or using a constructor with parameters matching the properties like this example shows)
+Debaser supports using a default constructor and properties with setters, or using a constructor with parameters matching the properties like this example shows.
 
-and then you create the `UpsertHelper` for it:
+You CAN also use C# records, but Debaser's configuration attributes (like `[DebaserKey]`, `[DebaserMapper(..)]`, etc.) must be used on properties, so C# classes using the primary constructor syntax as shown above is probably the most compact and neat way to declare your Debaser types.
+
+Then you create the `UpsertHelper` for it:
 
 ```csharp
 var upsertHelper = new UpsertHelper<SomeDataRow>("db");

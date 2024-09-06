@@ -19,10 +19,9 @@ public class TestBricData : FixtureBase
     [Test]
     public async Task CanWriteDoublesAndFloats()
     {
-        await _upserter.UpsertAsync(new[]
-        {
+        await _upserter.UpsertAsync([
             new BricData {CellId = "hg03jg93", GnsHstIndk2010 = 24, GnsPersIndkHigh2010 = 3435}
-        });
+        ]);
     }
 
     public class BricData

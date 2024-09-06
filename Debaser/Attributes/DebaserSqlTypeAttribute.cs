@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
-// ReSharper disable UnusedMember.Global
 
 namespace Debaser.Attributes;
 
+/// <summary>
+/// Configures which <see cref="SqlDbType"/> to use for the given property, and optionally also which size(s) to use.
+/// </summary>
 [AttributeUsage(AttributeTargets.Property)]
 public class DebaserSqlTypeAttribute : Attribute
 {
