@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
 using NUnit.Framework;
+// ReSharper disable ClassNeverInstantiated.Local
+// ReSharper disable UnusedMember.Local
 
 namespace Debaser.Tests.Schema;
 
@@ -8,7 +9,7 @@ namespace Debaser.Tests.Schema;
 public class TestSchemaOutputter : FixtureBase
 {
     [Test]
-    public async Task CanGetCreationSchema()
+    public void CanGetCreationSchema()
     {
         var helper = new UpsertHelper<Something>(ConnectionString);
 
