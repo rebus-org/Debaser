@@ -67,19 +67,12 @@ public class TestIngoreUpdate : FixtureBase
     }
 
     [DebaserUpdateCriteria("[S].[Rev] > [T].[Rev]")]
-    class SomeRowWithIntegerRevision
+    class SomeRowWithIntegerRevision(int id, string data, int rev)
     {
-        public SomeRowWithIntegerRevision(int id, string data, int rev)
-        {
-            Id = id;
-            Data = data;
-            Rev = rev;
-        }
+        public int Id { get; } = id;
+        public string Data { get; } = data;
 
-        public int Id { get; }
-        public string Data { get; }
-
-        public int Rev { get; }
+        public int Rev { get; } = rev;
     }
 
     [Test]
@@ -104,18 +97,11 @@ public class TestIngoreUpdate : FixtureBase
 
     //[DebaserRevision(nameof(LastUpdated))]
     [DebaserUpdateCriteria("[S].[LastUpdated] > [T].[LastUpdated]")]
-    class SomeRowWithDateTimeRevision
+    class SomeRowWithDateTimeRevision(int id, string data, DateTime lastUpdated)
     {
-        public SomeRowWithDateTimeRevision(int id, string data, DateTime lastUpdated)
-        {
-            Id = id;
-            Data = data;
-            LastUpdated = lastUpdated;
-        }
+        public int Id { get; } = id;
+        public string Data { get; } = data;
 
-        public int Id { get; }
-        public string Data { get; }
-
-        public DateTime LastUpdated { get; }
+        public DateTime LastUpdated { get; } = lastUpdated;
     }
 }

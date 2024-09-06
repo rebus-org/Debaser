@@ -89,16 +89,11 @@ public class TestDeleting : FixtureBase
         Assert.That(rowsAfterDeletingFarvel.Count, Is.EqualTo(4));
     }
 
-    class RowWithData
+    class RowWithData(string id, string data)
     {
-        public RowWithData(string id, string data)
-        {
-            Id = id;
-            Data = data;
-        }
-
         [DebaserKey]
-        public string Id { get; }
-        public string Data { get; }
+        public string Id { get; } = id;
+
+        public string Data { get; } = data;
     }
 }

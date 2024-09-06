@@ -2,14 +2,10 @@
 
 namespace Debaser;
 
-public class Settings
+public class Settings(
+    int commandTimeoutSeconds = 120,
+    IsolationLevel transactionIsolationLevel = IsolationLevel.ReadCommitted)
 {
-    public Settings(int commandTimeoutSeconds = 120, IsolationLevel transactionIsolationLevel = IsolationLevel.ReadCommitted)
-    {
-        CommandTimeoutSeconds = commandTimeoutSeconds;
-        TransactionIsolationLevel = transactionIsolationLevel;
-    }
-
-    public int CommandTimeoutSeconds { get; }
-    public IsolationLevel TransactionIsolationLevel { get; }
+    public int CommandTimeoutSeconds { get; } = commandTimeoutSeconds;
+    public IsolationLevel TransactionIsolationLevel { get; } = transactionIsolationLevel;
 }

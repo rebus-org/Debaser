@@ -66,17 +66,11 @@ public class TestQueries : FixtureBase
         Assert.That(results2[0].Id, Is.EqualTo(4));
     }
 
-    class RowWithData
+    class RowWithData(int id, string data)
     {
-        public RowWithData(int id, string data)
-        {
-            Id = id;
-            Data = data;
-        }
-
         [DebaserKey]
-        public int Id { get; }
+        public int Id { get; } = id;
 
-        public string Data { get; }
+        public string Data { get; } = data;
     }
 }

@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace Debaser.Internals.Query;
 
-class Parameter
+class Parameter(string name, object value)
 {
-    static readonly Dictionary<Type, SqlDbType> KnownTypes = new Dictionary<Type, SqlDbType>
+    static readonly Dictionary<Type, SqlDbType> KnownTypes = new()
     {
         {typeof(string), SqlDbType.NVarChar },
         {typeof(bool), SqlDbType.Bit },
@@ -24,14 +24,8 @@ class Parameter
         {typeof(Guid), SqlDbType.UniqueIdentifier },
     };
 
-    public string Name { get; }
-    public object Value { get; }
-
-    public Parameter(string name, object value)
-    {
-        Name = name;
-        Value = value;
-    }
+    public string Name { get; } = name;
+    public object Value { get; } = value;
 
     public void AddTo(SqlCommand command)
     {

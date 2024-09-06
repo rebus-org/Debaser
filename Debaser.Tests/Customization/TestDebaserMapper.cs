@@ -42,33 +42,22 @@ public class TestDebaserMapper : FixtureBase
         }));
     }
 
-    public class RowWithJson
+    public class RowWithJson(int id, Json json)
     {
-        public RowWithJson(int id, Json json)
-        {
-            Id = id;
-            Json = json;
-        }
-
-        public int Id { get; }
+        public int Id { get; } = id;
 
         [DebaserMapper(typeof(JsonMapperino))]
-        public Json Json { get; }
+        public Json Json { get; } = json;
     }
 
-    public class Json
+    public class Json(string text)
     {
-        public string Text { get; }
-
-        public Json(string text)
-        {
-            Text = text;
-        }
+        public string Text { get; } = text;
     }
 
     class JsonMapperino : IDebaserMapper
     {
-        static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings{TypeNameHandling=TypeNameHandling.All};
+        static readonly JsonSerializerSettings SerializerSettings = new() {TypeNameHandling=TypeNameHandling.All};
         public SqlDbType SqlDbType => SqlDbType.NVarChar;
         public int? SizeOrNull => int.MaxValue;
         public int? AdditionalSizeOrNull => null;

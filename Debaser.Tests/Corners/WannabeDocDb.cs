@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Debaser.Attributes;
 using Newtonsoft.Json;
@@ -51,30 +49,19 @@ public class WannabeDocDb : FixtureBase
         protected string GetList(List<string> values) => $";{string.Join(";", values.Select(value => value))};";
     }
 
-    class TeamRow : Doc<Team>
+    class TeamRow(Team entity) : Doc<Team>(entity)
     {
-        public TeamRow(Team entity) : base(entity)
-        {
-        }
-
         public string Id => Entity.Id;
 
         [DebaserSqlType(SqlDbType.NVarChar, int.MaxValue)]
         public string AccountIds => GetList(Entity.AccountIds);
     }
 
-    class Team
+    class Team(string id, string name, List<string> accountIds)
     {
-        public string Id { get; }
-        public string Name { get; }
-        public List<string> AccountIds { get; }
-
-        public Team(string id, string name, List<string> accountIds)
-        {
-            Id = id;
-            Name = name;
-            AccountIds = accountIds;
-        }
+        public string Id { get; } = id;
+        public string Name { get; } = name;
+        public List<string> AccountIds { get; } = accountIds;
     }
 
     class JsonMapper<T> : IDebaserMapper

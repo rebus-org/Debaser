@@ -33,26 +33,18 @@ public class TestThis : FixtureBase
         Assert.That(line.Timezone, Is.EqualTo(TimeZoneInfo.Local));
     }
 
-    public class SomeKindOfLine
+    public class SomeKindOfLine(int firstId, int secondId, decimal decimalNumber, TimeZoneInfo timezone)
     {
-        public SomeKindOfLine(int firstId, int secondId, decimal decimalNumber, TimeZoneInfo timezone)
-        {
-            FirstId = firstId;
-            SecondId = secondId;
-            DecimalNumber = decimalNumber;
-            Timezone = timezone;
-        }
+        [DebaserKey]
+        public int FirstId { get; } = firstId;
 
         [DebaserKey]
-        public int FirstId { get; }
+        public int SecondId { get; } = secondId;
 
-        [DebaserKey]
-        public int SecondId { get; }
-
-        public decimal DecimalNumber { get; }
+        public decimal DecimalNumber { get; } = decimalNumber;
 
         [DebaserMapper(typeof(TimeZoneInfoDebaserMapper))]
-        public TimeZoneInfo Timezone { get; }
+        public TimeZoneInfo Timezone { get; } = timezone;
 
         class TimeZoneInfoDebaserMapper : IDebaserMapper
         {

@@ -37,13 +37,8 @@ public class InsertEmptySequence : FixtureBase
         Assert.That(allRows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2, 3, 4 }));
     }
 
-    class MinimalRow
+    class MinimalRow(int id)
     {
-        public MinimalRow(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
+        public int Id { get; } = id;
     }
 }

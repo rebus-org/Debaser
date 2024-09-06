@@ -7,21 +7,14 @@ using Debaser.Mapping;
 
 namespace Debaser.Internals.Data;
 
-class DataReaderLookup : IValueLookup
+class DataReaderLookup(SqlDataReader reader, Dictionary<string, ClassMapProperty> properties) : IValueLookup
 {
-    readonly SqlDataReader _reader;
-    readonly Dictionary<string, ClassMapProperty> _properties;
-
-    public DataReaderLookup(SqlDataReader reader, Dictionary<string, ClassMapProperty> properties)
-    {
-        _reader = reader;
-        _properties = new Dictionary<string, ClassMapProperty>(properties, StringComparer.CurrentCultureIgnoreCase);
-    }
+    readonly Dictionary<string, ClassMapProperty> _properties = new(properties, StringComparer.CurrentCultureIgnoreCase);
 
     public object GetValue(string name, Type desiredType)
     {
-        var ordinal = _reader.GetOrdinal(name);
-        var value = _reader.GetValue(ordinal);
+        var ordinal = reader.GetOrdinal(name);
+        var value = reader.GetValue(ordinal);
 
         var property = GetProperty(name);
 

@@ -44,16 +44,10 @@ public class TestActivator : FixtureBase
         Assert.That(instance.Text, Is.EqualTo("HELLO"));
     }
 
-    class SomeClassWithConstructor
+    class SomeClassWithConstructor(decimal number, string text)
     {
-        public SomeClassWithConstructor(decimal number, string text)
-        {
-            Number = number;
-            Text = text;
-        }
-
-        public decimal Number { get; }
-        public string Text { get; }
+        public decimal Number { get; } = number;
+        public string Text { get; } = text;
     }
 
     [Test]
@@ -97,14 +91,9 @@ public class TestActivator : FixtureBase
         public string Text { get; set; }
     }
 
-    class TestValueLookup : IValueLookup
+    class TestValueLookup(Dictionary<string, object> values) : IValueLookup
     {
-        readonly Dictionary<string, object> _values;
-
-        public TestValueLookup(Dictionary<string, object> values)
-        {
-            _values = new Dictionary<string, object>(values, StringComparer.InvariantCultureIgnoreCase);
-        }
+        readonly Dictionary<string, object> _values = new(values, StringComparer.InvariantCultureIgnoreCase);
 
         public object GetValue(string name, Type desiredType)
         {

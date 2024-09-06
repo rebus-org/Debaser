@@ -103,6 +103,6 @@
 ## 0.28.0
 * Update Microsoft.Data.SqlClient to 5.2.2
 * Add additional compilation targets because why not
-
+* Initialize and keep more stuff to avoid a couple of allocations during upserts
 
 [FastMember]: https://github.com/mgravell/fast-member

@@ -63,10 +63,8 @@ public class CanEnlistMultipleOperationsInTheSameTransaction : FixtureBase
         }
     }
 
-    class SomethingToSave
+    class SomethingToSave(string id)
     {
-        public string Id { get; }
-
-        public SomethingToSave(string id) => Id = id;
+        public string Id { get; } = id;
     }
 }

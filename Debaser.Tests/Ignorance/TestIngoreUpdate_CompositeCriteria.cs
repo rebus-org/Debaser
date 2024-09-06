@@ -61,22 +61,14 @@ public class TestIngoreUpdate_CompositeCriteria : FixtureBase
 
     [DebaserUpdateCriteria("[S].[Rev] > [T].[Rev]")]
     [DebaserUpdateCriteria("[S].[LastUpdated] > [T].[LastUpdated]")]
-    class SomeRowWithCompositeRevision
+    class SomeRowWithCompositeRevision(int id, string data, int rev, DateTime lastUpdated)
     {
-        public SomeRowWithCompositeRevision(int id, string data, int rev, DateTime lastUpdated)
-        {
-            Id = id;
-            Data = data;
-            Rev = rev;
-            LastUpdated = lastUpdated;
-        }
+        public int Id { get; } = id;
 
-        public int Id { get; }
+        public string Data { get; } = data;
 
-        public string Data { get; }
+        public int Rev { get; } = rev;
 
-        public int Rev { get; }
-
-        public DateTime LastUpdated { get; }
+        public DateTime LastUpdated { get; } = lastUpdated;
     }
 }

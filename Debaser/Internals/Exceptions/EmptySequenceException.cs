@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace Debaser.Internals.Exceptions;
 
-[Serializable]
-class EmptySequenceException : Exception
-{
-    public EmptySequenceException()
-    {
-    }
-
-    public EmptySequenceException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
-}
+/// <summary>
+/// Special exception used internally when upserting and it turns out the sequence was empty
+/// </summary>
+class EmptySequenceException : Exception;

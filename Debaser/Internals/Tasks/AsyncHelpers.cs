@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+// ReSharper disable AsyncVoidLambda
 
 namespace Debaser.Internals.Tasks;
 
@@ -38,20 +39,15 @@ static class AsyncHelpers
     /// <summary>
     /// Synchronization context that can be "pumped" in order to have it execute continuations posted back to it
     /// </summary>
-    class CustomSynchronizationContext : SynchronizationContext
+    class CustomSynchronizationContext(Func<Task> task) : SynchronizationContext
     {
-        readonly ConcurrentQueue<Tuple<SendOrPostCallback, object>> _items = new ConcurrentQueue<Tuple<SendOrPostCallback, object>>();
-        readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
-        readonly Func<Task> _task;
+        readonly ConcurrentQueue<Tuple<SendOrPostCallback, object>> _items = new();
+        readonly AutoResetEvent _workItemsWaiting = new(initialState: false);
+        readonly Func<Task> _task = task ?? throw new ArgumentNullException(nameof(task), "Please remember to pass a Task to be executed");
 
         ExceptionDispatchInfo _caughtException;
 
         bool _done;
-
-        public CustomSynchronizationContext(Func<Task> task)
-        {
-            _task = task ?? throw new ArgumentNullException(nameof(task), "Please remember to pass a Task to be executed");
-        }
 
         public override void Post(SendOrPostCallback function, object state)
         {
@@ -77,7 +73,7 @@ static class AsyncHelpers
                 }
                 finally
                 {
-                    Post(state => _done = true, null);
+                    Post(_ => _done = true, null);
                 }
             }, null);
 
@@ -98,14 +94,8 @@ static class AsyncHelpers
             }
         }
 
-        public override void Send(SendOrPostCallback d, object state)
-        {
-            throw new NotSupportedException("Cannot send to same thread");
-        }
+        public override void Send(SendOrPostCallback d, object state) => throw new NotSupportedException("Cannot send to same thread");
 
-        public override SynchronizationContext CreateCopy()
-        {
-            return this;
-        }
+        public override SynchronizationContext CreateCopy() => this;
     }
 }

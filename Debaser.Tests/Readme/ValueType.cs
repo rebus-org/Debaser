@@ -50,39 +50,24 @@ class DateMapper : IDebaserMapper
     }
 }
 
-class CurrencyCrossRates
+class CurrencyCrossRates(Date date, string @base, string quote, decimal rate)
 {
-    public CurrencyCrossRates(Date date, string @base, string quote, decimal rate)
-    {
-        Date = date;
-        Base = @base;
-        Quote = quote;
-        Rate = rate;
-    }
-
     [DebaserKey]
     [DebaserMapper(typeof(DateMapper))]
-    public Date Date { get; }
+    public Date Date { get; } = date;
 
     [DebaserKey]
-    public string Base { get; }
+    public string Base { get; } = @base;
 
     [DebaserKey]
-    public string Quote { get; }
+    public string Quote { get; } = quote;
 
-    public decimal Rate { get; }
+    public decimal Rate { get; } = rate;
 }
 
-class Date
+class Date(int year, int month, int day)
 {
-    public Date(int year, int month, int day)
-    {
-        Year = year;
-        Month = month;
-        Day = day;
-    }
-
-    public int Year { get; }
-    public int Month { get; }
-    public int Day { get; }
+    public int Year { get; } = year;
+    public int Month { get; } = month;
+    public int Day { get; } = day;
 }

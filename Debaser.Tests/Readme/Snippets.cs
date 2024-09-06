@@ -67,16 +67,9 @@ public class Snippets : FixtureBase
     }
 }
 
-class SomeDataRow
+class SomeDataRow(int id, decimal number, string text)
 {
-    public SomeDataRow(int id, decimal number, string text)
-    {
-        Id = id;
-        Number = number;
-        Text = text;
-    }
-
-    public int Id { get; }
-    public decimal Number { get; }
-    public string Text { get; }
+    public int Id { get; } = id;
+    public decimal Number { get; } = number;
+    public string Text { get; } = text;
 }

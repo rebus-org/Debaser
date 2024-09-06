@@ -34,17 +34,11 @@ public class TestThisThingWithNull : FixtureBase
         Assert.That(rows[1].Value, Is.EqualTo(default(decimal?)));
     }
 
-    class CanContainNullValue
+    class CanContainNullValue(string id, decimal? value)
     {
-        public string Id { get; }
+        public string Id { get; } = id;
 
         [DebaserSqlType(SqlDbType.Decimal, 15, 5)]
-        public decimal? Value { get; }
-
-        public CanContainNullValue(string id, decimal? value)
-        {
-            Id = id;
-            Value = value;
-        }
+        public decimal? Value { get; } = value;
     }
 }

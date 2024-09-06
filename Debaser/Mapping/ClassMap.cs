@@ -13,6 +13,8 @@ namespace Debaser.Mapping;
 public class ClassMap
 {
     readonly List<ClassMapProperty> _properties;
+    readonly SqlMetaData[] _sqlMetaData;
+    readonly string _extraCriteria;
 
     /// <summary>
     /// Creates the map for the given <paramref name="type"/> containing the given list of <paramref name="properties"/> to be mapped
@@ -20,7 +22,10 @@ public class ClassMap
     public ClassMap(Type type, IEnumerable<ClassMapProperty> properties)
     {
         Type = type ?? throw new ArgumentNullException(nameof(type));
+
         _properties = properties?.ToList() ?? throw new ArgumentNullException(nameof(properties));
+        _sqlMetaData = Properties.Select(p => p.GetSqlMetaData()).ToArray();
+        _extraCriteria = string.Concat(Type.GetCustomAttributes<DebaserUpdateCriteriaAttribute>().Select(a => $" AND {a.UpdateCriteria}"));
     }
 
     /// <summary>
@@ -31,26 +36,15 @@ public class ClassMap
     /// <summary>
     /// Gets the sequence of properties
     /// </summary>
-    public IEnumerable<ClassMapProperty> Properties => _properties;
+    public IReadOnlyList<ClassMapProperty> Properties => _properties;
 
     /// <summary>
     /// Gets the <see cref="SqlMetaData"/> for each property
     /// </summary>
-    public SqlMetaData[] GetSqlMetaData()
-    {
-        return Properties
-            .Select(p => p.GetSqlMetaData())
-            .ToArray();
-    }
+    public SqlMetaData[] GetSqlMetaData() => _sqlMetaData;
 
     /// <summary>
     /// Gets any extra criteria required for a potential UPDATE to be carried out
     /// </summary>
-    public string GetExtraCriteria()
-    {
-        var criteria = Type.GetCustomAttributes<DebaserUpdateCriteriaAttribute>()
-            .Select(a => $" AND {a.UpdateCriteria}");
-
-        return string.Concat(criteria);
-    }
+    public string GetExtraCriteria() => _extraCriteria;
 }
