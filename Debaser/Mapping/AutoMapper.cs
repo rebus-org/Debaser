@@ -51,7 +51,7 @@ public class AutoMapper
                 var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
                 var fromDatabase = columnInfo.CustomFromDatabase ?? DefaultFromDatabase();
 
-                return new ClassMapProperty(propertyName, columnInfo, columnName, isKey, toDatabase, fromDatabase, property);
+                return new ClassMapProperty(propertyName, columnInfo, columnName, isKey, toDatabase, fromDatabase);
             })
             .ToList();
 

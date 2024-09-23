@@ -11,7 +11,7 @@ using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
-using FastMember;
+using Fasterflect;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
 using Activator = Debaser.Internals.Reflection.Activator;
@@ -366,7 +366,7 @@ GO
         {
             return args =>
             {
-                var dictionary = (IDictionary<string, object>) args;
+                var dictionary = (IDictionary<string, object>)args;
 
                 return dictionary
                     .Select(kvp => new Parameter(kvp.Key, kvp.Value))
@@ -374,8 +374,9 @@ GO
             };
         }
 
-        var accessor = TypeAccessor.Create(type);
-        var members = accessor.GetMembers();
+        //var accessor = TypeAccessor.Create(type);
+        //var members = accessor.GetMembers();
+        var members = type.GetProperties().Select(p => p.Name).ToList();
 
         return args =>
         {
@@ -383,10 +384,9 @@ GO
 
             for (var index = 0; index < members.Count; index++)
             {
-                var member = members[index];
-                var name = member.Name;
+                var name = members[index];
 
-                parameters.Add(new Parameter(name, accessor[args, name]));
+                parameters.Add(new Parameter(name, args.GetPropertyValue(name)));
             }
 
             return parameters;

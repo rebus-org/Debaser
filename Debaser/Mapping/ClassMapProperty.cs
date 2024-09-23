@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using FastMember;
+using Fasterflect;
 using Microsoft.Data.SqlClient.Server;
 
 namespace Debaser.Mapping;
@@ -12,7 +12,6 @@ public class ClassMapProperty
 {
     readonly Func<object, object> _toDatabase;
     readonly Func<object, object> _fromDatabase;
-    readonly TypeAccessor _accessor;
 
     /// <summary>
     /// Gets the name of the database column
@@ -37,16 +36,14 @@ public class ClassMapProperty
     /// <summary>
     /// Creates the property
     /// </summary>
-    public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase, PropertyInfo property)
+    public ClassMapProperty(string propertyName, ColumnInfo columnInfo, string columnName, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase)
     {
-        if (property == null) throw new ArgumentNullException(nameof(property));
         PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
         ColumnInfo = columnInfo ?? throw new ArgumentNullException(nameof(columnInfo));
         ColumnName = columnName ?? throw new ArgumentNullException(nameof(columnName));
         IsKey = isKey;
         _toDatabase = toDatabase ?? throw new ArgumentNullException(nameof(toDatabase));
         _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
-        _accessor = TypeAccessor.Create(property.DeclaringType);
     }
 
     /// <summary>
@@ -60,15 +57,13 @@ public class ClassMapProperty
     /// <summary>
     /// Gets the necessary SQL to make out a single column definition line in a 'CREATE TABLE (...)' statement
     /// </summary>
-    public string GetColumnDefinition()
-    {
-        return $"[{ColumnName}] {ColumnInfo.GetTypeDefinition()}";
-    }
+    public string GetColumnDefinition() => $"[{ColumnName}] {ColumnInfo.GetTypeDefinition()}";
 
     internal void WriteTo(SqlDataRecord record, object row)
     {
         var ordinal = record.GetOrdinal(ColumnName);
-        var value = _accessor[row, PropertyName];
+        //var value = _accessor[row, PropertyName];
+        var value = row.GetPropertyValue(PropertyName);
         var valueToWrite = ToDatabase(value);
 
         record.SetValue(ordinal, valueToWrite);

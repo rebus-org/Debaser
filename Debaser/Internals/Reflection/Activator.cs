@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Debaser.Internals.Values;
-using FastMember;
+using Fasterflect;
 
 namespace Debaser.Internals.Reflection;
 
@@ -20,10 +19,7 @@ class Activator
             : GetConstructorCreator(type, propertyNames);
     }
 
-    public object CreateInstance(IValueLookup valueLookup)
-    {
-        return _creationFunction(valueLookup);
-    }
+    public object CreateInstance(IValueLookup valueLookup) => _creationFunction(valueLookup);
 
     static Func<IValueLookup, object> GetPropertyCreator(Type type, HashSet<string> includedProperties)
     {
@@ -32,11 +28,9 @@ class Activator
             .Where(p => includedProperties.Contains(p.Name))
             .ToArray();
 
-        var accessor = TypeAccessor.Create(type);
-            
         return lookup =>
         {
-            var instance = System.Activator.CreateInstance(type);
+            var instance = type.CreateInstance();
 
             foreach (var property in properties)
             {
@@ -44,7 +38,7 @@ class Activator
                 var value = lookup.GetValue(propertyName, property.PropertyType);
                 try
                 {
-                    accessor[instance, propertyName] = value;
+                    instance.SetPropertyValue(propertyName, value);
                 }
                 catch (Exception exception)
                 {
@@ -80,7 +74,7 @@ class Activator
 
             try
             {
-                var instance = System.Activator.CreateInstance(type, parameterValues);
+                var instance = type.CreateInstance(parameterValues);
 
                 return instance;
             }
@@ -93,8 +87,8 @@ class Activator
 
     static string Capitalize(string parameterName)
     {
-        return parameterName.Length > 1 
-            ? $"{char.ToUpper(parameterName[0])}{parameterName.Substring(1)}" 
+        return parameterName.Length > 1
+            ? $"{char.ToUpper(parameterName[0])}{parameterName.Substring(1)}"
             : $"{char.ToUpper(parameterName[0])}";
     }
 
