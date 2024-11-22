@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
-		<LangVersion>12</LangVersion>
+		<TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+		<LangVersion>13</LangVersion>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>mookid8000</Authors>
 		<Company>Rebus FM ApS</Company>

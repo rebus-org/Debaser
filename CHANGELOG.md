@@ -105,4 +105,7 @@
 * Add additional compilation targets because why not
 * Initialize and keep more stuff to avoid a couple of allocations during upserts
 
+## 0.29.0
+* Target .NET 9 too
+
 [FastMember]: https://github.com/mgravell/fast-member
