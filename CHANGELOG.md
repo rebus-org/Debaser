@@ -110,5 +110,6 @@
 
 ## 0.30.0
 * Update to Microsoft.Data.SqlClient 6.0.1
+* Only target .NET
 
 [FastMember]: https://github.com/mgravell/fast-member
