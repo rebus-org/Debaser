@@ -5,10 +5,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="microsoft.net.test.sdk" Version="17.12.0" />
+		<PackageReference Include="microsoft.net.test.sdk" Version="17.13.0" />
 		<PackageReference Include="newtonsoft.json" Version="13.0.3" />
-		<PackageReference Include="nunit" Version="4.2.2" />
-		<PackageReference Include="nunit3testadapter" Version="4.6.0">
+		<PackageReference Include="nunit" Version="4.3.2" />
+		<PackageReference Include="nunit3testadapter" Version="5.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

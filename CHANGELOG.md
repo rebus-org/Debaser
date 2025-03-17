@@ -108,4 +108,7 @@
 ## 0.29.0
 * Target .NET 9 too
 
+## 0.30.0
+* Update to Microsoft.Data.SqlClient 6.0.1
+
 [FastMember]: https://github.com/mgravell/fast-member
