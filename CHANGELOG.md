@@ -112,4 +112,8 @@
 * Update to Microsoft.Data.SqlClient 6.0.1
 * Only target .NET
 
+## 0.31.0
+* Update nuggies
+* Remove support for manually handled managed identity
+
 [FastMember]: https://github.com/mgravell/fast-member
