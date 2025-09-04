@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="microsoft.net.test.sdk" Version="17.14.1" />
+		<PackageReference Include="newtonsoft.json" Version="13.0.3" />
+		<PackageReference Include="nunit" Version="4.4.0" />
+		<PackageReference Include="nunit3testadapter" Version="5.1.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Postgredebaser\Postgredebaser.csproj" />
+	</ItemGroup>
+
+</Project>
