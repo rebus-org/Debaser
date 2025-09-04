@@ -73,6 +73,16 @@ public class AutoMapper
             {typeof(bool?), new ColumnInfo(NpgsqlDbType.Boolean)},
             {typeof(DateTime), new ColumnInfo(NpgsqlDbType.Timestamp)},
             {typeof(DateTime?), new ColumnInfo(NpgsqlDbType.Timestamp)},
+            {typeof(DateTimeOffset), new ColumnInfo(
+                NpgsqlDbType.TimestampTz,
+                customToDatabase: obj => obj is DateTimeOffset dto ? dto.UtcDateTime : obj,
+                customFromDatabase: obj => obj is DateTime dt ? new DateTimeOffset(dt, TimeSpan.Zero) : obj
+            )},
+            {typeof(DateTimeOffset?), new ColumnInfo(
+                NpgsqlDbType.TimestampTz,
+                customToDatabase: obj => obj is DateTimeOffset dtoValue ? dtoValue.UtcDateTime : obj,
+                customFromDatabase: obj => obj == DBNull.Value || obj == null ? (DateTimeOffset?)null : obj is DateTime dt ? new DateTimeOffset(dt, TimeSpan.Zero) : obj
+            )},
             {typeof(decimal), new ColumnInfo(NpgsqlDbType.Numeric)},
             {typeof(decimal?), new ColumnInfo(NpgsqlDbType.Numeric)},
             {typeof(double), new ColumnInfo(NpgsqlDbType.Double)},

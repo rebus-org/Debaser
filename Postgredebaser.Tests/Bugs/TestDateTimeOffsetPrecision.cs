@@ -31,7 +31,6 @@ public class TestDateTimeOffsetPrecision : FixtureBase
     {
         public string Id { get; set; }
 
-        [DebaserNpgsqlType(NpgsqlDbType.TimestampTz, size: 0)]
         public DateTimeOffset Time { get; set; }
     }
 }
