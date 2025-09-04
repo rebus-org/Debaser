@@ -27,12 +27,16 @@ public class ColumnInfo
         return NpgsqlDbType switch
         {
             NpgsqlDbType.Integer => "INTEGER",
+            NpgsqlDbType.Bigint => "BIGINT",
             NpgsqlDbType.Text => "TEXT",
             NpgsqlDbType.Varchar => Size.HasValue ? $"VARCHAR({Size})" : "VARCHAR",
             NpgsqlDbType.Boolean => "BOOLEAN",
             NpgsqlDbType.Timestamp => "TIMESTAMP",
+            NpgsqlDbType.TimestampTz => "TIMESTAMPTZ",
             NpgsqlDbType.Uuid => "UUID",
             NpgsqlDbType.Numeric => AdditionalSize.HasValue ? $"NUMERIC({Size},{AdditionalSize})" : Size.HasValue ? $"NUMERIC({Size})" : "NUMERIC",
+            NpgsqlDbType.Double => "DOUBLE PRECISION",
+            NpgsqlDbType.Real => "REAL",
             _ => NpgsqlDbType.ToString().ToUpperInvariant()
         };
     }

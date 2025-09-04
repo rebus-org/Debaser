@@ -4,7 +4,7 @@ using Postgredebaser.Mapping;
 
 namespace Postgredebaser.Internals.Schema;
 
-class SchemaManager
+public class SchemaManager
 {
     readonly List<ClassMapProperty> _mutableProperties;
     readonly List<ClassMapProperty> _keyProperties;
@@ -84,6 +84,18 @@ class SchemaManager
     public string GetQuery(string criteria = null)
     {
         var sql = $"SELECT {string.Join(", ", _properties.Select(p => $"\"{p.ColumnName}\""))} FROM {_qualifiedTableName}";
+        
+        if (!string.IsNullOrWhiteSpace(criteria))
+        {
+            sql += $" WHERE {criteria}";
+        }
+        
+        return sql;
+    }
+
+    public string GetDeleteCommand(string criteria)
+    {
+        var sql = $"DELETE FROM {_qualifiedTableName}";
         
         if (!string.IsNullOrWhiteSpace(criteria))
         {

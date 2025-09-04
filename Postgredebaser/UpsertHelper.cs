@@ -203,4 +203,167 @@ public class UpsertHelper<T>
 
         return new SchemaManager(_factory, tableName, keyProperties, properties, schema, extraCriteria);
     }
+
+    List<Parameter> GetParameters(object args)
+    {
+        if (args == null) return _emptyList;
+
+        var getter = _parametersGetters.GetOrAdd(args.GetType(), GetGetter);
+
+        return getter(args);
+    }
+
+    static Func<object, List<Parameter>> GetGetter(Type type)
+    {
+        if (typeof(IDictionary<string, object>).IsAssignableFrom(type))
+        {
+            return args =>
+            {
+                var dictionary = (IDictionary<string, object>) args;
+
+                return dictionary
+                    .Select(kvp => new Parameter(kvp.Key, kvp.Value))
+                    .ToList();
+            };
+        }
+
+        var accessor = TypeAccessor.Create(type);
+        var members = accessor.GetMembers();
+
+        return args =>
+        {
+            var parameters = new List<Parameter>(members.Count);
+
+            for (var index = 0; index < members.Count; index++)
+            {
+                var member = members[index];
+                var name = member.Name;
+
+                parameters.Add(new Parameter(name, accessor[args, name]));
+            }
+
+            return parameters;
+        };
+    }
+
+    /// <summary>
+    /// Loads all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+    /// <code>"columnname" = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+    /// <code>new { someValue = "hej" }</code>.
+    /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
+    /// </summary>
+    public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null)
+    {
+        if (criteria == null) throw new ArgumentNullException(nameof(criteria));
+
+        await using var connection = _factory.OpenNpgsqlConnection();
+        await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+
+        return await LoadWhereAsync(connection, criteria, args, transaction);
+    }
+
+    /// <summary>
+    /// Loads all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+    /// <code>"columnname" = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+    /// <code>new { someValue = "hej" }</code>  using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+    /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
+    /// </summary>
+    public async Task<IReadOnlyList<T>> LoadWhereAsync(NpgsqlConnection connection, string criteria, object args = null, NpgsqlTransaction transaction = null)
+    {
+        var results = new List<T>();
+
+        await using var command = connection.CreateCommand();
+
+        command.Transaction = transaction;
+        command.CommandTimeout = _settings.CommandTimeoutSeconds;
+        command.CommandType = CommandType.Text;
+
+        var querySql = _schemaManager.GetQuery(criteria);
+        var parameters = GetParameters(args);
+
+        if (parameters.Any())
+        {
+            foreach (var parameter in parameters)
+            {
+                parameter.AddTo(command);
+            }
+        }
+
+        command.CommandText = querySql;
+
+        try
+        {
+            await using var reader = await command.ExecuteReaderAsync();
+
+            var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
+            var lookup = new DataReaderLookup(reader, classMapProperties);
+
+            while (reader.Read())
+            {
+                var instance = (T)_activator.CreateInstance(lookup);
+
+                results.Add(instance);
+            }
+        }
+        catch (Exception exception)
+        {
+            throw new ApplicationException($"Could not execute SQL {querySql}", exception);
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+    /// <code>"columnname" = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+    /// <code>new { someValue = "hej" }</code>
+    /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
+    /// </summary>
+    public async Task DeleteWhereAsync(string criteria, object args = null)
+    {
+        if (criteria == null) throw new ArgumentNullException(nameof(criteria));
+
+        await using var connection = _factory.OpenNpgsqlConnection();
+        await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+        await DeleteWhereAsync(connection, criteria, args, transaction);
+
+        transaction.Commit();
+    }
+
+    /// <summary>
+    /// Deletes all rows that match the given criteria. The <paramref name="criteria"/> must be specified on the form
+    /// <code>"columnname" = @someValue</code> where the accompanying <paramref name="args"/> would be something like
+    /// <code>new { someValue = "hej" }</code> using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
+    /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
+    /// </summary>
+    public async Task DeleteWhereAsync(NpgsqlConnection connection, string criteria, object args, NpgsqlTransaction transaction = null)
+    {
+        await using var command = connection.CreateCommand();
+
+        command.Transaction = transaction;
+        command.CommandTimeout = _settings.CommandTimeoutSeconds;
+        command.CommandType = CommandType.Text;
+
+        var querySql = _schemaManager.GetDeleteCommand(criteria);
+        var parameters = GetParameters(args);
+
+        if (parameters.Any())
+        {
+            foreach (var parameter in parameters)
+            {
+                parameter.AddTo(command);
+            }
+        }
+
+        command.CommandText = querySql;
+
+        try
+        {
+            await command.ExecuteNonQueryAsync();
+        }
+        catch (Exception exception)
+        {
+            throw new ApplicationException($"Could not execute SQL {querySql}", exception);
+        }
+    }
 }

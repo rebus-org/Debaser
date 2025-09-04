@@ -2,7 +2,7 @@ using Npgsql;
 
 namespace Postgredebaser.Internals.Sql;
 
-class NpgsqlConnectionFactory(string connectionString)
+public class NpgsqlConnectionFactory(string connectionString)
 {
     readonly string _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
 
