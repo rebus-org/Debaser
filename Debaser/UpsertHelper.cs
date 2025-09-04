@@ -2,7 +2,7 @@
 using System.Data;
 using Debaser.Internals.Data;
 using Debaser.Internals.Ex;
-using Debaser.Internals.Exceptions;
+using Debaser.Core.Internals.Exceptions;
 using Debaser.Internals.Query;
 using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
@@ -28,12 +28,12 @@ public class UpsertHelper<T>
     readonly SchemaManager _schemaManager;
     readonly Activator _activator;
     readonly ClassMap _classMap;
-    readonly Settings _settings;
+    readonly Core.Settings _settings;
 
     /// <summary>
     /// Creates the upsert helper
     /// </summary>
-    public UpsertHelper(string connectionString, string tableName = null, string typeName = null, string procName = null, string schema = "dbo", Settings settings = null)
+    public UpsertHelper(string connectionString, string tableName = null, string typeName = null, string procName = null, string schema = "dbo", Core.Settings settings = null)
         : this(connectionString, new AutoMapper().GetMap(typeof(T)), tableName, typeName, procName, schema, settings)
     {
     }
@@ -41,11 +41,11 @@ public class UpsertHelper<T>
     /// <summary>
     /// Creates the upsert helper
     /// </summary>
-    public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string typeName = null, string procName = null, string schema = "dbo", Settings settings = null)
+    public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string typeName = null, string procName = null, string schema = "dbo", Core.Settings settings = null)
     {
         _factory = new SqlConnectionFactory(connectionString);
         _classMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
-        _settings = settings ?? new Settings();
+        _settings = settings ?? new Core.Settings();
 
         var upsertTableName = tableName ?? typeof(T).Name;
         var dataTypeName = typeName ?? $"{upsertTableName}Type";

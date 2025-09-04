@@ -1,19 +1,21 @@
-﻿namespace Debaser.Attributes;
+﻿// This class has been moved to Debaser.Core.Attributes
+// This file provides backward compatibility
+
+using Debaser.Core.Attributes;
+
+namespace Debaser.Attributes;
 
 /// <summary>
 /// Attribute that can be applied to a property to affect how the value is roundtripped to/from a database column
 /// </summary>
-[AttributeUsage(AttributeTargets.Property)]
-public class DebaserMapperAttribute : Attribute
+[Obsolete("Use Debaser.Core.Attributes.DebaserMapperAttribute instead")]
+public class DebaserMapperAttribute : Core.Attributes.DebaserMapperAttribute
 {
-    internal Type DebaserMapperType { get; }
-
     /// <summary>
     /// Contructs the attribute with the <paramref name="debaserMapperType"/> type as the roundtripper. The type must implement
     /// <see cref="IDebaserMapper"/> and have a default constructor
     /// </summary>
-    public DebaserMapperAttribute(Type debaserMapperType)
+    public DebaserMapperAttribute(Type debaserMapperType) : base(debaserMapperType)
     {
-        DebaserMapperType = debaserMapperType ?? throw new ArgumentNullException(nameof(debaserMapperType));
     }
 }

@@ -1,9 +1,4 @@
-﻿// This class has been moved to Debaser.Core.Attributes
-// This file provides backward compatibility
-
-using Debaser.Core.Attributes;
-
-namespace Debaser.Attributes;
+namespace Debaser.Core.Attributes;
 
 /// <summary>
 /// Attribute that can be added to a property to indicate a criteria which must be fulfilled for an existing row to be overwritten by the row provided when calling the upsert helper.
@@ -12,7 +7,8 @@ namespace Debaser.Attributes;
 /// For example, the criteria <code>[S].[Rev] > [T].[Rev]</code> can be used to make an update conditional, depending on whether the <code>[Rev]</code> column of the source row
 /// is greater than that of the target row
 /// </summary>
-[Obsolete("Use Debaser.Core.Attributes.DebaserUpdateCriteriaAttribute instead")]
-public class DebaserUpdateCriteriaAttribute(string updateCriteria) : Core.Attributes.DebaserUpdateCriteriaAttribute(updateCriteria)
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class DebaserUpdateCriteriaAttribute(string updateCriteria) : Attribute
 {
+    public string UpdateCriteria { get; } = updateCriteria ?? throw new ArgumentNullException(nameof(updateCriteria));
 }

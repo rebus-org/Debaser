@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Debaser.Attributes;
+using Debaser.Core.Attributes;
 using Microsoft.Data.SqlClient.Server;
 
 namespace Debaser.Mapping;
