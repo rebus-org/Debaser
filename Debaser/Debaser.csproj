@@ -29,7 +29,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="fastmember" Version="1.5.0" />
-		<PackageReference Include="microsoft.data.sqlclient" Version="6.1.0" />
+		<PackageReference Include="microsoft.data.sqlclient" Version="6.1.1" />
 	</ItemGroup>
 
 </Project>
