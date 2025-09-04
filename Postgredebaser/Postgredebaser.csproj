@@ -7,6 +7,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="npgsql" Version="9.0.3" />
+		<PackageReference Include="fastmember" Version="1.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Debaser.Core\Debaser.Core.csproj" />
 	</ItemGroup>
 
 </Project>
