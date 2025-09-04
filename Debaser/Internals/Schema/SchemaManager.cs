@@ -67,7 +67,7 @@ class SchemaManager
 
     public string GetDeleteCommand(string criteria)
     {
-        var sql = $@"DELETE FROM [{_schema}].[{_tableName}]";
+        var sql = $"DELETE FROM [{_schema}].[{_tableName}]";
 
         if (string.IsNullOrWhiteSpace(criteria)) return sql;
 
@@ -172,20 +172,10 @@ CREATE TABLE [{_schema}].[{_tableName}] (
 
     public (string procedure, string type, string table) GetDropSchemaScript() =>
     (
-        procedure: $@"DROP PROCEDURE [{_schema}].[{_sprocName}]",
-        type: $@"DROP TYPE [{_schema}].[{_dataTypeName}]",
-        table: $@"DROP TABLE [{_schema}].[{_tableName}]"
+        procedure: $"DROP PROCEDURE [{_schema}].[{_sprocName}]",
+        type: $"DROP TYPE [{_schema}].[{_dataTypeName}]",
+        table: $"DROP TABLE [{_schema}].[{_tableName}]"
     );
-
-    static int ExecuteQuery(SqlConnection connection, SqlTransaction transaction, string sql)
-    {
-        using var command = connection.CreateCommand();
-
-        command.Transaction = transaction;
-        command.CommandText = sql;
-
-        return (int)command.ExecuteScalar();
-    }
 
     public string GetQuery(string criteria = null)
     {
@@ -241,12 +231,10 @@ FROM [{_schema}].[{_tableName}]
     {
         try
         {
-            using (var command = connection.CreateCommand())
-            {
-                command.Transaction = transaction;
-                command.CommandText = sql;
-                command.ExecuteNonQuery();
-            }
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
         }
         catch (Exception exception)
         {
