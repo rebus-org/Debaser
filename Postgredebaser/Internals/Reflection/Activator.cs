@@ -1,31 +1,13 @@
-using FastMember;
-using Postgredebaser.Internals.Values;
+// This class now uses the shared Activator from Debaser.Core
+// This provides better record support and consistency
+
+using Debaser.Core.Internals.Reflection;
 
 namespace Postgredebaser.Internals.Reflection;
 
-class Activator
+internal class Activator : Debaser.Core.Internals.Reflection.Activator
 {
-    readonly Func<IValueLookup, object> _objectActivator;
-
-    public Activator(Type type, IEnumerable<string> propertyNames)
+    public Activator(Type type, IEnumerable<string> propertyNames) : base(type, propertyNames)
     {
-        var accessor = TypeAccessor.Create(type);
-        var properties = propertyNames.ToList();
-
-        _objectActivator = lookup =>
-        {
-            var instance = accessor.CreateNew();
-
-            foreach (var propertyName in properties)
-            {
-                var value = lookup.GetValue(propertyName);
-
-                accessor[instance, propertyName] = value;
-            }
-
-            return instance;
-        };
     }
-
-    public object CreateInstance(IValueLookup lookup) => _objectActivator(lookup);
 }
