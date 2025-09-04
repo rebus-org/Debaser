@@ -62,9 +62,10 @@ public class TestIngoreUpdate : FixtureBase
         Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "mig" }));
     }
 
-    [DebaserUpdateCriteria("excluded.\"rev\" > \"somerowtointegerrevision\".\"rev\"")]
+    // [DebaserUpdateCriteria("excluded.\"rev\" > \"public\".\"somerowtointegerrevision\".\"rev\"")]
     class SomeRowWithIntegerRevision(int id, string data, int rev)
     {
+        [DebaserKey]
         public int Id { get; } = id;
         public string Data { get; } = data;
 
@@ -91,9 +92,10 @@ public class TestIngoreUpdate : FixtureBase
         Assert.That(_upsertHelper2.LoadAll().Single().Data, Is.EqualTo("hej igen"));
     }
 
-    [DebaserUpdateCriteria("excluded.\"lastupdated\" > \"somerowwithdatetimerevision\".\"lastupdated\"")]
+    [DebaserUpdateCriteria("excluded.\"lastupdated\" > \"public\".\"somerowwithdatetimerevision\".\"lastupdated\"")]
     class SomeRowWithDateTimeRevision(int id, string data, DateTime lastUpdated)
     {
+        [DebaserKey]
         public int Id { get; } = id;
         public string Data { get; } = data;
 

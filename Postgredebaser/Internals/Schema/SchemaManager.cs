@@ -107,9 +107,44 @@ public class SchemaManager
 
     public string GetUpsertSql()
     {
-        // For now, return a COPY command - we'll implement proper upsert logic later
         var columns = string.Join(", ", _properties.Select(p => $"\"{p.ColumnName}\""));
-        return $"COPY {_qualifiedTableName} ({columns}) FROM STDIN (FORMAT BINARY)";
+        var keyColumns = string.Join(", ", _keyProperties.Select(p => $"\"{p.ColumnName}\""));
+        var nonKeyColumns = _mutableProperties;
+        
+        var updateSet = string.Join(", ", nonKeyColumns.Select(p => $"\"{p.ColumnName}\" = EXCLUDED.\"{p.ColumnName}\""));
+        
+        var sql = $@"INSERT INTO {_qualifiedTableName} ({columns}) 
+VALUES ";
+
+        // Add placeholder for values - this will be used with parameterized queries, not COPY
+        var placeholders = string.Join(", ", _properties.Select((_, i) => $"@param{i + 1}"));
+        sql += $"({placeholders})";
+        
+        if (_keyProperties.Any())
+        {
+            sql += $" ON CONFLICT ({keyColumns})";
+            
+            if (nonKeyColumns.Any())
+            {
+                sql += $" DO UPDATE SET {updateSet}";
+                
+                // Add extra criteria if specified
+                if (!string.IsNullOrWhiteSpace(_extraCriteria))
+                {
+                    // Remove leading " AND " if present
+                    var cleanCriteria = _extraCriteria.TrimStart(' ').StartsWith("AND ") 
+                        ? _extraCriteria.TrimStart(' ').Substring(4) 
+                        : _extraCriteria;
+                    sql += $" WHERE {cleanCriteria}";
+                }
+            }
+            else
+            {
+                sql += " DO NOTHING";
+            }
+        }
+
+        return sql;
     }
 
     NpgsqlConnection OpenNpgsqlConnection()

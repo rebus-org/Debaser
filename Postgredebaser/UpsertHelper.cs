@@ -43,6 +43,12 @@ public class UpsertHelper<T>
         _classMap = classMap ?? throw new ArgumentNullException(nameof(classMap));
         _settings = settings ?? new Settings();
 
+        // Validate that at least one key property exists
+        if (!_classMap.Properties.Any(p => p.IsKey))
+        {
+            throw new ArgumentException($"Could not find any properties marked with [DebaserKey] on {typeof(T)} - you need to have at least one key property");
+        }
+
         var upsertTableName = tableName ?? typeof(T).Name.ToLowerInvariant();
 
         _schemaManager = GetSchemaCreator(schema, upsertTableName);
@@ -94,25 +100,36 @@ public class UpsertHelper<T>
     /// </summary>
     public async Task UpsertAsync(NpgsqlConnection connection, IEnumerable<T> rows, NpgsqlTransaction transaction = null)
     {
-        // For now, we'll implement a simple approach using COPY and then ON CONFLICT
-        // This is a placeholder implementation to get tests compiling
         var rowsList = rows.ToList();
         if (!rowsList.Any()) return;
 
         var upsertSql = _schemaManager.GetUpsertSql();
         
-        await using var writer = await connection.BeginBinaryImportAsync(upsertSql, cancellationToken: default);
-        
         foreach (var row in rowsList)
         {
-            await writer.StartRowAsync();
+            await using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = upsertSql;
+            command.CommandTimeout = _settings.CommandTimeoutSeconds;
+            
+            // Add parameters for each property
+            var parameterIndex = 1;
             foreach (var property in _classMap.Properties)
             {
-                await property.WriteToAsync(writer, row);
+                var value = property.ToDatabase(GetPropertyValue(row, property.PropertyName));
+                var parameter = new NpgsqlParameter($"param{parameterIndex++}", value ?? DBNull.Value);
+                parameter.NpgsqlDbType = property.ColumnInfo.NpgsqlDbType;
+                command.Parameters.Add(parameter);
             }
+            
+            await command.ExecuteNonQueryAsync();
         }
-        
-        await writer.CompleteAsync();
+    }
+
+    object GetPropertyValue(object obj, string propertyName)
+    {
+        var accessor = TypeAccessor.Create(obj.GetType());
+        return accessor[obj, propertyName];
     }
 
     /// <summary>

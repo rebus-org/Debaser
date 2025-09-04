@@ -1,4 +1,5 @@
 using NpgsqlTypes;
+using Debaser.Core.Attributes;
 using Postgredebaser.Attributes;
 
 namespace Postgredebaser.Tests.Bugs;
@@ -29,6 +30,7 @@ public class TestDateTimeOffsetPrecision : FixtureBase
 
     class SomeClassWithDateTimeOffset
     {
+        [DebaserKey]
         public string Id { get; set; }
 
         public DateTimeOffset Time { get; set; }
