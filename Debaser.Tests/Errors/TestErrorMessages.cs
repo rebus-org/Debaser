@@ -1,8 +1,6 @@
-﻿using System;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Debaser.Attributes;
-using NUnit.Framework;
+
 // ReSharper disable ObjectCreationAsStatement
 
 namespace Debaser.Tests.Errors;

@@ -1,9 +1,7 @@
-﻿using System.Linq;
-using Debaser.Internals.Schema;
+﻿using Debaser.Internals.Schema;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;
 using Microsoft.Data.SqlClient;
-using NUnit.Framework;
 
 namespace Debaser.Tests.Schema;
 

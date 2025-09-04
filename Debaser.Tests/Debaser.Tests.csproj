@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,6 +17,10 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Debaser\Debaser.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="NUnit.Framework"/>
 	</ItemGroup>
 
 </Project>

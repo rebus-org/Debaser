@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace Debaser.Tests.Corners;
+﻿namespace Debaser.Tests.Corners;
 
 [TestFixture]
 public class InsertEmptySequence : FixtureBase

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Debaser.Attributes;
+﻿namespace Debaser.Attributes;
 
 /// <summary>
 /// Include as an update criteria the requirement that this particular property has a value that is incremented compared to the previous value

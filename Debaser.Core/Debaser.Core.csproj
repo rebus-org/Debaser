@@ -5,8 +5,4 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="npgsql" Version="9.0.3" />
-	</ItemGroup>
-
 </Project>

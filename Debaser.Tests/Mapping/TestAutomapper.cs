@@ -1,9 +1,6 @@
-﻿using System;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
 using Debaser.Attributes;
 using Debaser.Mapping;
-using NUnit.Framework;
 
 namespace Debaser.Tests.Mapping;
 

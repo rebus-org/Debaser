@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Debaser.Attributes;
+﻿namespace Debaser.Attributes;
 
 /// <summary>
 /// Attribute that can be added to a property to indicate a criteria which must be fulfilled for an existing row to be overwritten by the row provided when calling the upsert helper.

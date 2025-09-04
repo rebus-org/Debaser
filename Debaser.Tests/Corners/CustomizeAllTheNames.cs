@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Debaser.Tests.Extensions;
-using NUnit.Framework;
+﻿using Debaser.Tests.Extensions;
+
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable ArgumentsStyleStringLiteral
 

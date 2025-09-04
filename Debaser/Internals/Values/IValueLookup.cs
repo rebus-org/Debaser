@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Debaser.Internals.Values;
+﻿namespace Debaser.Internals.Values;
 
 interface IValueLookup
 {

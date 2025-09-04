@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>13</LangVersion>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>mookid8000</Authors>
@@ -30,6 +31,10 @@
 	<ItemGroup>
 		<PackageReference Include="fastmember" Version="1.5.0" />
 		<PackageReference Include="microsoft.data.sqlclient" Version="6.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Debaser.Core\Debaser.Core.csproj" />
 	</ItemGroup>
 
 </Project>

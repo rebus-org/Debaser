@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Debaser.Attributes;
+﻿namespace Debaser.Attributes;
 
 /// <summary>
 /// Attribute that can be applied to a property to affect how the value is roundtripped to/from a database column

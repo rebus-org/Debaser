@@ -1,8 +1,6 @@
 ﻿using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Debaser.Attributes;
-using NUnit.Framework;
+
 // ReSharper disable ArgumentsStyleLiteral
 
 namespace Debaser.Tests.Bugs;

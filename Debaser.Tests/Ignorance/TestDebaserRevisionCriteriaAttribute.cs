@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Debaser.Attributes;
-using NUnit.Framework;
+﻿using Debaser.Attributes;
 
 namespace Debaser.Tests.Ignorance;
 

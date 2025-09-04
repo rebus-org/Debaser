@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using System.Linq;
+﻿using Microsoft.Data.SqlClient;
 using Debaser.Internals.Ex;
 using Debaser.Internals.Sql;
 using Debaser.Mapping;

@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36401.2 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stuff", "stuff", "{1ABDD7C1-1F8D-402D-8692-3E4B66962DE0}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 stuff", "0 stuff", "{1ABDD7C1-1F8D-402D-8692-3E4B66962DE0}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		CHANGELOG.md = CHANGELOG.md
@@ -17,6 +17,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Postgredebaser", "Postgredebaser\Postgredebaser.csproj", "{4833B7FC-745A-4677-82CE-F7DF5BCDF068}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Postgredebaser.Tests", "Postgredebaser.Tests\Postgredebaser.Tests.csproj", "{953FA2A7-ED58-4F66-91DC-BB395EEDF419}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debaser.Core", "Debaser.Core\Debaser.Core.csproj", "{3216506E-E7BC-4C3F-8CF4-6EB003BBC94C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 common", "1 common", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 sql server", "2 sql server", "{A6560236-A4CB-4E7C-82E5-D059E0C0D59F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 postgres", "3 postgres", "{19B263A4-519C-471B-9425-56BE7DA5D0C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,9 +48,20 @@ Global
 		{953FA2A7-ED58-4F66-91DC-BB395EEDF419}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{953FA2A7-ED58-4F66-91DC-BB395EEDF419}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{953FA2A7-ED58-4F66-91DC-BB395EEDF419}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3216506E-E7BC-4C3F-8CF4-6EB003BBC94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3216506E-E7BC-4C3F-8CF4-6EB003BBC94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3216506E-E7BC-4C3F-8CF4-6EB003BBC94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3216506E-E7BC-4C3F-8CF4-6EB003BBC94C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0D5CB199-FF80-47F7-9D9B-6588E83D6C31} = {A6560236-A4CB-4E7C-82E5-D059E0C0D59F}
+		{00842D6E-B50C-4A6B-93EE-F08BFFED5465} = {A6560236-A4CB-4E7C-82E5-D059E0C0D59F}
+		{4833B7FC-745A-4677-82CE-F7DF5BCDF068} = {19B263A4-519C-471B-9425-56BE7DA5D0C9}
+		{953FA2A7-ED58-4F66-91DC-BB395EEDF419} = {19B263A4-519C-471B-9425-56BE7DA5D0C9}
+		{3216506E-E7BC-4C3F-8CF4-6EB003BBC94C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3BB1ABF1-682D-4651-8DC3-55DFC8C787B0}

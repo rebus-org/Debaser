@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Debaser.Internals.Exceptions;
+﻿namespace Debaser.Internals.Exceptions;
 
 /// <summary>
 /// Special exception used internally when upserting and it turns out the sequence was empty

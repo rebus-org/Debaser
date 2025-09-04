@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
-namespace Debaser.Tests;
+﻿namespace Debaser.Tests;
 
 [TestFixture]
 public class TestUpsertHelper : FixtureBase

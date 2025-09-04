@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿
 // ReSharper disable ClassNeverInstantiated.Local
 // ReSharper disable UnusedMember.Local
 

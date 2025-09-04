@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Data.SqlClient;
-using System.Threading.Tasks;
-using NUnit.Framework;
+﻿using Microsoft.Data.SqlClient;
 
 namespace Debaser.Tests;
 

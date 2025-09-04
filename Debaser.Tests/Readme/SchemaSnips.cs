@@ -1,5 +1,4 @@
 ﻿using Debaser.Attributes;
-using NUnit.Framework;
 
 namespace Debaser.Tests.Readme;
 

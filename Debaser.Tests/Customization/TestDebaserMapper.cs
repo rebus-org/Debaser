@@ -1,9 +1,6 @@
 ﻿using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Debaser.Attributes;
 using Newtonsoft.Json;
-using NUnit.Framework;
 
 namespace Debaser.Tests.Customization;
 
