@@ -13,7 +13,7 @@
 		<Copyright>Copyright Rebus FM ApS 2012</Copyright>
 		<RepositoryUrl>https://github.com/rebus-org/Debaser</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/rebus-org/Debaser/wiki</PackageProjectUrl>
-		<PackageTags>mssql; sqlserver; microsoft sql server; upsert; postgres; postgresql; npgsql</PackageTags>
+		<PackageTags>mssql; sqlserver; microsoft sql server; upsert; postgres; postgresql; npgsql; debaser</PackageTags>
 		<IsPackable>true</IsPackable>
 	</PropertyGroup>
 
