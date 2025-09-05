@@ -4,7 +4,17 @@
       "WebSearch",
       "Bash(dotnet build)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Read(/C:\\projects\\Debaser\\Debaser.Tests\\Ignorance/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser.Tests\\Ignorance/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser\\Internals\\Schema/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser\\Internals\\Schema/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser/**)",
+      "Read(/C:\\projects\\Debaser\\Postgredebaser\\Internals\\Schema/**)"
     ],
     "deny": [],
     "ask": []
