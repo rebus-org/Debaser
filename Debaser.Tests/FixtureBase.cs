@@ -4,9 +4,7 @@ namespace Debaser.Tests;
 
 public abstract class FixtureBase
 {
-    const int DatabaseAlreadyExists = 1801;
-
-    protected static string ConnectionString => Environment.GetEnvironmentVariable("testdb") ?? "server=.; database=debaser_test; trusted_connection=true; encrypt=false";
+    protected static string ConnectionString => ContainerManager.ConnectionString;
 
     [SetUp]
     public void InnerSetUp()

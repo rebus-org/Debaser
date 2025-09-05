@@ -1,4 +1,4 @@
-namespace Postgredebaser.Tests;
+﻿namespace Debaser.Tests.General;
 
 [TestFixture]
 public class TestUpsertHelper : FixtureBase
@@ -9,11 +9,11 @@ public class TestUpsertHelper : FixtureBase
     protected override void SetUp()
     {
         _upsertHelper = new UpsertHelper<SimpleClassRow>(ConnectionString);
-        _upsertHelper.DropSchema(dropTable: true);
+        _upsertHelper.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
         _upsertHelper.CreateSchema();
 
         _upsertHelper2 = new UpsertHelper<SimpleRecordRow>(ConnectionString);
-        _upsertHelper2.DropSchema(dropTable: true);
+        _upsertHelper2.DropSchema(dropTable: true, dropProcedure: true, dropType: true);
         _upsertHelper2.CreateSchema();
     }
 

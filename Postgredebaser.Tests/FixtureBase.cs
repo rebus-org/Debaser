@@ -4,7 +4,7 @@ namespace Postgredebaser.Tests;
 
 public abstract class FixtureBase
 {
-    protected static string ConnectionString => "host=localhost; database=postgredebaser_test; user id=user; password=password;";
+    protected static string ConnectionString => ContainerManager.ConnectionString;
 
     [SetUp]
     public void InnerSetUp()
