@@ -38,13 +38,13 @@ public class AutoMapper
         Func<object, object> DefaultToDatabase() => obj => obj;
 
         var properties = type.GetProperties()
-            .Where(property => !property.GetCustomAttributes<Core.Attributes.DebaserIgnoreAttribute>().Any())
+            .Where(property => !property.GetCustomAttributes<DebaserIgnoreAttribute>().Any())
             .Select(property =>
             {
                 var propertyName = property.Name;
                 var columnInfo = GetColumnInfo(property);
                 var columnName = property.Name;
-                var isKey = property.GetCustomAttributes<Core.Attributes.DebaserKeyAttribute>().Any();
+                var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
 
                 var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();
                 var fromDatabase = columnInfo.CustomFromDatabase ?? DefaultFromDatabase();
@@ -96,7 +96,7 @@ so Debaser will know how to identity each row.");
             {typeof(Guid), new ColumnInfo(SqlDbType.UniqueIdentifier)},
         };
 
-        var debaserMapperAttribute = property.GetCustomAttribute<Core.Attributes.DebaserMapperAttribute>();
+        var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();
         var debaserTypeAttribute = property.GetCustomAttribute<DebaserSqlTypeAttribute>();
 
         if (debaserTypeAttribute != null && debaserMapperAttribute != null)

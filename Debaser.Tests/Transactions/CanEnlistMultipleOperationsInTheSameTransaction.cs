@@ -51,12 +51,12 @@ public class CanEnlistMultipleOperationsInTheSameTransaction : FixtureBase
         if (commit)
         {
             Assert.That(allRows.Count, Is.EqualTo(3));
-            Assert.That(allRows.OrderBy(r => r.Id).Select(r => r.Id), Is.EqualTo(new[] { "id1", "id2", "id3" }));
+            Assert.That(allRows.OrderBy(r => r.Id).Select(r => r.Id), Is.EqualTo(["id1", "id2", "id3"]));
         }
         else
         {
             Assert.That(allRows.Count, Is.EqualTo(1));
-            Assert.That(allRows.OrderBy(r => r.Id).Select(r => r.Id), Is.EqualTo(new[] { "id1" }));
+            Assert.That(allRows.OrderBy(r => r.Id).Select(r => r.Id), Is.EqualTo(["id1"]));
         }
     }
 

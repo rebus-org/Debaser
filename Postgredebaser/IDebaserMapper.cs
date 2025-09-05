@@ -1,5 +1,4 @@
 using Debaser.Core;
-using Debaser.Core.Attributes;
 using NpgsqlTypes;
 
 namespace Postgredebaser;

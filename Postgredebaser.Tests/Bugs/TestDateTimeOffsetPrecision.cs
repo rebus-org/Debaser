@@ -1,6 +1,4 @@
-using NpgsqlTypes;
-using Debaser.Core.Attributes;
-using Postgredebaser.Attributes;
+using Debaser.Attributes;
 
 namespace Postgredebaser.Tests.Bugs;
 

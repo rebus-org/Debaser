@@ -30,7 +30,7 @@ public class InsertEmptySequence : FixtureBase
 
         var allRows = _upserter.LoadAll().OrderBy(r => r.Id).ToList();
 
-        Assert.That(allRows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2, 3, 4 }));
+        Assert.That(allRows.Select(r => r.Id), Is.EqualTo([1, 2, 3, 4]));
     }
 
     class MinimalRow(int id)

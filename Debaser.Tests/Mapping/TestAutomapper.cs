@@ -20,19 +20,17 @@ public class TestAutoMapper : FixtureBase
         var classMap = _mapper.GetMap(typeof(Poco));
 
         Assert.That(classMap.Type, Is.EqualTo(typeof(Poco)));
-        Assert.That(classMap.Properties.Count(), Is.EqualTo(3));
-        Assert.That(classMap.Properties.Select(p => p.PropertyName), Is.EqualTo(new[]
-        {
+        Assert.That(classMap.Properties.Count, Is.EqualTo(3));
+        Assert.That(classMap.Properties.Select(p => p.PropertyName), Is.EqualTo([
             nameof(Poco.Id),
             nameof(Poco.Decimal),
-            nameof(Poco.DateTime),
-        }));
-        Assert.That(classMap.Properties.Select(p => p.ColumnInfo.SqlDbType), Is.EqualTo(new[]
-        {
+            nameof(Poco.DateTime)
+        ]));
+        Assert.That(classMap.Properties.Select(p => p.ColumnInfo.SqlDbType), Is.EqualTo([
             SqlDbType.Int,
             SqlDbType.Decimal,
-            SqlDbType.DateTime2,
-        }));
+            SqlDbType.DateTime2
+        ]));
     }
 
     class Poco
@@ -51,7 +49,7 @@ public class TestAutoMapper : FixtureBase
 
         var keys = properties.Where(p => p.IsKey);
 
-        Assert.That(keys.Select(k => k.PropertyName), Is.EqualTo(new[] { "KeyA", "KeyB" }));
+        Assert.That(keys.Select(k => k.PropertyName), Is.EqualTo(["KeyA", "KeyB"]));
     }
 
     class PocoWithExplicitKey

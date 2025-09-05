@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using Debaser.Attributes;
-
 // ReSharper disable ArgumentsStyleLiteral
 
 namespace Debaser.Tests.Bugs;

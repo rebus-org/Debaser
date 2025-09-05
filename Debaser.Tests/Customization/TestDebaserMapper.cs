@@ -31,12 +31,11 @@ public class TestDebaserMapper : FixtureBase
 
         var roundtrippedRows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 
-        Assert.That(roundtrippedRows.Select(r => r.Json.Text), Is.EqualTo(new[]
-        {
+        Assert.That(roundtrippedRows.Select(r => r.Json.Text), Is.EqualTo([
             "json1",
             "json2",
-            "json3",
-        }));
+            "json3"
+        ]));
     }
 
     public class RowWithJson(int id, Json json)

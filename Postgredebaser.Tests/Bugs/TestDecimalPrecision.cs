@@ -31,8 +31,7 @@ public class TestDecimalPrecision : FixtureBase
 
         var all = helper.LoadAll().OrderBy(d => d.Decimal).ToList();
 
-        Assert.That(all.Select(a => a.Decimal), Is.EqualTo(new[]
-        {
+        Assert.That(all.Select(a => a.Decimal), Is.EqualTo([
             1.1m,
             1.12m,
             1.123m,
@@ -42,8 +41,8 @@ public class TestDecimalPrecision : FixtureBase
             1.1234567m,
             1.12345678m,
             1.123456789m,
-            1.1234567891m,
-        }));
+            1.1234567891m
+        ]));
     }
 
     class SomeClassWithDecimal

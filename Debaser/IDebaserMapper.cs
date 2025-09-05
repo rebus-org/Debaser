@@ -1,6 +1,6 @@
 using System.Data;
 using Debaser.Core;
-using Debaser.Core.Attributes;
+using Debaser.Attributes;
 
 namespace Debaser;
 

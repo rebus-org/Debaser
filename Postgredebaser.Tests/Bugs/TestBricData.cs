@@ -1,4 +1,4 @@
-using Debaser.Core.Attributes;
+using Debaser.Attributes;
 
 namespace Postgredebaser.Tests.Bugs;
 

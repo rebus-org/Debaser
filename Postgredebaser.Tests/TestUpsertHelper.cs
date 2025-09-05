@@ -28,8 +28,8 @@ public class TestUpsertHelper : FixtureBase
         var rows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 
         Assert.That(rows.Count, Is.EqualTo(2));
-        Assert.That(rows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2 }));
-        Assert.That(rows.Select(r => r.Text), Is.EqualTo(new[] { "this is the first row", "this is the second row" }));
+        Assert.That(rows.Select(r => r.Id), Is.EqualTo([1, 2]));
+        Assert.That(rows.Select(r => r.Text), Is.EqualTo(["this is the first row", "this is the second row"]));
     }
 
     [Test]

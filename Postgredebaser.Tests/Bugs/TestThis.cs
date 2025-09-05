@@ -1,7 +1,5 @@
+using Debaser.Attributes;
 using NpgsqlTypes;
-using Debaser.Core.Attributes;
-using Postgredebaser;
-
 // ReSharper disable ArgumentsStyleLiteral
 
 namespace Postgredebaser.Tests.Bugs;

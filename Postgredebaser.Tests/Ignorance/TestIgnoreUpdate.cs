@@ -1,4 +1,4 @@
-using Debaser.Core.Attributes;
+using Debaser.Attributes;
 
 namespace Postgredebaser.Tests.Ignorance;
 
@@ -31,7 +31,7 @@ public class TestIgnoreUpdate : FixtureBase
         var rows = _upsertHelper.LoadAll().OrderBy(r => r.Id).ToList();
 
         Assert.That(rows.Count, Is.EqualTo(3));
-        Assert.That(rows.Select(r => r.Id), Is.EqualTo(new[] { 1, 2, 3 }));
+        Assert.That(rows.Select(r => r.Id), Is.EqualTo([1, 2, 3]));
     }
 
     [Test]
@@ -43,7 +43,7 @@ public class TestIgnoreUpdate : FixtureBase
             new SomeRowWithIntegerRevision(3, "dig", 0)
         ]);
 
-        Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "dig" }));
+        Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(["hej", "med", "dig"]));
 
         await _upsertHelper.UpsertAsync([
             new SomeRowWithIntegerRevision(1, "hej", 1),
@@ -51,7 +51,7 @@ public class TestIgnoreUpdate : FixtureBase
             new SomeRowWithIntegerRevision(3, "mig", 1)
         ]);
 
-        Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "mig" }));
+        Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(["hej", "med", "mig"]));
 
         await _upsertHelper.UpsertAsync([
             new SomeRowWithIntegerRevision(1, "hej", 2),
@@ -59,7 +59,7 @@ public class TestIgnoreUpdate : FixtureBase
             new SomeRowWithIntegerRevision(3, "Frank Frank", 1)
         ]);
 
-        Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(new[] { "hej", "med", "mig" }));
+        Assert.That(_upsertHelper.LoadAll().OrderBy(r => r.Id).Select(r => r.Data), Is.EqualTo(["hej", "med", "mig"]));
     }
 
     // [DebaserUpdateCriteria("excluded.\"rev\" > \"public\".\"somerowtointegerrevision\".\"rev\"")]

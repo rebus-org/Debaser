@@ -1,4 +1,5 @@
-using Debaser.Core.Attributes;
+using Debaser.Attributes;
+// ReSharper disable TypeParameterCanBeVariant
 
 namespace Debaser.Core;
 

@@ -1,4 +1,4 @@
-using Debaser.Core.Attributes;
+using Debaser.Attributes;
 
 namespace Postgredebaser.Tests.Ignorance;
 
@@ -28,8 +28,8 @@ public class TestIgnoreAttribute : FixtureBase
 
         var roundtrippedRows = _helper.LoadAll().OrderBy(r => r.Id).ToList();
 
-        Assert.That(roundtrippedRows.Select(r => r.Id), Is.EqualTo(new[] { "001", "002" }));
-        Assert.That(roundtrippedRows.Select(r => r.Data), Is.EqualTo(new[] { "this is data", "this is more data" }));
+        Assert.That(roundtrippedRows.Select(r => r.Id), Is.EqualTo(["001", "002"]));
+        Assert.That(roundtrippedRows.Select(r => r.Data), Is.EqualTo(["this is data", "this is more data"]));
         Assert.That(roundtrippedRows.Select(r => r.IgnoredData), Is.EqualTo(new string[] { null, null }));
     }
 

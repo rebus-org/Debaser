@@ -1,5 +1,5 @@
+using Debaser.Attributes;
 using NpgsqlTypes;
-using Debaser.Core.Attributes;
 using Postgredebaser.Attributes;
 
 // ReSharper disable ObjectCreationAsStatement
