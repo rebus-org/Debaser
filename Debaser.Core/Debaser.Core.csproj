@@ -3,8 +3,30 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>13</LangVersion>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Authors>mookid8000</Authors>
+		<Company>Rebus FM ApS</Company>
+		<Description>Upserts without hassle 🚀</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>new_logo_250.png</PackageIcon>
+		<Copyright>Copyright Rebus FM ApS 2012</Copyright>
+		<RepositoryUrl>https://github.com/rebus-org/Debaser</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/rebus-org/Debaser/wiki</PackageProjectUrl>
+		<PackageTags>mssql; sqlserver; microsoft sql server; upsert; postgres; postgresql; npgsql</PackageTags>
 		<IsPackable>true</IsPackable>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\artwork\new_logo_250.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="fastmember" Version="1.5.0" />

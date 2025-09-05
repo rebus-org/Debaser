@@ -119,7 +119,7 @@
 ## 0.32.0
 * Update Microsoft.Data.SqlClient to 6.1.1
 
-## 0.33.0-a01
+## 0.33.0-a02
 * Add PostgreSQL port
 
 [FastMember]: https://github.com/mgravell/fast-member
