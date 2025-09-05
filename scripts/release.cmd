@@ -32,7 +32,7 @@ if %ERRORLEVEL% neq 0 (
  	goto exit_fail
 )
 
-dotnet pack "%root%/%project%" -c Release -o "%deploydir%" -p:PackageVersion=%version% --no-restore
+dotnet pack -c Release -o "%deploydir%" -p:PackageVersion=%version% --no-restore
 if %ERRORLEVEL% neq 0 (
 	popd
  	goto exit_fail
@@ -41,11 +41,6 @@ if %ERRORLEVEL% neq 0 (
 call scripts\push.cmd "%version%"
 
 popd
-
-
-
-
-
 
 goto exit_success
 :exit_fail

@@ -26,17 +26,11 @@ if not exist "%nuget%" (
   goto exit_fail
 )
 
-
 "%nuget%" push "%destination%\*.%version%.nupkg" -Source https://nuget.org
 if %ERRORLEVEL% neq 0 (
   echo NuGet push failed.
   goto exit_fail
 )
-
-
-
-
-
 
 goto exit_success
 :exit_fail
