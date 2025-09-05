@@ -55,7 +55,26 @@ public class AutoMapper
                     toDatabase: toDatabase,
                     fromDatabase: fromDatabase
                 );
-            });
+            })
+            .ToList();
+
+        if (!properties.Any(p => p.IsKey))
+        {
+            var defaultKeyProperty = properties.FirstOrDefault(p => string.Equals("Id", p.PropertyName));
+
+            if (defaultKeyProperty == null)
+            {
+                throw new ArgumentException(@"Could not find property named 'Id' - please either 
+
+* add a property called 'Id', or
+* decorate one or more properties with the [DebaserKey] attribute, or
+* pass a class map to the UpsertHelper ctor with one or more properties designated as keys
+
+so Debaser will know how to identity each row.");
+            }
+
+            defaultKeyProperty.MakeKey();
+        }
 
         return properties;
     }
@@ -109,7 +128,7 @@ public class AutoMapper
         if (debaserMapperAttribute != null)
         {
             var mapperType = debaserMapperAttribute.DebaserMapperType;
-            
+
             if (!typeof(IDebaserMapper).IsAssignableFrom(mapperType))
             {
                 throw new InvalidOperationException($"The mapper {mapperType} does not implement {typeof(IDebaserMapper)}");
@@ -118,8 +137,8 @@ public class AutoMapper
             var mapper = (IDebaserMapper)Activator.CreateInstance(mapperType);
 
             return new ColumnInfo(
-                npgsqlDbType: mapper.NpgsqlDbType, 
-                size: mapper.SizeOrNull, 
+                npgsqlDbType: mapper.NpgsqlDbType,
+                size: mapper.SizeOrNull,
                 additionalSize: mapper.AdditionalSizeOrNull,
                 customToDatabase: mapper.ToDatabase,
                 customFromDatabase: mapper.FromDatabase

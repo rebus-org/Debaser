@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Reflection;
 using Debaser.Attributes;
-using Debaser.Core.Attributes;
+
 // ReSharper disable ArgumentsStyleNamedExpression
 
 namespace Debaser.Mapping;

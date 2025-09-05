@@ -3,7 +3,7 @@
 namespace Debaser.Tests.Ignorance;
 
 [TestFixture]
-public class TestIngoreUpdate : FixtureBase
+public class TestIgnoreUpdate : FixtureBase
 {
     UpsertHelper<SomeRowWithIntegerRevision> _upsertHelper;
     UpsertHelper<SomeRowWithDateTimeRevision> _upsertHelper2;

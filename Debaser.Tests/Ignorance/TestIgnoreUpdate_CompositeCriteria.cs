@@ -3,7 +3,7 @@
 namespace Debaser.Tests.Ignorance;
 
 [TestFixture]
-public class TestIngoreUpdate_CompositeCriteria : FixtureBase
+public class TestIgnoreUpdate_CompositeCriteria : FixtureBase
 {
     UpsertHelper<SomeRowWithCompositeRevision> _upsertHelper;
 

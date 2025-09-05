@@ -30,7 +30,7 @@ public class ClassMapProperty
     /// <summary>
     /// Gets whether this property is part of the primary key
     /// </summary>
-    public bool IsKey { get; }
+    public bool IsKey { get; set; }
 
     internal ClassMapProperty(string propertyName, string columnName, ColumnInfo columnInfo, bool isKey, Func<object, object> toDatabase, Func<object, object> fromDatabase)
     {
@@ -42,10 +42,12 @@ public class ClassMapProperty
         _fromDatabase = fromDatabase ?? throw new ArgumentNullException(nameof(fromDatabase));
     }
 
+    public void MakeKey() => IsKey = true;
+    
     public object ToDatabase(object value) => _toDatabase(value);
 
     public object FromDatabase(object value) => _fromDatabase(value);
-
+    
     public async Task WriteToAsync(NpgsqlBinaryImporter writer, object row)
     {
         var accessor = TypeAccessor.Create(row.GetType());
