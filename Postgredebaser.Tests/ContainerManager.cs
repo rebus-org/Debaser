@@ -12,7 +12,7 @@ public class ContainerManager
     
     static readonly Lazy<PostgreSqlContainer> LazyContainer = new(() =>
     {
-        var container = new PostgreSqlBuilder()
+        var container = new PostgreSqlBuilder("postgres:16-alpine")
             .WithUsername("user")
             .WithPassword("password")
             .Build();

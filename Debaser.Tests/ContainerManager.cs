@@ -12,7 +12,7 @@ public class ContainerManager
     
     static readonly Lazy<MsSqlContainer> LazyContainer = new(() =>
     {
-        var container = new MsSqlBuilder().Build();
+        var container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
 
         AsyncHelpers.RunSync(() => container.StartAsync());
        
