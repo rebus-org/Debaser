@@ -122,4 +122,8 @@
 ## 0.33.0-a03
 * Add PostgreSQL port
 
+## 0.33.0
+* Update some packages
+* Add .NET10 as target
+
 [FastMember]: https://github.com/mgravell/fast-member

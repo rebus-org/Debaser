@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="microsoft.net.test.sdk" Version="17.14.1" />
-		<PackageReference Include="newtonsoft.json" Version="13.0.3" />
-		<PackageReference Include="nunit" Version="4.4.0" />
-		<PackageReference Include="nunit3testadapter" Version="5.1.0">
+		<PackageReference Include="microsoft.net.test.sdk" Version="18.3.0" />
+		<PackageReference Include="newtonsoft.json" Version="13.0.4" />
+		<PackageReference Include="nunit" Version="4.5.1" />
+		<PackageReference Include="nunit3testadapter" Version="6.2.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="testcontainers.postgresql" Version="4.7.0" />
+		<PackageReference Include="testcontainers.postgresql" Version="4.11.0" />
 	</ItemGroup>
 
 	<ItemGroup>
