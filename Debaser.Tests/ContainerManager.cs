@@ -8,7 +8,7 @@ public class ContainerManager
 {
     const string LocalConnectionString = "server=.; database=debaser_test; trusted_connection=true; encrypt=false";
     
-    static readonly string[] MachineNamesWithLocallyRunningPostgres = ["MHG-PC"];
+    static readonly string[] MachineNamesWithLocallyRunningPostgres = ["MHG-PC", "MHG-PC3"];
     
     static readonly Lazy<MsSqlContainer> LazyContainer = new(() =>
     {

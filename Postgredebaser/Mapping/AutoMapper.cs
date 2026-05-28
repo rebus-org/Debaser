@@ -110,6 +110,8 @@ so Debaser will know how to identity each row.");
             {typeof(float?), new ColumnInfo(NpgsqlDbType.Real)},
             {typeof(Guid), new ColumnInfo(NpgsqlDbType.Uuid)},
             {typeof(Guid?), new ColumnInfo(NpgsqlDbType.Uuid)},
+            {typeof(DateOnly), new ColumnInfo(NpgsqlDbType.Date)},
+            {typeof(DateOnly?), new ColumnInfo(NpgsqlDbType.Date)},
         };
 
         var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();

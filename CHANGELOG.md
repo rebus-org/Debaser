@@ -126,4 +126,8 @@
 * Update some packages
 * Add .NET10 as target
 
+## 0.34.0
+* Update nuggies
+* Add support for `DateOnly`
+
 [FastMember]: https://github.com/mgravell/fast-member

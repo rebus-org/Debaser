@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using System.Reflection;
 using Debaser.Attributes;
+using Debaser.Internals;
+using Debaser.Internals.Query;
 
 // ReSharper disable ArgumentsStyleNamedExpression
 
@@ -76,26 +78,6 @@ so Debaser will know how to identity each row.");
 
     static ColumnInfo GetColumnInfo(PropertyInfo property)
     {
-        var defaultDbTypes = new Dictionary<Type, ColumnInfo>
-        {
-            {typeof(bool), new ColumnInfo(SqlDbType.Bit)},
-            {typeof(byte), new ColumnInfo(SqlDbType.TinyInt)},
-            {typeof(short), new ColumnInfo(SqlDbType.SmallInt)},
-            {typeof(int), new ColumnInfo(SqlDbType.Int)},
-            {typeof(long), new ColumnInfo(SqlDbType.BigInt)},
-
-            {typeof(decimal), new ColumnInfo(SqlDbType.Decimal)},
-            {typeof(double), new ColumnInfo(SqlDbType.Float)},
-            {typeof(float), new ColumnInfo(SqlDbType.Real)},
-
-            {typeof(string), new ColumnInfo(SqlDbType.NVarChar)},
-
-            {typeof(DateTime), new ColumnInfo(SqlDbType.DateTime2)},
-            {typeof(DateTimeOffset), new ColumnInfo(SqlDbType.DateTimeOffset)},
-
-            {typeof(Guid), new ColumnInfo(SqlDbType.UniqueIdentifier)},
-        };
-
         var debaserMapperAttribute = property.GetCustomAttribute<DebaserMapperAttribute>();
         var debaserTypeAttribute = property.GetCustomAttribute<DebaserSqlTypeAttribute>();
 
@@ -130,14 +112,14 @@ Please use [DebaserMapper(...)] if you want to
             return GetColumInfoFromDebaserMapper(debaserMapperAttribute.DebaserMapperType);
         }
 
-        if (defaultDbTypes.TryGetValue(property.PropertyType, out var columnInfo))
+        if (TypeMap.KnownTypes.TryGetValue(property.PropertyType, out var sqlDbType))
         {
-            return columnInfo;
+            return new(sqlDbType);
         }
 
         throw new ArgumentException($@"Could not automatically generate column info for {property}. Please use one of the types supported out-of-the-box:
 
-{string.Join(Environment.NewLine, defaultDbTypes.Select(kvp => $"* {kvp.Key} => {kvp.Value.GetTypeDefinition()}"))}
+{string.Join(Environment.NewLine, TypeMap.KnownTypes.Select(kvp => $"* {kvp.Key} => {new ColumnInfo(kvp.Value).GetTypeDefinition()}"))}
 
 or decorate the property with either
 
