@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Data;
+using System.Runtime.CompilerServices;
 using Debaser.Core;
 using FastMember;
 using Npgsql;
@@ -8,6 +9,7 @@ using Postgredebaser.Internals.Schema;
 using Postgredebaser.Internals.Sql;
 using Postgredebaser.Internals.Data;
 using Postgredebaser.Mapping;
+// ReSharper disable ForCanBeConvertedToForeach
 
 namespace Postgredebaser;
 
@@ -81,46 +83,48 @@ public class UpsertHelper<T>
     /// <summary>
     /// Upserts the given sequence of <typeparamref name="T"/> instances
     /// </summary>
-    public async Task UpsertAsync(IEnumerable<T> rows)
+    public async Task UpsertAsync(IEnumerable<T> rows, CancellationToken cancellationToken = default)
     {
         if (rows == null) throw new ArgumentNullException(nameof(rows));
 
         await using var connection = _factory.OpenNpgsqlConnection();
-        await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+        await using var transaction = await connection.BeginTransactionAsync(_settings.TransactionIsolationLevel, cancellationToken);
 
         await UpsertAsync(connection, rows, transaction);
 
-        await transaction.CommitAsync();
+        await transaction.CommitAsync(cancellationToken);
     }
 
     /// <summary>
     /// Upserts the given sequence of <typeparamref name="T"/> instances using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// </summary>
-    public async Task UpsertAsync(NpgsqlConnection connection, IEnumerable<T> rows, NpgsqlTransaction transaction = null)
+    public async Task UpsertAsync(NpgsqlConnection connection, IEnumerable<T> rows, NpgsqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         var rowsList = rows.ToList();
         if (!rowsList.Any()) return;
 
         var upsertSql = _schemaManager.GetUpsertSql();
-        
+
         foreach (var row in rowsList)
         {
             await using var command = connection.CreateCommand();
             command.Transaction = transaction;
             command.CommandText = upsertSql;
             command.CommandTimeout = _settings.CommandTimeoutSeconds;
-            
+
             // Add parameters for each property
             var parameterIndex = 1;
             foreach (var property in _classMap.Properties)
             {
                 var value = property.ToDatabase(GetPropertyValue(row, property.PropertyName));
-                var parameter = new NpgsqlParameter($"param{parameterIndex++}", value ?? DBNull.Value);
-                parameter.NpgsqlDbType = property.ColumnInfo.NpgsqlDbType;
+                var parameter = new NpgsqlParameter($"param{parameterIndex++}", value ?? DBNull.Value)
+                {
+                    NpgsqlDbType = property.ColumnInfo.NpgsqlDbType
+                };
                 command.Parameters.Add(parameter);
             }
-            
-            await command.ExecuteNonQueryAsync();
+
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
     }
 
@@ -134,13 +138,13 @@ public class UpsertHelper<T>
     /// Loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage)
     /// </summary>
-    public IEnumerable<T> LoadAll()
+    public IEnumerable<T> LoadAll(CancellationToken cancellationToken = default)
     {
         using var connection = _factory.OpenNpgsqlConnection();
         using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
         // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
-        foreach (var instance in LoadAll(connection, transaction))
+        foreach (var instance in LoadAll(connection, transaction, cancellationToken))
         {
             yield return instance;
         }
@@ -150,8 +154,10 @@ public class UpsertHelper<T>
     /// Loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage) using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// </summary>
-    public IEnumerable<T> LoadAll(NpgsqlConnection connection, NpgsqlTransaction transaction = null)
+    public IEnumerable<T> LoadAll(NpgsqlConnection connection, NpgsqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         using var command = connection.CreateCommand();
 
         command.Transaction = transaction;
@@ -161,11 +167,14 @@ public class UpsertHelper<T>
 
         using var reader = command.ExecuteReader();
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
         var lookup = new DataReaderLookup(reader, classMapProperties);
 
         while (reader.Read())
         {
+            cancellationToken.ThrowIfCancellationRequested();
             yield return (T)_activator.CreateInstance(lookup);
         }
     }
@@ -174,13 +183,13 @@ public class UpsertHelper<T>
     /// Asynchronously loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage) 
     /// </summary>
-    public async IAsyncEnumerable<T> LoadAllAsync()
+    public async IAsyncEnumerable<T> LoadAllAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await using var connection = _factory.OpenNpgsqlConnection();
-        await using var transaction = await connection.BeginTransactionAsync(_settings.TransactionIsolationLevel);
+        await using var transaction = await connection.BeginTransactionAsync(_settings.TransactionIsolationLevel, cancellationToken);
 
         // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
-        await foreach (var instance in LoadAllAsync(connection, transaction))
+        await foreach (var instance in LoadAllAsync(connection, transaction).WithCancellation(cancellationToken))
         {
             yield return instance;
         }
@@ -190,7 +199,7 @@ public class UpsertHelper<T>
     /// Asynchronously loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage) using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// </summary>
-    public async IAsyncEnumerable<T> LoadAllAsync(NpgsqlConnection connection, NpgsqlTransaction transaction = null)
+    public async IAsyncEnumerable<T> LoadAllAsync(NpgsqlConnection connection, NpgsqlTransaction transaction = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await using var command = connection.CreateCommand();
 
@@ -199,12 +208,12 @@ public class UpsertHelper<T>
         command.CommandType = CommandType.Text;
         command.CommandText = _schemaManager.GetQuery();
 
-        await using var reader = await command.ExecuteReaderAsync();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
         var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
         var lookup = new DataReaderLookup(reader, classMapProperties);
 
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(cancellationToken))
         {
             yield return (T)_activator.CreateInstance(lookup);
         }
@@ -234,7 +243,7 @@ public class UpsertHelper<T>
         {
             return args =>
             {
-                var dictionary = (IDictionary<string, object>) args;
+                var dictionary = (IDictionary<string, object>)args;
 
                 return dictionary
                     .Select(kvp => new Parameter(kvp.Key, kvp.Value))
@@ -267,14 +276,14 @@ public class UpsertHelper<T>
     /// <code>new { someValue = "hej" }</code>.
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null)
+    public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null, CancellationToken cancellationToken = default)
     {
         if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
         await using var connection = _factory.OpenNpgsqlConnection();
-        await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
+        await using var transaction = await connection.BeginTransactionAsync(_settings.TransactionIsolationLevel, cancellationToken);
 
-        return await LoadWhereAsync(connection, criteria, args, transaction);
+        return await LoadWhereAsync(connection, criteria, args, transaction, cancellationToken);
     }
 
     /// <summary>
@@ -283,7 +292,7 @@ public class UpsertHelper<T>
     /// <code>new { someValue = "hej" }</code>  using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task<IReadOnlyList<T>> LoadWhereAsync(NpgsqlConnection connection, string criteria, object args = null, NpgsqlTransaction transaction = null)
+    public async Task<IReadOnlyList<T>> LoadWhereAsync(NpgsqlConnection connection, string criteria, object args = null, NpgsqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         var results = new List<T>();
 
@@ -308,12 +317,12 @@ public class UpsertHelper<T>
 
         try
         {
-            await using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
             var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
             var lookup = new DataReaderLookup(reader, classMapProperties);
 
-            while (reader.Read())
+            while (await reader.ReadAsync(cancellationToken))
             {
                 var instance = (T)_activator.CreateInstance(lookup);
 
@@ -334,15 +343,15 @@ public class UpsertHelper<T>
     /// <code>new { someValue = "hej" }</code>
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task DeleteWhereAsync(string criteria, object args = null)
+    public async Task DeleteWhereAsync(string criteria, object args = null, CancellationToken cancellationToken = default)
     {
         if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
         await using var connection = _factory.OpenNpgsqlConnection();
-        await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
-        await DeleteWhereAsync(connection, criteria, args, transaction);
+        await using var transaction = await connection.BeginTransactionAsync(_settings.TransactionIsolationLevel, cancellationToken);
+        await DeleteWhereAsync(connection, criteria, args, transaction, cancellationToken);
 
-        transaction.Commit();
+        await transaction.CommitAsync(cancellationToken);
     }
 
     /// <summary>
@@ -351,7 +360,7 @@ public class UpsertHelper<T>
     /// <code>new { someValue = "hej" }</code> using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task DeleteWhereAsync(NpgsqlConnection connection, string criteria, object args, NpgsqlTransaction transaction = null)
+    public async Task DeleteWhereAsync(NpgsqlConnection connection, string criteria, object args, NpgsqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         await using var command = connection.CreateCommand();
 
@@ -374,7 +383,7 @@ public class UpsertHelper<T>
 
         try
         {
-            await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
         catch (Exception exception)
         {

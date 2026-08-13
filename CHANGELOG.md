@@ -130,4 +130,11 @@
 * Update nuggies
 * Add support for `DateOnly`
 
+## 0.35.0
+* Update nuggies
+* Add cancellation support
+
+
+
+
 [FastMember]: https://github.com/mgravell/fast-member

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Data;
+using System.Runtime.CompilerServices;
 using Debaser.Internals.Data;
 using Debaser.Internals.Ex;
 using Debaser.Core.Internals.Exceptions;
@@ -109,14 +110,14 @@ GO
     /// <summary>
     /// Upserts the given sequence of <typeparamref name="T"/> instances
     /// </summary>
-    public async Task UpsertAsync(IEnumerable<T> rows)
+    public async Task UpsertAsync(IEnumerable<T> rows, CancellationToken cancellationToken = default)
     {
         if (rows == null) throw new ArgumentNullException(nameof(rows));
 
         await using var connection = _factory.OpenSqlConnection();
         await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
-        await UpsertAsync(connection, rows, transaction);
+        await UpsertAsync(connection, rows, transaction, cancellationToken);
 
         transaction.Commit();
     }
@@ -124,7 +125,7 @@ GO
     /// <summary>
     /// Upserts the given sequence of <typeparamref name="T"/> instances using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// </summary>
-    public async Task UpsertAsync(SqlConnection connection, IEnumerable<T> rows, SqlTransaction transaction = null)
+    public async Task UpsertAsync(SqlConnection connection, IEnumerable<T> rows, SqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         await using var command = connection.CreateCommand();
 
@@ -139,7 +140,7 @@ GO
 
         try
         {
-            await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
         catch (EmptySequenceException)
         {
@@ -150,13 +151,13 @@ GO
     /// Loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage)
     /// </summary>
-    public IEnumerable<T> LoadAll()
+    public IEnumerable<T> LoadAll(CancellationToken cancellationToken = default)
     {
         using var connection = _factory.OpenSqlConnection();
         using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
         // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
-        foreach (var instance in LoadAll(connection, transaction))
+        foreach (var instance in LoadAll(connection, transaction, cancellationToken))
         {
             yield return instance;
         }
@@ -166,8 +167,10 @@ GO
     /// Loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage) using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// </summary>
-    public IEnumerable<T> LoadAll(SqlConnection connection, SqlTransaction transaction = null)
+    public IEnumerable<T> LoadAll(SqlConnection connection, SqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        
         using var command = connection.CreateCommand();
 
         command.Transaction = transaction;
@@ -177,11 +180,14 @@ GO
 
         using var reader = command.ExecuteReader();
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
         var lookup = new DataReaderLookup(reader, classMapProperties);
 
         while (reader.Read())
         {
+            cancellationToken.ThrowIfCancellationRequested();
             yield return (T)_activator.CreateInstance(lookup);
         }
     }
@@ -190,13 +196,13 @@ GO
     /// Asynchronously loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage) 
     /// </summary>
-    public async IAsyncEnumerable<T> LoadAllAsync()
+    public async IAsyncEnumerable<T> LoadAllAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await using var connection = _factory.OpenSqlConnection();
         await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
         // it's important that we traverse&yield here to avoid premature disposal of the connection/transaction
-        await foreach (var instance in LoadAllAsync(connection, transaction))
+        await foreach (var instance in LoadAllAsync(connection, transaction).WithCancellation(cancellationToken))
         {
             yield return instance;
         }
@@ -206,7 +212,7 @@ GO
     /// Asynchronously loads all rows from the database (in a streaming fashion, allows you to traverse all
     /// objects without worrying about memory usage) using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// </summary>
-    public async IAsyncEnumerable<T> LoadAllAsync(SqlConnection connection, SqlTransaction transaction = null)
+    public async IAsyncEnumerable<T> LoadAllAsync(SqlConnection connection, SqlTransaction transaction = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await using var command = connection.CreateCommand();
 
@@ -215,12 +221,12 @@ GO
         command.CommandType = CommandType.Text;
         command.CommandText = _schemaManager.GetQuery();
 
-        await using var reader = await command.ExecuteReaderAsync();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
         var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
         var lookup = new DataReaderLookup(reader, classMapProperties);
 
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(cancellationToken))
         {
             yield return (T)_activator.CreateInstance(lookup);
         }
@@ -232,13 +238,13 @@ GO
     /// <code>new { someValue = "hej" }</code>
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task DeleteWhereAsync(string criteria, object args = null)
+    public async Task DeleteWhereAsync(string criteria, object args = null, CancellationToken cancellationToken = default)
     {
         if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
         await using var connection = _factory.OpenSqlConnection();
         await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
-        await DeleteWhereAsync(connection, criteria, args, transaction);
+        await DeleteWhereAsync(connection, criteria, args, transaction, cancellationToken);
 
         transaction.Commit();
     }
@@ -249,7 +255,7 @@ GO
     /// <code>new { someValue = "hej" }</code> using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task DeleteWhereAsync(SqlConnection connection, string criteria, object args, SqlTransaction transaction = null)
+    public async Task DeleteWhereAsync(SqlConnection connection, string criteria, object args, SqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         await using var command = connection.CreateCommand();
 
@@ -272,7 +278,7 @@ GO
 
         try
         {
-            await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
         catch (Exception exception)
         {
@@ -286,14 +292,14 @@ GO
     /// <code>new { someValue = "hej" }</code>.
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null)
+    public async Task<IReadOnlyList<T>> LoadWhereAsync(string criteria, object args = null, CancellationToken cancellationToken = default)
     {
         if (criteria == null) throw new ArgumentNullException(nameof(criteria));
 
         await using var connection = _factory.OpenSqlConnection();
         await using var transaction = connection.BeginTransaction(_settings.TransactionIsolationLevel);
 
-        return await LoadWhereAsync(connection, criteria, args, transaction);
+        return await LoadWhereAsync(connection, criteria, args, transaction, cancellationToken);
     }
 
     /// <summary>
@@ -302,7 +308,7 @@ GO
     /// <code>new { someValue = "hej" }</code>  using the given <paramref name="connection"/> (possibly also enlisting the command in the given <paramref name="transaction"/>)
     /// <paramref name="args"/> can also be a <code>Dictionary&lt;string, object&gt;</code>
     /// </summary>
-    public async Task<IReadOnlyList<T>> LoadWhereAsync(SqlConnection connection, string criteria, object args = null, SqlTransaction transaction = null)
+    public async Task<IReadOnlyList<T>> LoadWhereAsync(SqlConnection connection, string criteria, object args = null, SqlTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         var results = new List<T>();
 
@@ -327,12 +333,12 @@ GO
 
         try
         {
-            await using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
             var classMapProperties = _classMap.Properties.ToDictionary(p => p.PropertyName);
             var lookup = new DataReaderLookup(reader, classMapProperties);
 
-            while (reader.Read())
+            while (await reader.ReadAsync(cancellationToken))
             {
                 var instance = (T)_activator.CreateInstance(lookup);
 
@@ -362,7 +368,7 @@ GO
         {
             return args =>
             {
-                var dictionary = (IDictionary<string, object>) args;
+                var dictionary = (IDictionary<string, object>)args;
 
                 return dictionary
                     .Select(kvp => new Parameter(kvp.Key, kvp.Value))
