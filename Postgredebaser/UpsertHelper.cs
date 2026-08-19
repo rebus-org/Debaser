@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Debaser.Core;
 using FastMember;
 using Npgsql;
+using Postgredebaser.Internals.Naming;
 using Postgredebaser.Internals.Query;
 using Postgredebaser.Internals.Schema;
 using Postgredebaser.Internals.Sql;
@@ -27,7 +28,9 @@ public class UpsertHelper<T>
     readonly Settings _settings;
 
     /// <summary>
-    /// Creates the upsert helper
+    /// Creates the upsert helper. The table and column names are derived from the type and property names by
+    /// snake-casing them, e.g. <code>OrderLine</code> becomes <code>order_line</code>. An explicitly specified
+    /// <paramref name="tableName"/> is always used verbatim.
     /// </summary>
     public UpsertHelper(string connectionString, string tableName = null, string schema = "public", Settings settings = null)
         : this(connectionString, new AutoMapper().GetMap(typeof(T)), tableName, schema, settings)
@@ -35,7 +38,9 @@ public class UpsertHelper<T>
     }
 
     /// <summary>
-    /// Creates the upsert helper
+    /// Creates the upsert helper using the given <paramref name="classMap"/>. Please note that the column names
+    /// come from the <paramref name="classMap"/>, so they're only snake-cased if the map was built by
+    /// <see cref="AutoMapper"/>.
     /// </summary>
     public UpsertHelper(string connectionString, ClassMap classMap, string tableName = null, string schema = "public", Settings settings = null)
     {
@@ -49,7 +54,7 @@ public class UpsertHelper<T>
             throw new ArgumentException($"Could not find any properties marked with [DebaserKey] on {typeof(T)} - you need to have at least one key property");
         }
 
-        var upsertTableName = tableName ?? typeof(T).Name.ToLowerInvariant();
+        var upsertTableName = tableName ?? NameConverter.ToPostgresName(typeof(T).Name);
 
         _schemaManager = GetSchemaCreator(schema, upsertTableName);
 

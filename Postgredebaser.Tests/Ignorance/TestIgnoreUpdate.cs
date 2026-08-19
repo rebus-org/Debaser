@@ -63,7 +63,7 @@ public class TestIgnoreUpdate : FixtureBase
     }
 
     [DebaserUpdateCriteria("""
-                           EXCLUDED."rev" > "public"."somerowwithintegerrevision"."rev"
+                           EXCLUDED."rev" > "public"."some_row_with_integer_revision"."rev"
                            """)]
     class SomeRowWithIntegerRevision(int id, string data, int rev)
     {
@@ -95,7 +95,7 @@ public class TestIgnoreUpdate : FixtureBase
     }
 
     [DebaserUpdateCriteria("""
-                           EXCLUDED."lastupdated" > "public"."somerowwithdatetimerevision"."lastupdated"
+                           EXCLUDED."last_updated" > "public"."some_row_with_date_time_revision"."last_updated"
                            """)]
     class SomeRowWithDateTimeRevision(int id, string data, DateTime lastUpdated)
     {

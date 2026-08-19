@@ -2,11 +2,13 @@ using System.Reflection;
 using Debaser.Attributes;
 using NpgsqlTypes;
 using Postgredebaser.Attributes;
+using Postgredebaser.Internals.Naming;
 
 namespace Postgredebaser.Mapping;
 
 /// <summary>
-/// Helper that can generate a <see cref="ClassMap"/> for the PostgreSQL <see cref="UpsertHelper{T}"/> to use
+/// Helper that can generate a <see cref="ClassMap"/> for the PostgreSQL <see cref="UpsertHelper{T}"/> to use.
+/// Column names are the snake-cased property names.
 /// </summary>
 public class AutoMapper
 {
@@ -41,7 +43,7 @@ public class AutoMapper
             {
                 var propertyName = property.Name;
                 var columnInfo = GetColumnInfo(property);
-                var columnName = property.Name.ToLowerInvariant(); // PostgreSQL convention
+                var columnName = NameConverter.ToPostgresName(property.Name);
                 var isKey = property.GetCustomAttributes<DebaserKeyAttribute>().Any();
 
                 var toDatabase = columnInfo.CustomToDatabase ?? DefaultToDatabase();

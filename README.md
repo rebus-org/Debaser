@@ -100,6 +100,24 @@ Updating 10000 random rows in dataset of 100000 took average of 0.2 s - that's 5
 
 which (again) I think is OK.
 
+## PostgreSQL
+
+There's a PostgreSQL flavor too, in the `Postgredebaser` package. It works the same way, except it uses `INSERT ... ON CONFLICT` instead of `MERGE INTO`, so there's no data type and no stored procedure to create - only a table.
+
+```csharp
+var upsertHelper = new Postgredebaser.UpsertHelper<SomeDataRow>(connectionString);
+```
+
+### Naming convention
+
+Table and column names follow PostgreSQL convention: they're the snake-cased type and property names. So a class `OrderLine` with properties `Id`, `OrderNumber` and `CustomerID` maps to a table `order_line` with columns `id`, `order_number` and `customer_id`.
+
+The conversion is `JsonNamingPolicy.SnakeCaseLower` from the BCL, so acronyms and digits are handled the way you'd expect: `HTTPStatus` becomes `http_status`, `CustomerID` becomes `customer_id`, and `Sha256Hash` becomes `sha256_hash`.
+
+A table name you pass explicitly is used verbatim, so `new UpsertHelper<OrderLine>(connectionString, "MyTable")` gives you `MyTable`. The columns are still snake-cased though.
+
+One thing to be aware of: criteria are raw SQL, so they're not converted for you. You write `LoadWhereAsync("\"order_number\" = @n", new { n = 42 })` yourself, and the same goes for the criteria in `[DebaserUpdateCriteria]`.
+
 ## Maturity
 
 Debaser is fairly mature. It's been used for some serious things already, but please back your Debaser-based stuff up by some nice integration tests.
