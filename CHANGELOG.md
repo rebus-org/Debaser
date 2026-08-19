@@ -135,9 +135,10 @@
 * Add cancellation support
 
 ## 0.36.0
-* BREAKING for PostgreSQL: table and column names are now snake cased instead of merely lower cased, so e.g. `OrderLine.OrderNumber` maps to `order_line.order_number` and not `orderline.ordernumber`. Existing tables will need to be renamed - `CreateSchema` will otherwise quietly create new, empty ones alongside them. Identifiers hardcoded in `LoadWhere`/`DeleteWhere` criteria and in `[DebaserUpdateCriteria]` need updating too.
+* BREAKING for PostgreSQL: table and column names are now snake cased instead of merely lower cased, so e.g. `OrderLine.OrderNumber` maps to `order_line.order_number` and not `orderline.ordernumber`. Existing tables will need to be renamed - `CreateSchema` will otherwise quietly create new, empty ones alongside them. Identifiers hardcoded in `LoadWhere`/`DeleteWhere` criteria and in `[DebaserUpdateCriteria]` need updating too. - thanks [skarum]
 * Update nuggies
 
 
 
 [FastMember]: https://github.com/mgravell/fast-member
+[skarum]: https://github.com/skarum
